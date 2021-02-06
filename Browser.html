@@ -1,1 +1,22 @@
-webz
+<title>Browser</title>
+
+<div>
+
+<a href="/Free-webtop-webos-vm">Quit</a>
+
+</div>
+
+<div>
+  
+<input id="test" placeholder="Http://" type=text><button onclick="open()">GO!</button>
+  
+  </div>
+
+<script>
+function open()
+  {
+    var url=document.getElementById('test').value
+  }
+  </script>
+  
+<embed type="text/html" src="'http://'+url" width="500" height="200">
