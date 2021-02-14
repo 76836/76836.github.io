@@ -14,12 +14,15 @@
 <input id="test" placeholder="HTML" style="height:50%;width:100%; type="text"><button onclick="redirect()">View HTML as webpage</button>
   
   </div>
-
+                                                                                                          
+<b>Go to:<b>
+<div></div>                                                                                                          
+<textarea  class="textarea is-small" rows="3" name="link" id="link"></textarea>                                                                                                          
 <script>
 function redirect()
   {
     var url=document.getElementById('test').value
-    window.open("//Data;text/html,"+url);
+    document.getElementById("link").innerHTML = "Data:text/html,"+url;
   }
   </script>
   
