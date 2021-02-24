@@ -7,4 +7,15 @@
 
 </div>
 
-<embed type="text/html" src="https://bing.com" width="100%" height="100%">
+<textarea  class="textarea is-small" rows="3" id="link" id="link"></textarea><button onclick="open()">GO</button>    
+
+<embed id="page" type="text/html" src="https://bing.com" width="100%" height="100%">
+
+<script>
+function open()
+  {
+    var url=document.getElementById('link').value
+    document.getElementById("page").innerHTML = "http://"+url;
+  }
+  </script>
+
