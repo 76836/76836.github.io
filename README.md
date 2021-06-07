@@ -1,3 +1,3 @@
-# Free-webtop-webos-vm
+# VirtualOS
 A free super basic VM
-go to http://76836.github.io/Free-webtop-webos-vm to try it!
+go to https://VirtualOS.tk to try it!
