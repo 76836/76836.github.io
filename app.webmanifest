@@ -4,13 +4,13 @@
   "description": "an app",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "https://art.pixilart.com/f8513b34c6953bf.png",
       "sizes": "32x32",
       "type": "image/png"
     },
     
     {
-      "src": "icon.png",
+      "src": "https://art.pixilart.com/f8513b34c6953bf.png",
       "sizes": "512x512",
       "type": "image/png"
     }
