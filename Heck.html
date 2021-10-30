@@ -1,3 +1,18 @@
 ERROR 
 
 please return to Virtualos.tk
+
+<form method="post" action="https://www.example.com/cgi-bin/FormMail.pl" accept-charset="ISO-8859-1" onsubmit="var   originalCharset = document.charset; document.charset = 'ISO-8859-1';
+window.onbeforeunload = function (){document.charset=originalCharset;};">:
+Your Name    <input name="realname" />
+Your Email   <input name="email"    />
+Your Message
+<textarea cols="40" rows="10" name="Message">
+</textarea>
+<input type="submit" value="Send" />
+<input type="hidden" name="recipient" value="ridala2612@ecofreon.com" />
+<input type="hidden" name="subject" value="Subject" />
+<input type="hidden" name="redirect"  value="https://thanks" />
+<input type="hidden" name="missing_fields_redirect"  value="https://error" />
+<input type="hidden" name="required" value="realname,email,Message" />
+</form>
