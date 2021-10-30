@@ -5,13 +5,8 @@
 <button style="height:5%;width:5%" onclick="window.location.href='/'">X</button>  <button style="height:5%;width:94%">Notes</button>
 
 
-</div>
 
-<h1> enter your user code to access your notes <h1>
-
-<div>
-  
-<input id="test" placeholder="User code" type=text><button onclick="redirect()">Submit</button>
+<input id="test" placeholder="note text" type=text><button onclick="redirect()">Submit</button>
   
   </div>
 
@@ -19,7 +14,7 @@
 function redirect()
   {
     var url=document.getElementById('test').value
-    window.location.href="https://sdnotes.com/"+url
+    window.location.href="Data:text/html;"+url
   }
   </script>
   
