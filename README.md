@@ -1,3 +1,3 @@
 # VirtualOS
-A free super basic VM
-go to https://VirtualOS.tk to try it!
+Maybe it'll work...
+go to https://76836.tk to try it!
