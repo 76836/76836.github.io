@@ -1,6 +1,6 @@
 {
     "name": "VirtualOS",
-    "start_url": "/",
+    "start_url": "/XP",
     "scope": "/",
     "display": "standalone",
     "background_color": "#fff",
