@@ -1,5 +1,16 @@
-LOADING...
-<div>
+<form name="open" >
+<input style="font-size: 250%;height:70%;width:100%" type="textfield" name="ans" value="">
+</form>
+<button style="height:20%;width:100%" onclick="redirect()">ENTER</button>
+  
+  </div>
 
-██████████■■■■■■■■■■■■■■■
-</div>
+<script>
+function redirect()
+  {
+    var url=document.open.ans.value
+    window.location.href=url
+  }
+  </script>
+  
+ 
