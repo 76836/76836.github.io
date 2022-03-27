@@ -1,0 +1,32 @@
+<input id="new" value=c type=text><button onclick="save()">Save</button>
+  
+<div id="old">
+  ---BLANK---
+  </div>
+
+<script>
+function save()
+  {
+    var url=document.getElementById('web').value
+    document.cookie = "note="+url+"; expires=Thu, 18 Dec 2099 12:00:00 UTC";
+  }
+  </script>
+
+<script>
+  
+    let name = note + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i <ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+document.getElementById("new").innerHTML = c;
+</script>
