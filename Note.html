@@ -21,7 +21,7 @@ function getCookie(cname) {
     let c = ca[i];
     while (c.charAt(0) == ' ') {
       c = c.substring(1);
-      document.getElementById("new").innerHTML = c;
+      document.getElementById("old").innerHTML = c;
     }
     if (c.indexOf(name) == 0) {
       return c.substring(name.length, c.length);
