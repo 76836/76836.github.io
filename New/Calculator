@@ -1,0 +1,38 @@
+
+<div>
+
+<button style="font-size: 100%;height:3%;width:100%">Calculator</button>
+
+
+</div>
+
+<title>Calculator</title>
+
+<head>
+<title>HTML Calculator</title>
+</head>
+<body bgcolor= "#000000" text= "gold">
+<form name="calculator" >
+<input style="font-size: 250%;height:10%;width:100%" type="textfield" name="ans" value="">
+<input style="font-size: 400%;height:20%;width:19%" type="button" value="1" onClick="document.calculator.ans.value+='1'">
+<input style="font-size: 400%;height:20%;width:19%" type="button" value="2" onClick="document.calculator.ans.value+='2'">
+<input style="font-size: 400%;height:20%;width:19%" type="button" value="3" onClick="document.calculator.ans.value+='3'">
+<input style="font-size: 400%;height:20%;width:19%" type="button" value="4" onClick="document.calculator.ans.value+='4'">
+<input style="font-size: 400%;height:20%;width:19%" type="button" value="5" onClick="document.calculator.ans.value+='5'">
+<input style="font-size: 400%;height:20%;width:19%" type="button" value="6" onClick="document.calculator.ans.value+='6'">
+<input style="font-size: 400%;height:20%;width:19%" type="button" value="7" onClick="document.calculator.ans.value+='7'">
+<input style="font-size: 400%;height:20%;width:19%" type="button" value="8" onClick="document.calculator.ans.value+='8'">
+<input style="font-size: 400%;height:20%;width:19%" type="button" value="9" onClick="document.calculator.ans.value+='9'">
+<input style="font-size: 400%;height:20%;width:19%" type="button" value="0" onClick="document.calculator.ans.value+='0'">
+<input style="font-size: 400%;height:20%;width:19%" type="button" value="-" onClick="document.calculator.ans.value+='-'">
+<input style="font-size: 400%;height:20%;width:19%" type="button" value="+" onClick="document.calculator.ans.value+='+'">
+<input style="font-size: 400%;height:20%;width:19%" type="button" value="*" onClick="document.calculator.ans.value+='*'">
+<input style="font-size: 400%;height:20%;width:19%" type="button" value="/" onClick="document.calculator.ans.value+='/'">
+<input style="font-size: 400%;height:20%;width:19%" type="reset" value="AC">
+<input style="font-size: 400%;height:20%;width:19%" type="button" value="=" onClick="document.calculator.ans.value=eval(document.calculator.ans.value)">
+<input style="font-size: 400%;height:20%;width:19%" type="button" value="." onClick="document.calculator.ans.value+='.'">
+<input style="font-size: 400%;height:20%;width:19%" type="button" value="(" onClick="document.calculator.ans.value+='('">
+<input style="font-size: 400%;height:20%;width:19%" type="button" value=")" onClick="document.calculator.ans.value+=')'">
+</form>
+</body>
+</html>
