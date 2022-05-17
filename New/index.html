@@ -7,12 +7,17 @@
 <iframe src="/New/Home" frameBorder="0" width="100%" height="94%"></iframe>
 
 <style>
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+  
 body {
   background-image: url('32px-Solid_black.svg.png');
 }
 
 .myButton {
-  font-size:5vw";
+  font-size:2%";
   border: 5px groove black;
   border-radius:0px;
   color:white;
@@ -22,7 +27,7 @@ body {
   
 }
 .myButton:hover {
-  font-size:7vw";
+  font-size:4%";
   border: 2px solid white;
   border-radius: 1px;
   background: grey;
@@ -34,6 +39,6 @@ body {
 }
 </style>
 
-<button class="mybutton" onclick="">≡</button>
+<button class="disabled" onclick="">≡</button>
 <button class="mybutton" onclick="window.location.href='/New'">▢</button>
-<button class="mybutton" onclick="">↩</button>
+<button class="disabled" onclick="">↩</button>
