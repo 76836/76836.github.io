@@ -10,8 +10,27 @@
 body {
   background-image: url('32px-Solid_black.svg.png');
 }
+
+.myButton {
+  border: 5px groove black;
+  border-radius:0px;
+  color:white;
+  background:black;
+  height:5%;
+  width:32%
+
+}
+.myButton:hover {
+  border: 1px solid black;
+  border-radius: 1px;
+  background: grey;
+  color: black;
+  display:inline-block;
+  height:5%;
+  width:32%
+}
 </style>
 
-<button style="height:5%;width:32%" onclick="">≡</button>
-<button style="height:5%;width:33%" onclick="window.location.href='/New'">▢</button>
-<button style="height:5%;width:32%" onclick="">↩</button>
+<button class="mybutton" onclick="">≡</button>
+<button class="mybutton" onclick="window.location.href='/New'">▢</button>
+<button class="mybutton" onclick="">↩</button>
