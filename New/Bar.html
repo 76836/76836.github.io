@@ -1,7 +1,26 @@
-<input style="width: 100%;height: 15%" id="web" value="Https://" type=text><button style="width: 100%;height: 10%" onclick="redirect()">GO</button>
-<input style="width: 100%;height: 15%" id="search" placeholder="Bing search." type=text><button style="width: 100%;height: 10%" onclick="search()">SEARCH</button>
+
 
   </div>
+<style>
+    .button {
+  background-color: black;
+  color: grey;
+  border: 3px solid white;
+  font-size: 3vw;
+  height:7%;
+  width:14%
+    }
+    .box {
+  background-color: black;
+  color: grey;
+  border: 3px solid white;
+  font-size: 3vw;
+  height:7%;
+  width:83%
+</style>  
+
+<input class="box" id="web" value="Https://" type=text><button class="button" onclick="redirect()">GO</button>
+<input class="box" id="search" placeholder="Bing search." type=text><button class="button" onclick="search()">SEARCH</button>
 
 <script>
 function redirect()
