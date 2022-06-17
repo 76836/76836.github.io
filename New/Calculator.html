@@ -1,7 +1,7 @@
 
 <div>
 
-<button class="infobar">Calculator</button>
+
 
 
 </div>
@@ -16,47 +16,45 @@
   background-image: url('32px-Solid_black.svg.png');
 }
     
-    .infobar {
-  transition-duration: 3s;
-  background-color: white;
-  color: black;
-  border: 2px solid #555555;
-  font-size: 100%;
-  height:3%;
-  width:100%
+    .key {
+  transition-duration: 1s;
+  background-color: black;
+  color: white;
+  font-size: 7vh;
+  height:15%;
+  width:32%;
 }
 
-.infobar:hover {
-  background-color: #555555;
+.key:hover {
+  background-color: grey;
   color: white;
-  font-size: 100%;
-  height:20%;
-  width:100%
+  font-size: 7vh;
+  height:15%;
+  width:32%;
 }
   </style>
-
-<body bgcolor= "#000000" text= "gold">
+<body>
 <form name="calculator" >
-<input style="font-size: 250%;height:10%;width:100%" type="textfield" name="ans" value="">
-<input style="font-size: 400%;height:20%;width:19%" type="button" value="1" onClick="document.calculator.ans.value+='1'">
-<input style="font-size: 400%;height:20%;width:19%" type="button" value="2" onClick="document.calculator.ans.value+='2'">
-<input style="font-size: 400%;height:20%;width:19%" type="button" value="3" onClick="document.calculator.ans.value+='3'">
-<input style="font-size: 400%;height:20%;width:19%" type="button" value="4" onClick="document.calculator.ans.value+='4'">
-<input style="font-size: 400%;height:20%;width:19%" type="button" value="5" onClick="document.calculator.ans.value+='5'">
-<input style="font-size: 400%;height:20%;width:19%" type="button" value="6" onClick="document.calculator.ans.value+='6'">
-<input style="font-size: 400%;height:20%;width:19%" type="button" value="7" onClick="document.calculator.ans.value+='7'">
-<input style="font-size: 400%;height:20%;width:19%" type="button" value="8" onClick="document.calculator.ans.value+='8'">
-<input style="font-size: 400%;height:20%;width:19%" type="button" value="9" onClick="document.calculator.ans.value+='9'">
-<input style="font-size: 400%;height:20%;width:19%" type="button" value="0" onClick="document.calculator.ans.value+='0'">
-<input style="font-size: 400%;height:20%;width:19%" type="button" value="-" onClick="document.calculator.ans.value+='-'">
-<input style="font-size: 400%;height:20%;width:19%" type="button" value="+" onClick="document.calculator.ans.value+='+'">
-<input style="font-size: 400%;height:20%;width:19%" type="button" value="*" onClick="document.calculator.ans.value+='*'">
-<input style="font-size: 400%;height:20%;width:19%" type="button" value="/" onClick="document.calculator.ans.value+='/'">
-<input style="font-size: 400%;height:20%;width:19%" type="reset" value="AC">
-<input style="font-size: 400%;height:20%;width:19%" type="button" value="=" onClick="document.calculator.ans.value=eval(document.calculator.ans.value)">
-<input style="font-size: 400%;height:20%;width:19%" type="button" value="." onClick="document.calculator.ans.value+='.'">
-<input style="font-size: 400%;height:20%;width:19%" type="button" value="(" onClick="document.calculator.ans.value+='('">
-<input style="font-size: 400%;height:20%;width:19%" type="button" value=")" onClick="document.calculator.ans.value+=')'">
+<input class="key" type="textfield" name="ans" value="">
+<input class="key" type="button" value="1" onClick="document.calculator.ans.value+='1'">
+<input class="key" type="button" value="2" onClick="document.calculator.ans.value+='2'">
+<input class="key" type="button" value="3" onClick="document.calculator.ans.value+='3'">
+<input class="key" type="button" value="4" onClick="document.calculator.ans.value+='4'">
+<input class="key" type="button" value="5" onClick="document.calculator.ans.value+='5'">
+<input class="key" type="button" value="6" onClick="document.calculator.ans.value+='6'">
+<input class="key" type="button" value="7" onClick="document.calculator.ans.value+='7'">
+<input class="key" type="button" value="8" onClick="document.calculator.ans.value+='8'">
+<input class="key" type="button" value="9" onClick="document.calculator.ans.value+='9'">
+<input class="key" type="button" value="0" onClick="document.calculator.ans.value+='0'">
+<input class="key" type="button" value="-" onClick="document.calculator.ans.value+='-'">
+<input class="key" type="button" value="+" onClick="document.calculator.ans.value+='+'">
+<input class="key" type="button" value="*" onClick="document.calculator.ans.value+='*'">
+<input class="key" type="button" value="/" onClick="document.calculator.ans.value+='/'">
+<input class="key" type="reset" value="AC">
+<input class="key" type="button" value="=" onClick="document.calculator.ans.value=eval(document.calculator.ans.value)">
+<input class="key" type="button" value="." onClick="document.calculator.ans.value+='.'">
+<input class="key" type="button" value="(" onClick="document.calculator.ans.value+='('">
+<input class="key" type="button" value=")" onClick="document.calculator.ans.value+=')'">
 </form>
 </body>
 </html>
