@@ -23,6 +23,7 @@
   font-size: 7vh;
   height:12%;
   width:32%;
+  border: 0px solid black;
 }
 
 .key:hover {
@@ -31,9 +32,10 @@
   font-size: 7vh;
   height:12%;
   width:32%;
+  border: 0px solid black;
 }
 .display {
-  background-color: darkgray;
+  background-color: darkgreen;
   color: green;
   font-size: 7vh;
   height:12%;
@@ -58,10 +60,10 @@
 <input class="key" type="button" value="*" onClick="document.calculator.ans.value+='*'">
 <input class="key" type="button" value="/" onClick="document.calculator.ans.value+='/'">
 <input class="key" type="reset" value="AC">
-<input class="key" type="button" value="=" onClick="document.calculator.ans.value=eval(document.calculator.ans.value)">
 <input class="key" type="button" value="." onClick="document.calculator.ans.value+='.'">
 <input class="key" type="button" value="(" onClick="document.calculator.ans.value+='('">
 <input class="key" type="button" value=")" onClick="document.calculator.ans.value+=')'">
+<input class="key" type="button" value="=" onClick="document.calculator.ans.value=eval(document.calculator.ans.value)">
 </form>
 </body>
 </html>
