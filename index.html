@@ -8,20 +8,28 @@ body {
 }
 .welcome {
   color:red;
-  font-size:5vw;
+  font-size:2vw;
   }
   .button {
   background-color: black;
   color: green;
-  border: 0px solid green;
+  border: 3px solid green;
   font-size: 3vw;
   height:10%;
-  width:49%
+  width:45%
+    }
+    .button-bad {
+  background-color: black;
+  color: red;
+  border: 0px solid red;
+  font-size: 2vw;
+  height:10%;
+  width:45%
     }
 </style>
-<p class="welcome" >Welcome to bios! There is only one option*, so you should do it.</p> 
+<p class="welcome" >Welcome to bios! Select boot to get to normal VOS.</p> 
 <button class="button" onclick="boot()">Boot VirtualOS</button>
-<img width="100px" height="100px" onclick="window.location='Heck';" src="32px-Solid_black.svg.png"></button>
+<button class="button-bad" onclick="window.location='Heck';">Bad Terminal</button>
 
 <script>
 function boot()
@@ -30,7 +38,3 @@ function boot()
     window.location.href=UI
   }
   </script>
-
-
-
-*there   m i g h t   be more that just one option 
