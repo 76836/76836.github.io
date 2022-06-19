@@ -1,18 +1,17 @@
 <style>
     .button {
-      font-size: 2vh; 
-      border: 0px solid black; 
+      font-size: 4vw; 
+      border: 5px solid darkred; 
       border-radius: 1px; 
       color:red; 
       background:black; 
       height:10%; 
       width:100%;
-      text-align: center;
 }
     .box {
       background-color: black;
       color: darkgreen;
-      border: 0px solid grey;
+      border: 5px solid darkgreen;
       font-size: 4vw;
       height:80%;
       width:100%
@@ -25,14 +24,14 @@
 </style>  
 
 <form name="open" >
-<input class="box" type="textfield" name="ans" value="">
+<input class="box" type="textfield" name="ans" value="/">
 </form>
-<button class="button" onclick="redirect()">Run.</button>
+<button class="button" onclick="open()">Run.</button>
   
   </div>
 
 <script>
-function redirect()
+function open()
   {
     var url=document.open.ans.value
     window.location.href=url
