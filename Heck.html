@@ -1,7 +1,7 @@
 <style>
     .button {
       font-size: 4vw; 
-      border: 5px solid darkred; 
+      border: 5px inset darkred; 
       border-radius: 1px; 
       color:red; 
       background:black; 
@@ -11,11 +11,10 @@
     .box {
       background-color: black;
       color: darkgreen;
-      border: 5px solid darkgreen;
+      border: 5px inset darkgreen;
       font-size: 4vw;
-      height:80%;
+      height:50%;
       width:100%
-      text-align: center;
 }
     body {
       background-color: black;
@@ -23,10 +22,12 @@
 
 </style>  
 
+<body>
 <form name="open" >
 <input class="box" type="textfield" name="ans" value="">
 </form>
 <button class="button" onclick="redirect()">Run.</button>
+</body>
   
   </div>
 
