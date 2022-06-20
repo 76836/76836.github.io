@@ -1,0 +1,76 @@
+<head>
+	<script type="text/javascript" src="dom-drag.js"></script>
+	
+	<style type="text/css">
+		#root {
+			position:absolute;
+			height:45%;
+			width:45%;
+			background-color:cyan;
+			border:1px solid cyan;
+			}
+	
+		#handle {
+			margin:2px;
+			padding:1px;
+			width: 99%;
+			color:cyan;
+			background-color: black;
+			font-weight: bold;
+			}
+		body  {
+  			background-color: black;
+			}
+	</style>
+	</head>
+	
+	<body>
+	
+	<div id="W1">
+	<div id="root">
+		<div id="handle">
+	<button onclick="Close1()">X</button> Window 1
+		</div>
+	<div><iframe Width="100%" Height="100%" src="http://76836.tk/New/Launcher"></iframe></div>
+		</div>
+	<script language="javascript">
+		var WindowOpen1 = document.getElementById('W1').innerHTML;
+		var theHandle = document.getElementById("handle");
+		var theRoot   = document.getElementById("root");
+		Drag.init(theHandle, theRoot);
+	</script>
+	<script language="javascript">
+	function start1()
+		{
+		var WindowOpen1 = document.getElementById('W1').innerHTML;
+		var theHandle = document.getElementById("handle");
+		var theRoot   = document.getElementById("root");
+		Drag.init(theHandle, theRoot);
+	}
+	</script>
+	</div>
+	
+	
+	<img id="B1" Width="5%" Height="auto" onclick="Open1()" src="https://76836.tk/apple-touch-icon.png">
+	<script type="text/javascript">
+	Drag.init(document.getElementById("B1"));
+	</script>
+	
+	<script>
+	function Open1()
+	  {
+	document.getElementById("W1").innerHTML=WindowOpen1;
+	start1();
+	  }
+	  </script>
+	
+	<script>
+	function Close1()
+	  {
+	document.getElementById("W1").innerHTML="";
+	  }
+	  </script>
+	
+	</body>
+	
+	
