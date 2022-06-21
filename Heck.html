@@ -1,19 +1,19 @@
 <style>
     .button {
       font-size: 4vw; 
-      border: 5px inset darkred; 
+      border: 5px solid black; 
       border-radius: 1px; 
-      color:red; 
+      color:darkgray; 
       background:black; 
-      height:10%; 
+      height:5%; 
       width:100%;
 }
     .box {
       background-color: black;
       color: darkgreen;
-      border: 5px inset darkgreen;
+      border: 5px inset darkgray;
       font-size: 4vw;
-      height:50%;
+      height:93%;
       width:100%
 }
     body {
@@ -30,7 +30,13 @@
 </body>
   
   </div>
-
+  <script>
+    document.addEventListener("keyup", function(event) {
+    if (event.keyCode === 13) {
+        redirect();
+    }
+});
+  </script>
 <script>
 function redirect()
   {
@@ -38,5 +44,3 @@ function redirect()
     window.location.href=url
   }
   </script>
-  
-3rd easter egg, WoW.  By checking VirtualOS's github page, you can see every file it contains, and you can open those files from the invisible app in VOS (its right after Paper.io).
