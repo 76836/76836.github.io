@@ -10,8 +10,8 @@
 }
     .box {
       background-color: black;
-      color: darkgreen;
-      border: 10px inset black;
+      color: green;
+      border: 10px inset darkgray;
       font-size: 4vw;
       height:93%;
       width:98%
@@ -25,19 +25,19 @@
 <script>
    function entsense()
      {
-    document.addEventListener("keyup", function(event) {
-    if (event.keyCode === 13) {
+    node.addEventListener("keyup", ({key}) => {
+    if (key === "Enter") {
         redirect();
     }
-});
+})
      }
   </script>
 
-<body onload="entsense()">
+<body onload="entsense();">
 <form name="open" >
 <input class="box" type="textfield" name="ans" value="">
 </form>
-<button class="button" onclick="redirect()">Run.</button>
+<button class="button" onclick="redirect()">Enter ↲</button>
 </body>
   
   </div>
