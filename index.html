@@ -1,5 +1,5 @@
 <head>
-<title>VirtualOS-BIOS</title>
+<title>VirtualOS boot selection</title>
   <link rel="manifest" href="app.webmanifest">
 </head>
 <style>
@@ -27,10 +27,10 @@ body {
   width:99%
     }
 </style>
-<p class="welcome" >Welcome to BIOS! This is not an error! Select boot to get to normal VOS.</p> 
-<button class="button" onclick="boot()">Boot VirtualOS.</button>
-<button class="button" onclick="window.location='VOS-DEX';">boot VirtualOS Desktop. (pre-release)</button>
-<button class="button-bad" onclick="window.location='Heck';">Run application.</button>
+<p class="welcome" >Please select the preferred version of VirtualOS.</p> 
+<button class="button" onclick="boot()">VirtualOS Touch v1.0</button>
+<button class="button" onclick="window.location='VOS-DEX';">VirtualOS Desktop v0.1 (PC only)</button>
+<button class="button-bad" onclick="window.location='Heck';">VirtualOS Terminal v0.1</button>
 
 <script>
 function boot()
