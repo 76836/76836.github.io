@@ -1,6 +1,6 @@
 <style>
     .button {
-      font-size: 4vw; 
+      font-size: 2vh; 
       border: 5px solid black; 
       border-radius: 1px; 
       color:darkgray; 
@@ -11,10 +11,10 @@
     .box {
       background-color: black;
       color: darkgreen;
-      border: 5px inset darkgray;
+      border: 10px inset black;
       font-size: 4vw;
       height:93%;
-      width:100%
+      width:98%
 }
     body {
       background-color: black;
@@ -22,7 +22,18 @@
 
 </style>  
 
-<body>
+<script>
+   function entsense()
+     {
+    document.addEventListener("keyup", function(event) {
+    if (event.keyCode === 13) {
+        redirect();
+    }
+});
+     }
+  </script>
+
+<body onload="entsense()">
 <form name="open" >
 <input class="box" type="textfield" name="ans" value="">
 </form>
@@ -30,13 +41,7 @@
 </body>
   
   </div>
-  <script>
-    document.addEventListener("keyup", function(event) {
-    if (event.keyCode === 13) {
-        redirect();
-    }
-});
-  </script>
+  
 <script>
 function redirect()
   {
