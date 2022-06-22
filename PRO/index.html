@@ -1,0 +1,43 @@
+
+<head>
+<title>VirtualOS boot selection</title>
+  <link rel="manifest" href="app.webmanifest">
+</head>
+<style>
+body {
+  background-color: black;
+}
+.welcome {
+  color:blue;
+  font-size:3.5vh;
+  }
+  .button {
+  background-color: lightgray;
+  color: green;
+  border: 7px inset darkgray;
+  font-size: 2.5vh;
+  height:5%;
+  width:99%
+    }
+    .button-bad {
+  background-color: lightgray;
+  color: red;
+  border: 3px inset darkgray;
+  font-size: 2.5vh;
+  height:5%;
+  width:99%
+    }
+</style>
+<p class="welcome" >Please select the preferred version of VirtualOS to enable pro mode.</p> 
+<button class="button" onclick="boot()">VirtualOS Touch</button>
+<button class="button" onclick="window.location='VOS-DEX';">VirtualOS Desktop</button>
+<button class="button-bad" onclick="window.location='Heck';">VirtualOS Terminal</button>
+
+<p class="welcome" >Warning! VirtualOS PRO is paid for by crypto mining, it will not load until crypto mining is active.</p>
+<script>
+function boot()
+  {
+    var UI="/New"
+    window.location.href=UI
+  }
+  </script>
