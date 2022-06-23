@@ -1,0 +1,22 @@
+{
+  "name": "VirtualOS PRO",
+  "short_name": "VirtualOS",
+  "description": "VirtualOS PRO Edition.",
+  "icons": [
+    {
+      "src": "/PRO/icon-clear.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    
+    {
+      "src": "/PRO/icon-clear.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/PRO/",
+  "display": "fullscreen",
+  "theme_color": "#000000",
+  "background_color": "#000000"
+}
