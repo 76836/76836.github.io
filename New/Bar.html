@@ -21,12 +21,18 @@
   border: 1px solid white;
   font-size: 4vh;
   height:10%;
-  width:78%
+  width:75%
+  }
+  .startpage {
+  height:85%;
+  width:100%;
+  border-radius:10px;
+  }
 </style>  
 <button class="button" onclick="search()">🔍</button>
-<input class="box" id="request" placeholder="Search or URL." type=text>
+<input class="box" id="request" placeholder="Https://" type=text>
 <button class="button" onclick="redirect()">→</button>
-
+<iFrame src="https://bing.com" style="startpage"></iFrame>
 
 <script>
 function redirect()
