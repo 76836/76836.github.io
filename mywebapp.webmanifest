@@ -1,0 +1,25 @@
+{
+  "name": "My Web App",
+  "short_name": "My",
+  "icons": [{
+      "src": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/6d/6db2ac365ae4ee52c350ac4e9a34fdbf013c64ce.jpg",
+      "sizes": "32x32",
+      "type": "image/jpeg"
+    },{
+      "src": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/6d/6db2ac365ae4ee52c350ac4e9a34fdbf013c64ce_medium.jpg",
+      "sizes": "64x64",
+      "type": "image/jpeg"
+    },{
+      "src": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/6d/6db2ac365ae4ee52c350ac4e9a34fdbf013c64ce_full.jpg",
+      "sizes": "184x184",
+      "type": "image/jpeg"
+    },{
+      "src": "https://wiki.teamfortress.com/w/images/a/a5/Buffed_blu_engineer.jpg",
+      "sizes": "244x244",
+      "type": "image/jpeg"
+    }],
+  "start_url": "pwa.html",
+  "display": "standalone",
+  "background_color": "cyan",
+  "theme_color": "blue"
+}
