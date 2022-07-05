@@ -6,9 +6,12 @@
 <meta name="theme-color" content="black"/>
 </head>
 <script>
+  function pwa() 
+    {
   if ('serviceWorker' in navigator) {
    navigator.serviceWorker.register("sw.js");
-}
+  }
+    }
 </script>
 <style>
 body {
@@ -35,12 +38,15 @@ body {
   width:99%
     }
 </style>
+
+<Body onload="pwa()">
 <p class="welcome" >Please select the preferred version of VirtualOS.</p> 
 <button class="button" onclick="boot()">VirtualOS Touch v1.0</button>
 <button class="button" onclick="window.location='/PRO/';">VirtualOS PRO</button>
 <button class="button" onclick="window.location='VOS-DEX';">VirtualOS Desktop v0.2 (PC only)</button>
 <button class="button-bad" onclick="window.location='Heck';">VirtualOS Terminal v0.1</button>
 <button class="button-bad" onclick="window.location='Micro';">VirtualOS Micro (for older browsers)</button>
+</Body>
 
 <script>
 function boot()
