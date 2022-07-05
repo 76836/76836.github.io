@@ -7,7 +7,6 @@ const cacheFiles = [
 	"https://76836.tk/index.html",
 	"https://76836.tk/New/index.html",
 	"https://76836.tk/New/launcher",
-	"https://aaronos.dev/AaronOS/COOKIE/",
 ];
 
 self.addEventListener('fetch', event => {
