@@ -19,7 +19,7 @@
       "purpose": "any"
     }],
   "start_url": "/",
-  "scope": ".",
+  "scope": "/",
   "display": "fullscreen",
   "background_color": "black",
   "theme_color": "black"
