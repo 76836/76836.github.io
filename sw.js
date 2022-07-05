@@ -4,11 +4,9 @@
 
 const cacheName = 'default';
 const cacheFiles = [
-	"pwa.html",
-	"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/6d/6db2ac365ae4ee52c350ac4e9a34fdbf013c64ce.jpg",
-	"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/6d/6db2ac365ae4ee52c350ac4e9a34fdbf013c64ce_medium.jpg",
-	"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/6d/6db2ac365ae4ee52c350ac4e9a34fdbf013c64ce_full.jpg",
-	"https://wiki.teamfortress.com/w/images/a/a5/Buffed_blu_engineer.jpg",
+	"/index.html",
+	"/new/",
+	"https://aaronos.dev/AaronOS/COOKIE/",
 ];
 
 self.addEventListener('fetch', event => {
