@@ -18,7 +18,8 @@
       "type": "image/png",
       "purpose": "any"
     }],
-  "start_url": "/index.html",
+  "start_url": "/",
+  "scope": ".",
   "display": "fullscreen",
   "background_color": "black",
   "theme_color": "black"
