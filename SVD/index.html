@@ -1,0 +1,51 @@
+<style>
+    .button {
+      font-size: 2vh; 
+      border: 10px inset darkgray;
+      border-radius: 1px; 
+      color:darkgray; 
+      background:black; 
+      height:5%; 
+      width:100%;
+}
+    .box {
+      background-color: black;
+      color: green;
+      border: 10px inset darkgray;
+      font-size: 4vw;
+      height:5%;
+      width:98%
+}
+    body {
+      background-color: black;
+}
+
+</style>  
+
+<script>
+   function entsense()
+     {
+    node.addEventListener("keyup", ({key}) => {
+    if (key === "Enter") {
+        redirect();
+    }
+})
+     }
+  </script>
+
+<body onload="entsense();">
+<form name="open" >
+<input class="box" type="textfield" name="ans" value="">
+</form>
+<button class="button" onclick="redirect()">Connect to virtual device.</button>
+</body>
+  
+  </div>
+  
+<script>
+function redirect()
+  {
+    var url=document.open.ans.value
+    window.location.href="/SVD/"+url
+  }
+  </script>
