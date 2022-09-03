@@ -1,0 +1,26 @@
+{
+  "name": "Titanium web browser",
+  "prefer_related_applications": false,
+  "short_name": "Titanium",
+  "icons": [{
+      "src": "/icon512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },{
+      "src": "/icon192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },{
+      "src": "/icon144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    }],
+  "start_url": "/",
+  "scope": "/",
+  "display": "fullscreen",
+  "background_color": "black",
+  "theme_color": "black"
+}
