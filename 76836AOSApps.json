@@ -1,0 +1,29 @@
+
+        {
+            "repoName": "76836 v1.0",
+            "repoID": "76836",
+            "repoAliases": ["VOS", "VirtualOS", "76836"],
+            "repoVersion": "1.0",
+            "packages": {
+
+                "Launcher": {
+                    "packageName": "VOSLauncher",
+                    "packageID": "VOSL",
+                    "packageAliases": ["launcher", "apps", "VOSL"],
+                    "version": "1.0",
+                    "packageType": "webApp",
+                    "installURL": "https://76836.tk/AOSLauncherPackage.json",
+                    "icon": {
+                        "foreground": "https://76836.tk/apple_touch_icon.png",
+                        "backgroundColor": "#000000",
+                        "backgroundBorder": {
+                            "thickness": 2,
+                            "color": "#000000"
+                        }
+                    },
+                    "description": "More apps for AOS!"
+                }
+
+            }
+        }
+    
