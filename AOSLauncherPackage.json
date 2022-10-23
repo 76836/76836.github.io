@@ -7,7 +7,7 @@
             "appType": "webApp",
             "homeURL": "https://76836.tk/DesktopLauncher",
             "icon": {
-                "foreground": "https://76836.tk/apple_touch_icon.png",
+                "foreground": "https://76836.tk/apple-touch-icon.png",
                 "backgroundColor": "#000000",
                 "backgroundBorder": {
                     "thickness": 2,
