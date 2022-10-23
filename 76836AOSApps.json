@@ -1,27 +1,27 @@
 
         {
-            "repoName": "76836 v1.0",
+            "repoName": "76836 v1.1",
             "repoID": "76836",
             "repoAliases": ["VOS", "VirtualOS", "76836"],
-            "repoVersion": "1.0",
+            "repoVersion": "1.1",
             "packages": {
 
                 "Launcher": {
-                    "packageName": "VOSLauncher",
+                    "packageName": "VOSL",
                     "packageID": "VOSL",
                     "packageAliases": ["launcher", "apps", "VOSL"],
-                    "version": "1.0",
+                    "version": "1.1",
                     "packageType": "webApp",
                     "installURL": "https://76836.tk/AOSLauncherPackage.json",
                     "icon": {
-                        "foreground": "https://76836.tk/apple_touch_icon.png",
+                        "foreground": "https://76836.tk/apple-touch-icon.png",
                         "backgroundColor": "#000000",
                         "backgroundBorder": {
                             "thickness": 2,
                             "color": "#000000"
                         }
                     },
-                    "description": "More apps for AOS!"
+                    "description": "AOS > Windows 11"
                 }
 
             }
