@@ -3,7 +3,7 @@
             "repoName": "76836 v1.1",
             "repoID": "76836",
             "repoAliases": ["VOS", "VirtualOS", "76836"],
-            "repoVersion": "1.1",
+            "repoVersion": "1.0",
             "packages": {
 
                 "Launcher": {
