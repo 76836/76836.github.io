@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+
 <head>
 <title>BIOS</title>
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -14,6 +16,14 @@ body {
   text-align: center;
   font-size:3.5vh;
   background-color: darkblue;
+  margin: 0px;
+  }
+.bottom {
+  color:white;
+  text-align: center;
+  font-size:3.5vh;
+  background-color: blue;
+  margin: 0px;
   }
 .button {
   background-color: darkgray;
@@ -26,7 +36,7 @@ body {
 .falsepage {
   background-color: darkgray;
   color: black;
-  border: 5px inset lightgray;
+  border: 0px inset lightgray;
   font-size: 2.5vh;
   height:78%;
   width:99%;
@@ -37,8 +47,8 @@ body {
 <Body>
 <p class="title" >BIOS FAKE USLISITY</p> 
 <button class="button" onclick="boot()">BOOT OPTIONS</button>
-<button class="button" onclick="document.getElementById('Page').innerHTML=`<button class='falsepage' onclick='window.location='BIOS'>Secure boot forever turned on.</button>;`>SECURITY</button>
-<button class="button" onclick="document.getElementById('Page').innerHTML=`<button class='falsepage' onclick='window.location='BIOS'>v01.00 (N)Norights 2020-2022, Southern Minitrends, Inc.</button>;`>ABOUT</button>
+<button class="button" onclick="document.getElementById('Page').innerHTML=`<button class='falsepage' onclick='window.location='BIOS'>Secure boot forever turned on.</button>;` >SECURITY</button>
+<button class="button" onclick="document.getElementById('Page').innerHTML=`<button class='falsepage' onclick='window.location='BIOS'>v01.00 (N)Norights 2020-2022, Southern Minitrends, Inc.</button>;` >ABOUT</button>
   
 <div id="Page">
 <button class="falsepage" onclick="window.location='BIOS';">BIOS Simulator. </button>
