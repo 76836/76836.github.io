@@ -1,0 +1,49 @@
+<head>
+<title>BIOS</title>
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="black"/>
+</head>
+
+<style>
+body {
+  background-color: blue;
+}
+.title {
+  color:white;
+  font-size:3.5vh;
+  }
+  .button {
+  background-color: darkgray;
+  color: blue;
+  border: 0px inset darkgray;
+  font-size: 2vh;
+  height:5%;
+  width:15%
+    }
+    .button-opt {
+  background-color: lightgray;
+  color: red;
+  border: 3px inset darkgray;
+  font-size: 2.5vh;
+  height:80%;
+  width:99%
+    }
+</style>
+
+<Body>
+<p class="welcome" >BIOS FAKE USLISITY</p> 
+<button class="button" onclick="boot()">BOOT OPTIONS</button>
+<button class="button" onclick="window.location='/PRO/';">SECURITY</button>
+<button class="button-bad" onclick="window.location='Heck';">ABOUT</button>
+<!--<button class="button-bad" onclick="window.location='BIOS';">BIOS Simulator. </button>-->
+
+</Body>
+
+<script>
+function boot()
+  {
+    var UI="/New"
+    window.location.href=UI
+  }
+  </script>
