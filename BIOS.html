@@ -11,6 +11,7 @@ body {
 }
 .title {
   color:white;
+  text-align: center;
   font-size:3.5vh;
   }
   .button {
@@ -22,9 +23,9 @@ body {
   width:15%
     }
     .button-opt {
-  background-color: lightgray;
+  background-color: darkgray;
   color: red;
-  border: 3px inset darkgray;
+  border: 5px inset lightgray;
   font-size: 2.5vh;
   height:80%;
   width:99%
@@ -32,11 +33,11 @@ body {
 </style>
 
 <Body>
-<p class="welcome" >BIOS FAKE USLISITY</p> 
+<p class="title" >BIOS FAKE USLISITY</p> 
 <button class="button" onclick="boot()">BOOT OPTIONS</button>
 <button class="button" onclick="window.location='/PRO/';">SECURITY</button>
-<button class="button-bad" onclick="window.location='Heck';">ABOUT</button>
-<!--<button class="button-bad" onclick="window.location='BIOS';">BIOS Simulator. </button>-->
+<button class="button" onclick="window.location='Heck';">ABOUT</button>
+<button class="button-opt" onclick="window.location='BIOS';">BIOS Simulator. </button>
 
 </Body>
 
