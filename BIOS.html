@@ -13,8 +13,9 @@ body {
   color:white;
   text-align: center;
   font-size:3.5vh;
+  background-color: darkblue;
   }
-  .button {
+.button {
   background-color: darkgray;
   color: blue;
   border: 0px inset darkgray;
@@ -22,29 +23,35 @@ body {
   height:5%;
   width:15%
     }
-    .button-opt {
+.falsepage {
   background-color: darkgray;
-  color: red;
+  color: black;
   border: 5px inset lightgray;
   font-size: 2.5vh;
-  height:80%;
-  width:99%
+  height:78%;
+  width:99%;
+  text-align: left;
     }
 </style>
 
 <Body>
 <p class="title" >BIOS FAKE USLISITY</p> 
 <button class="button" onclick="boot()">BOOT OPTIONS</button>
-<button class="button" onclick="window.location='/PRO/';">SECURITY</button>
-<button class="button" onclick="window.location='Heck';">ABOUT</button>
-<button class="button-opt" onclick="window.location='BIOS';">BIOS Simulator. </button>
-
+<button class="button" onclick="document.getElementById("Page").innerHTML='<button class="falsepage" onclick="window.location='BIOS';">Secure boot forever turned on.</button>';">SECURITY</button>
+<button class="button" onclick="document.getElementById("Page").innerHTML='<button class="falsepage" onclick="window.location='BIOS';">v01.00 (N)Norights 2020-2022, Southern Minitrends, Inc.</button>';">ABOUT</button>
+  
+<div id="Page">
+<button class="falsepage" onclick="window.location='BIOS';">BIOS Simulator. </button>
+  </div>
+  
 </Body>
 
 <script>
 function boot()
   {
-    var UI="/New"
+    var UI="/BIOS"
     window.location.href=UI
   }
   </script>
+
+<p class="title" >v01.00 (N)Norights 2020-2022, Southern Minitrends, Inc.</p> 
