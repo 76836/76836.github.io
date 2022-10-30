@@ -63,7 +63,7 @@
 <input class="key" type="button" value="." onClick="document.calculator.ans.value+='.'">
 <input class="key" type="button" value="(" onClick="document.calculator.ans.value+='('">
 <input class="key" type="button" value=")" onClick="document.calculator.ans.value+=')'">
-<input class="key" type="button" value="=" onClick="document.calculator.ans.value=eval(document.calculator.ans.value)">
+<input class="key" type="button" value="=" onClick=" if (document.calculator.ans.value == '0/0') { document.calculator.ans.value='STEVE' } else { document.calculator.ans.value=eval(document.calculator.ans.value) }">
 </form>
 </body>
 </html>
