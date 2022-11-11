@@ -1,0 +1,13 @@
+
+<Iframe Id='screen' style="margin-left: 29; margin-top width="100%" height="90%" Src="/SVD/demo"></iframe>
+<Div>
+<Button onclick="document.getElementById('screen').src = document.getElementById('screen').src" style="width: 100%; height: 10%; font-size: 7vh; margin-top: 50px;">Home</button>
+</Div>
+<Style>
+ Body {
+ Background-color: black;
+ background-image: url("/SVD/FRAME1.png");
+ background-repeat: no-repeat;
+ background-position: left top;
+}
+</Style>
