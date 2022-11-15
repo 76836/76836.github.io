@@ -37,6 +37,21 @@ body {
   height:10%;
   width:99%
     }
+  .scroller {
+  scrollbar-color: black black;
+}
+  
+.myButton {
+  font-weight:bold;
+  font-size: 3.2vh;
+  border: 0px solid black;
+  border-radius: 1px;
+  color:white;
+  background:black;
+  height:4%;
+  width:32%;
+  
+}
 </style>
 
 <Body onload="pwa()">
@@ -56,3 +71,18 @@ function boot()
     window.location.href=UI
   }
   </script>
+
+
+
+
+
+<style>
+body {
+  background-color: black;
+}
+
+
+</style>
+
+<button class="mybutton" onclick="window.location.href='/'">▢</button>
+<button class="mybutton" onclick="history.back()">◁</button>
