@@ -1,0 +1,41 @@
+<head>
+    <title>VOS Micro</title>
+</head>
+
+<script>
+  function sleep(milliseconds) {
+  const date = Date.now();
+  let currentDate = null;
+  do {
+    currentDate = Date.now();
+  } while (currentDate - date < milliseconds);
+}
+  
+    function initialize() 
+    {
+        var H=window.innerHeight;
+        var W=window.innerWidth;
+        var Good=`
+        
+        
+        <iFrame height='"+(H/10)*9+"px' width='"+W+"px' src='https://76836.tk/New/Launcher'></iFrame>
+        
+        
+        `;
+        sleep(300);
+        document.getElementById("UI").innerHTML=Good;
+    }
+</script>
+<Body onload="initialize()">
+<div id="UI">
+    <style>
+    body  {
+			background-image: url("https://cdn.dribbble.com/users/14275/screenshots/1882226/amc_loading.gif");
+  			background-color: black;
+			background-repeat: no-repeat;
+			background-size: 100% 100%;
+			}
+</style>
+    <h1>VirtualOS isn't loading...</h1>
+</div>
+</Body>
