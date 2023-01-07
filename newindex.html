@@ -3,13 +3,10 @@
 </head>
 
 <script>
-  function sleep(milliseconds) {
-  const date = Date.now();
-  let currentDate = null;
-  do {
-    currentDate = Date.now();
-  } while (currentDate - date < milliseconds);
-}
+function sleep(ms) {
+  return new Promise(
+    resolve => setTimeout(resolve, ms)
+  );
   
     function initialize() 
     {
@@ -17,12 +14,24 @@
         var W=window.innerWidth;
         var Good=`
         
+           <style>
+	    body  {
+		    background-color: black;
+	    }
+
+	    .text {
+		    font-size: x-large;
+		    color: white;
+	    }
+</style>
+    <p class="text" >
+	    Lol itll never load.
+	</p>
         
-        <iFrame height='"+(H/10)*9+"px' width='"+W+"px' src='https://76836.tk/New/Launcher'></iFrame>
         
         
         `;
-        sleep(3000);
+        await sleep(3000);
         document.getElementById("UI").innerHTML=Good;
     }
 </script>
