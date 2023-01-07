@@ -1,5 +1,5 @@
 <head>
-    <title>Booting...</title>
+    
 </head>
 
 <script>
@@ -15,6 +15,11 @@ function sleep(ms) {
         var W=window.innerWidth;
         var Good=`
         
+           <!DOCTYPE html>
+<head>
+    <title>Select boot device.</title>
+</head>
+
            <style>
 	    body  {
 		    background-color: black;
@@ -24,13 +29,55 @@ function sleep(ms) {
 		    font-size: x-large;
 		    color: white;
 	    }
+		.title {
+		    font-size: xx-large;
+		    color: white;
+			text-align: center;
+			margin: 0;
+			margin-top: 1%;
+			margin-bottom: 1%;
+			border-bottom: 5px solid white;
+	    }
+		.option {
+		    font-size: xx-large;
+		    color: white;
+			text-align: left;
+			background-color: rgb(2,2,200);
+			width: 100%;
+			border: 0px solid white;
+			margin-bottom: 1%;
+			height: 12%;
+
+	    }
+
+		.box {
+			background-color:blue;
+			position: fixed;
+			top: 30vh;
+			left: 30vw;
+			width: 40vw;
+			height: 40vh;
+			border: 5px solid white;
+			margin: 0;
+		}
 </style>
+
+<body>
+
+
+
     <p class="text" >
-	    Lol itll never load. \n
-	    ooooooooo
+	     <br>
+	    _
 	</p>
-        
-        
+	
+	<div class="box">
+		<p class="title" >Please select boot device:</p>
+		<button onclick="window.location='./New';" class="option" >  HDD: P0- VOS_Touch x86 </button>
+		<button onclick="window.location='.PRO/';" class="option" >  UEFI: VirtualOS </button>
+		<button onclick="window.location='./SVD/';" class="option" >  Network Boot: VirtualOS Experiments </button>
+	</div>
+</body>
         
         `;
         await sleep(3000);
@@ -50,11 +97,8 @@ function sleep(ms) {
 	    }
 </style>
     <p class="text" >
-	    VirtualOS isn't loading...
-	    
-	    OH
-	    NOOOOOOOOOOOOOO
-	    !!!!!!
+	Put something your BIOS would say here...
 	</p>
+	<title>Booting...</title>
 </div>
 </Body>
