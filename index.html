@@ -86,7 +86,35 @@ function sleep(ms) {
         document.getElementById("UI").innerHTML=Good;
     }
 </script>
-<Body onload="initialize()">
+
+
+
+
+
+
+
+
+<script>
+var elem = document.getElementById("EEE");
+function openFullscreen() {
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.webkitRequestFullscreen) { /* Safari */
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { /* IE11 */
+    elem.msRequestFullscreen();
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<Body id="EEE" onclick="openFullscreen();" onload="initialize()" onmouseover="openFullscreen();" oncontextmenu="openFullscreen()">
 <div id="UI">
     <style>
 	    body  {
@@ -120,3 +148,11 @@ function sleep(ms) {
 	<title>Booting...</title>
 </div>
 </Body>
+
+
+
+
+
+
+
+
