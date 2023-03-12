@@ -15,15 +15,15 @@
       width:100%;
 }
     .box {
-      background-color: black;
-      color: green;
+      background-color: gray;
+      color: black;
       border: 10px inset darkgray;
       font-size: 4vw;
       height:15%;
       width:100%
 }
     body {
-      background-color: black;
+      background-color: darkblue;
 }
 
 .scroller {
@@ -32,34 +32,20 @@
   
 .myButton {
   font-weight:bold;
-  font-size: 3.2vh;
-  padding-top: 61vh;
-  border: 0px solid black;
-  border-radius: 1px;
-  color:white;
-  background:black;
+  border: 1% solid black;
+  color:black;
+  background:darkgray;
   height:4%;
   width:32%;
   
 }
 </style>  
 
-<script>
-   function entsense()
-     {
-    node.addEventListener("keyup", ({key}) => {
-    if (key === "Enter") {
-        redirect();
-    }
-})
-     }
-  </script>
 
-<body onload="entsense();">
 <form name="open" >
 <input class="box" type="textfield" name="ans" value="">
 </form>
-<button class="button" onclick="redirect()">Connect to virtual device.</button>
+<button class="myButton" onclick="redirect()">Launch</button>
 </body>
   
   </div>
@@ -74,9 +60,5 @@ function redirect()
 
 
 
-
-
-
-<button class="mybutton" onclick=""> </button>
-<button class="mybutton" onclick="window.location.href='/'">▢</button>
-<button class="mybutton" onclick="history.back()">◁</button>
+<button class="mybutton" onclick="window.location.href='/'">Exit</button>
+<button class="mybutton" onclick="history.back()">Go Back</button>
