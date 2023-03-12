@@ -1,0 +1,106 @@
+<head>
+    
+</head>
+
+<script>
+function sleep(ms) {
+  return new Promise(
+    resolve => setTimeout(resolve, ms)
+  );
+}
+	
+    async function initialize() 
+    {
+        var H=window.innerHeight;
+        var W=window.innerWidth;
+        var Good=`
+        
+           <!DOCTYPE html>
+<head>
+    <title>Select boot device.</title>
+</head>
+
+           <style>
+	    body  {
+		    background-color: black;
+	    }
+
+	    .text {
+		    font-size: x-large;
+		    color: white;
+	    }
+		.title {
+		    font-size: xx-large;
+		    color: white;
+			text-align: center;
+			margin: 0;
+			margin-top: 1%;
+			margin-bottom: 1%;
+			border-bottom: 5px solid white;
+	    }
+		.option {
+		    font-size: 5vh;
+		    color: white;
+			text-align: left;
+			background-color: rgb(2,2,200);
+			width: 100%;
+			border: 0px solid white;
+			margin-bottom: 1%;
+			
+	    }
+
+		.box {
+			background-color:blue;
+			position: fixed;
+			top: 30vh;
+			left: 30vw;
+			width: 40vw;
+			height: auto;
+			border: 5px solid white;
+			margin: 0;
+		}
+</style>
+
+<body>
+
+
+
+    <p class="text" >
+	     <br>
+	    _
+	</p>
+	
+	<div class="box">
+		
+		<p class="title" >Please select boot device:</p>
+		<button onclick="history.back();" class="option" >  📂 Back</button>
+		<button onclick="window.location='https://aaronos.dev';" class="option" >  UEFI: AaronOS </button>
+		<button onclick="window.location='https://silveos.com';" class="option" >  Network Boot: SilveOS </button>
+		<button onclick="window.location='https://windows96.net';" class="option" >  CD: Windows 96 </button>
+		<button onclick="window.location='/';" class="option" >  ( ' ) Shutdown</button>
+	</div>
+</body>
+        
+        `;
+        await sleep(100);
+        document.getElementById("UI").innerHTML=Good;
+    }
+</script>
+<Body onload="initialize()">
+<div id="UI">
+    <style>
+	    body  {
+		    background-color: black;
+	    }
+
+	    .text {
+		    font-size: x-large;
+		    color: white;
+	    }
+</style>
+    <p class="text" >
+	_
+	</p>
+	<title>Select boot device.</title>
+</div>
+</Body>
