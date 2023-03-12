@@ -41,7 +41,7 @@ function sleep(ms) {
 			border-bottom: 5px solid white;
 	    }
 		.option {
-		    font-size: xx-large;
+		    font-size: 5vh;
 		    color: white;
 			text-align: left;
 			background-color: rgb(2,2,200);
@@ -57,7 +57,7 @@ function sleep(ms) {
 			top: 30vh;
 			left: 30vw;
 			width: 40vw;
-			height: 40vh;
+			height: auto;
 			border: 5px solid white;
 			margin: 0;
 		}
@@ -76,7 +76,9 @@ function sleep(ms) {
 		<p class="title" >Please select boot device:</p>
 		<button onclick="window.location='./New';" class="option" >  HDD: P0- VOS_Touch x86 </button>
 		<button onclick="window.location='./PRO/';" class="option" >  UEFI: VirtualOS </button>
-		<button onclick="window.location='./SVD/';" class="option" >  Network Boot: VOS_Experiments </button>
+		<button onclick="window.location='./SVD/';" class="option" >  Network Boot: Experiments</button>
+		<button onclick="window.location='./Boot/Daedal';" class="option" >  DVD: Daedal OS </button>
+		<button onclick="window.location='./Boot/Folder';" class="option" >  📁 ...</button>
 		<button onclick="window.location='./BIOS';" class="option" >  Enter Setup </button>
 	</div>
 </body>
