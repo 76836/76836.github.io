@@ -110,11 +110,12 @@ const isMobile = {
 };
 
         if ( isMobile.any() ){
-			alert('mobile browser detected');
-		};
+			window.location='./Mobile';
+		}
+		else {
 		await sleep(1000);
         document.getElementById("UI").innerHTML=Good;
-
+		};
     }
 </script>
 
