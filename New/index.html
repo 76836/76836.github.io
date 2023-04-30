@@ -1,62 +1,80 @@
-<head>
-<title>VirtualOS</title>
-<link rel="manifest" href="/app.webmanifest">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="viewport" content="initial-scale=1">
-</head>
-
-<div class="notification-bar">
-    <container style="position:fixed; left: 5vw; top:0; color:white; " >
-  <p id="clock">NaN-Droid</p>
-    </container>
-  <p id=' THERE IS NO "ID" '  style="position:fixed; right: 5vw; top:0; color:white; ">"Connected"</p>
-</div>
-
 <script>
-    var myVar = setInterval(function() {
-  myTimer();
-}, 1000);
-
-function myTimer() {
-  var d = new Date();
-  document.getElementById("clock").innerHTML = d.toLocaleTimeString();
-}
+    function initialize() 
+    {
+        var H=window.innerHeight;
+        //var W=window.innerWidth;
+        var W='100vw';
+        var Frame="<iFrame frameBorder='0' height='"+(H-57)+"px' width='"+W+"  ' src='/New/Launcher'></iFrame>";
+        document.getElementById("UI").innerHTML=Frame;
+        //Mhmm yep that'll work... I think.
+    }
 </script>
 
-<iframe src="/New/Launcher" frameBorder="0" width="100%" height="92%"></iframe>
-
-
-<style>
-body {
-  background-color: #1b1b1b;
-  overflow: hidden;
-  height: 100vh;
-  width: 100vw;
-  margin: 0;
-}
-.notification-bar {
-  background-color: #1b1b1b;
-  width:100vw;
-  height: 3vh;
-  overflow: hidden;
+<head>
+  <title>VirtualOS</title>
+  <link rel="manifest" href="/app.webmanifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="initial-scale=1">
+  </head>
+  
+  <div class="notification-bar">
+      <container style=" position:fixed; left: 5vw; top:0; color:white; " >
+    <p style="margin:3px; position:fixed; left: 5vw; top:0; color:white;" id="clock">NaN-Droid</p>
+      </container>
+    <p id=' THERE IS NO "ID" '  style="margin:3px; position:fixed; right: 5vw; top:0; color:white; ">"Connected"</p>
+  </div>
+  
+  <script>
+      var myVar = setInterval(function() {
+    myTimer();
+  }, 1000);
+  
+  function myTimer() {
+    var d = new Date();
+    document.getElementById("clock").innerHTML = d.toLocaleTimeString();
   }
-.scroller {
-  scrollbar-color: black black;
-}
+  </script>
   
-.myButton {
-  font-weight:bold;
-  font-size: 25px;
-  border: 0px solid black;
-  border-radius: 1px;
-  color:white;
-  background: #1b1b1b;
-  height:4%;
-  width:32%;
+  <div id="UI">
+    <h1>Waiting for JavaScript...</h1>
+  </div>
   
-}
-</style>
-
-<button class="mybutton" onclick="alert('This feature is coming, in a few years.')">|||</button>
-<button class="mybutton" onclick="window.location.href='/New'">▢</button>
-<button class="mybutton" onclick="history.back()">◁</button>
+  
+  
+  <style>
+  body {
+    background-color: #1b1b1b;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+  }
+  .notification-bar {
+    background-color: #1b1b1b;
+    width:100vw;
+    height: 22px;
+    overflow: hidden;
+    
+    }
+  .scroller {
+    scrollbar-color: black black;
+  }
+    
+  .myButton {
+    font-weight:bold;
+    font-size: 25px;
+    border: 0px solid black;
+    border-radius: 1px;
+    color:white;
+    background: #1b1b1b;
+    height:35px;
+    width:32%;
+    
+  }
+  </style>
+  
+  <body onload="initialize();">
+  <button class="mybutton" onclick="alert('This feature is coming, in a few years.')">|||</button>
+  <button class="mybutton" onclick="window.location.href='/New'">▢</button>
+  <button class="mybutton" onclick="history.back()">◁</button>
+  </body>
