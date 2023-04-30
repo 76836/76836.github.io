@@ -1,10 +1,11 @@
+<!DOCTYPE html>
 <script>
     function initialize() 
     {
         var H=window.innerHeight;
         //var W=window.innerWidth;
-        var W='100vw';
-        var Frame="<iFrame frameBorder='0' height='"+(H-57)+"px' width='"+W+"  ' src='/New/Launcher'></iFrame>";
+        var W=('100vw');
+        var Frame="<iFrame frameBorder='0' height='"+(H-57)+"px' width='"+W+"' src='/New/Launcher'></iFrame>";
         document.getElementById("UI").innerHTML=Frame;
         //Mhmm yep that'll work... I think.
     }
@@ -32,6 +33,7 @@
   function myTimer() {
     var d = new Date();
     document.getElementById("clock").innerHTML = d.toLocaleTimeString();
+      //my confidence is failing me
   }
   </script>
   
