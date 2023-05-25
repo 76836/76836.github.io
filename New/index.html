@@ -56,17 +56,13 @@
     overflow: hidden;
     
     }
-  .scroller {
-    scrollbar-color: black black;
-  }
-    
   .myButton {
     font-weight:bold;
     font-size: 25px;
     border: 0px solid black;
     border-radius: 1px;
     color:white;
-    background: #1b1b1b;
+    background: transparent;
     height:37px;
     width:32%;
     
@@ -74,7 +70,7 @@
   </style>
   
   <body onload="initialize();">
-  <button class="mybutton" onclick="alert('This feature is coming, in a few years.')">|||</button>
-  <button class="mybutton" onclick="window.location.href='/New'">▢</button>
-  <button class="mybutton" onclick="history.back()">◁</button>
+  <button Style="position:fixed; bottom:0; right:0;" class="mybutton" onclick="alert('No recent items')">|||</button>
+  <button Style="position:fixed; bottom:0; left:34%;" class="mybutton" onclick="window.location.href='/New'">▢</button>
+  <button Style="position:fixed; bottom:0; left:0;" class="mybutton" onclick="history.back()">◁</button>
   </body>
