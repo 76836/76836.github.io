@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <head>
-	<title>VOS Desktop v2.2 public release</title>
+	<title>VOS Desktop v3.2 public release</title>
 </head>
 <html>	
 	<style type="text/css">
@@ -35,7 +35,7 @@
 		}
 		.pwricon {
 			height:7vw;
-			width:7vw;
+			width:auto;
 			background-color:transparent;
 			position:fixed;
 			right: 0;
@@ -59,7 +59,7 @@
 	  overflow: hidden;
 	  resize: both;
 	  border-radius: 10px;
-	  transition-duration: 0.4;
+	  transition-duration: 0.4s;
 	}
 	.div:Hover{
 	  position: absolute;
@@ -101,10 +101,10 @@
 
 	var part1 = `<div style="" class="div" id="mydiv`;
 	var part2 = `"> 
-	  <iframe Width="100%" Height="97vh" src="https://76836.github.io/DesktopLauncher"></iframe>
+	  <iframe Width="100%" Height="97%" src="https://76836.github.io/DesktopLauncher"></iframe>
 	  <div class="divheader" id="mydiv`;
-	var part3 = `header"><button class="buttonx" onclick="Close(`;
-	var part4 = `)">X</button><button class="buttonback" onclick="history.back()">◁</button></div>
+	var part3 = `header"><button class="buttonback" onclick="history.back()">◁</button><button class="buttonx" onclick="Close(`;
+	var part4 = `)">X</button></div>
 	</div>`;
 	//all the pieces needed to build a window
 
