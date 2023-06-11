@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <head>
-	<title>VOS Desktop v2.1 pre-release</title>
+	<title>VOS Desktop v2.2 public release</title>
 </head>
 <html>	
 	<style type="text/css">
@@ -27,27 +27,49 @@
 			color:black;
 			height:7vw;
 			width:7vw;
-			background-color:whitesmoke;
+			background-color:transparent;
 			position:fixed;
 			right: 0;
 			bottom: 0;
 			margin: 1vw;
 		}
+		.pwricon {
+			height:7vw;
+			width:7vw;
+			background-color:transparent;
+			position:fixed;
+			right: 0;
+			bottom: 8vw;
+			margin: 1vw;
+		}
 		.buttonback {
 			border-radius:0px;
-			color:black;
+			border: 0px solid black;
+			color:white;
 			height:100%;
-			background-color:gray;
+			background-color:black;
 		}
 
 	.div {
 	  position: absolute;
+	  z-index: 7;
+	  background-color: transparent;
+	  text-align: right;
+	  border: 1px solid black;
+	  overflow: hidden;
+	  resize: both;
+	  border-radius: 10px;
+	  transition-duration: 0.4;
+	}
+	.div:Hover{
+	  position: absolute;
 	  z-index: 9;
 	  background-color: transparent;
 	  text-align: right;
-	  border: 1px solid #d3d3d3;
+	  border: 1px solid cyan;
 	  overflow: hidden;
 	  resize: both;
+	  border-radius: 0px;
 	}
 	.closed {
 		z-index: -100;
@@ -59,8 +81,8 @@
 	.divheader {
 	  cursor: move;
 	  z-index: 10;
-	  background-color: #2196F3;
-	  color: #fff;
+	  background-color: black;
+	  color: white;
 	  overflow: auto;
 	  height: 3vh;
 	}
@@ -79,10 +101,10 @@
 
 	var part1 = `<div style="" class="div" id="mydiv`;
 	var part2 = `"> 
+	  <iframe Width="100%" Height="97vh" src="https://76836.github.io/DesktopLauncher"></iframe>
 	  <div class="divheader" id="mydiv`;
 	var part3 = `header"><button class="buttonx" onclick="Close(`;
-	var part4 = `)">X</button><button class="buttonback" onclick="history.back()">BACK</button></div>
-	  <iframe Width="100%" Height="100%" src="https://76836.github.io/New/Launcher.html"></iframe>
+	var part4 = `)">X</button><button class="buttonback" onclick="history.back()">◁</button></div>
 	</div>`;
 	//all the pieces needed to build a window
 
@@ -151,11 +173,11 @@
 
 		
 		<div id="B1">
-		<button class="icon" onclick="Open()" src="/apple-touch-icon.png">+</img>
+		<button class="icon" onclick="Open()" >+</img>
 		</div>
 	
 		<div id="B2">
-		<image style="width: 5vw;" class="power" onclick="window.location='./';" src="/PWR.png">log out</img>
+		<image style="width: 5vw;" class="pwricon" onclick="window.location='./';" src="/PWR.png"></img>
 		</div>
 
 	</body>
