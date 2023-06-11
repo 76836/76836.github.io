@@ -17,8 +17,21 @@
 			height:100%;
 			background-color:red;
 			position:sticky;
-			left: 0;
-			
+			right: 0;
+		}
+		.icon {
+			border-radius:4vw;
+			border: 0.5vw solid black;
+			font-size: xx-large;
+			font-weight: bolder;
+			color:black;
+			height:7vw;
+			width:7vw;
+			background-color:whitesmoke;
+			position:fixed;
+			right: 0;
+			bottom: 0;
+			margin: 1vw;
 		}
 		.buttonback {
 			border-radius:0px;
@@ -31,7 +44,7 @@
 	  position: absolute;
 	  z-index: 9;
 	  background-color: transparent;
-	  text-align: left;
+	  text-align: right;
 	  border: 1px solid #d3d3d3;
 	  overflow: hidden;
 	  resize: both;
@@ -138,11 +151,11 @@
 
 		
 		<div id="B1">
-		<button class="icon" onclick="Open()" src="/apple-touch-icon.png">new window</img>
+		<button class="icon" onclick="Open()" src="/apple-touch-icon.png">+</img>
 		</div>
 	
 		<div id="B2">
-		<button class="icon" onclick="window.location='./';" src="/PWR.png">log out</img>
+		<image style="width: 5vw;" class="power" onclick="window.location='./';" src="/PWR.png">log out</img>
 		</div>
 
 	</body>
