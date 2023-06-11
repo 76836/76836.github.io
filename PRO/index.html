@@ -18,6 +18,7 @@
 			background-color:red;
 			position:sticky;
 			right: 0;
+			margin-right: 5%;
 		}
 		.icon {
 			border-radius:4vw;
@@ -59,7 +60,6 @@
 	  overflow: hidden;
 	  resize: both;
 	  border-radius: 10px;
-	  transition-duration: 0.4s;
 	}
 	.div:Hover{
 	  position: absolute;
@@ -70,6 +70,7 @@
 	  overflow: hidden;
 	  resize: both;
 	  border-radius: 0px;
+	  transition-duration: 0.4s;
 	}
 	.closed {
 		z-index: -100;
@@ -84,8 +85,12 @@
 	  background-color: black;
 	  color: white;
 	  overflow: auto;
-	  height: 3vh;
+	  height: 5%;
 	}
+	.iframe {
+		width: 100%;
+		height: 95%;
+		}
 	</style>
 	<body>
 
@@ -101,7 +106,7 @@
 
 	var part1 = `<div style="" class="div" id="mydiv`;
 	var part2 = `"> 
-	  <iframe Width="100%" Height="97%" src="https://76836.github.io/DesktopLauncher"></iframe>
+	  <iframe class="iframe" src="https://76836.github.io/DesktopLauncher"></iframe>
 	  <div class="divheader" id="mydiv`;
 	var part3 = `header"><button class="buttonback" onclick="history.back()">◁</button><button class="buttonx" onclick="Close(`;
 	var part4 = `)">X</button></div>
@@ -177,7 +182,7 @@
 		</div>
 	
 		<div id="B2">
-		<image style="width: 5vw;" class="pwricon" onclick="window.location='./';" src="/PWR.png"></img>
+		<image class="pwricon" onclick="window.location='./';" src="/PWR.png"></img>
 		</div>
 
 	</body>
