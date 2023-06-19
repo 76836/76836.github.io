@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <head>
-	<title>VOS Desktop v3.3 public release</title>
+	<title>VOS Desktop v3.4 public release</title>
 </head>
 <html>	
 	<style type="text/css">
@@ -26,8 +26,22 @@
 			font-size: xx-large;
 			font-weight: bolder;
 			color:black;
-			height:7vw;
-			width:7vw;
+			height:6vw;
+			width:6vw;
+			background-color:transparent;
+			position:fixed;
+			right: 0;
+			bottom: 0;
+			margin: 1vw;
+		}
+				.icon:hover {
+			border-radius:4vw;
+			border: 0.5vw inset cyan;
+			font-size: xx-large;
+			font-weight: bolder;
+			color: white;
+			height:6vw;
+			width:6vw;
 			background-color:transparent;
 			position:fixed;
 			right: 0;
@@ -35,13 +49,13 @@
 			margin: 1vw;
 		}
 		.pwricon {
-			height:7vw;
+			height:6vw;
 			width:auto;
 			background-color:transparent;
 			position:fixed;
 			right: 0;
 			bottom: 8vw;
-			margin: 1vw;
+			margin: 1.1vw;
 		}
 		.buttonback {
 			border-radius:0px;
@@ -55,9 +69,9 @@
 	  position: absolute;
 	  z-index: 7;
 	  background-color: transparent;
-	  text-align: right;
-	  border: 1px solid black;
-	  overflow: visible;
+	  text-align: left;
+	  border: 1px solid gray;
+	  overflow: hidden;
 	  resize: both;
 	  border-radius: 10px;
 	}
@@ -65,9 +79,9 @@
 	  position: absolute;
 	  z-index: 9;
 	  background-color: transparent;
-	  text-align: right;
+	  text-align: left;
 	  border: 1px solid cyan;
-	  overflow: visible;
+	  overflow: hidden;
 	  resize: both;
 	  border-radius: 0px;
 	  transition-duration: 0s;
@@ -85,72 +99,20 @@
 	  background-color: black;
 	  color: white;
 	  overflow: auto;
-	  height: 3vh;
+	  height: 4vh;
+	  overflow: hidden;
 	}
 	.iframe {
 		width: 100%;
-		height: 100%;
+		height: calc(100% - 4vh);
 		}
 	</style>
 	<body>
 
 <div id="ActiveZone">
-
+	<h1>VOS Desktop v3.3 public release</h1>
 </div>
-
-		
-		
-		
-		
-		
-<script type="module">
-import interact from 
-'https://cdn.interactjs.io/v1.10.17/interactjs/index.js'
-
-interact('.div')
-  .resizable({
-    // resize from all edges and corners
-    edges: { left: true, right: true, bottom: true, top: true },
-
-    listeners: {
-      move (event) {
-        var target = event.target
-        var x = (parseFloat(target.getAttribute('data-x')) || 0)
-        var y = (parseFloat(target.getAttribute('data-y')) || 0)
-
-        // update the element's style
-        target.style.width = event.rect.width + 'px'
-        target.style.height = event.rect.height + 'px'
-
-        // translate when resizing from top or left edges
-        x += event.deltaRect.left
-        y += event.deltaRect.top
-
-        target.style.transform = 'translate(' + x + 'px,' + y + 'px)'
-
-        target.setAttribute('data-x', x)
-        target.setAttribute('data-y', y)
-        target.textContent = Math.round(event.rect.width) + '\u00D7' + Math.round(event.rect.height)
-      }
-    },
-    modifiers: [
-      // keep the edges inside the parent
-      interact.modifiers.restrictEdges({
-        outer: 'parent'
-      }),
-
-      // minimum size
-      interact.modifiers.restrictSize({
-        min: { width: 100, height: 50 }
-      })
-    ],
-
-    inertia: false
-  })
-</script>
-		
-		
-		
+	
 		
 		
 
@@ -163,8 +125,8 @@ interact('.div')
 	var part2 = `"> 
 	  <iframe class="iframe" src="https://76836.github.io/DesktopLauncher"></iframe>
 	  <div class="divheader" id="mydiv`;
-	var part3 = `header"><button class="buttonback" onclick="history.back()">◁</button><button class="buttonx" onclick="Close(`;
-	var part4 = `)">X</button></div>
+	var part3 = `header"><button class="buttonx" onclick="Close(`;
+	var part4 = `)">X</button><button class="buttonback" onclick="history.back()">◁</button><button class="buttonback" onclick="alert('home button doesn't work yet :/');">◯</button></div>
 	</div>`;
 	//all the pieces needed to build a window
 
