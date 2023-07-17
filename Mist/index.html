@@ -1,0 +1,78 @@
+<script>
+    function initialize() 
+    {
+        var Frame="<iFrame frameBorder='0' class='iframe' src='./home.html'></iFrame>";
+        document.getElementById("UI").innerHTML=Frame;
+        //Mhmm yep that'll work... I think.
+        console.log('Welcome to MistOS simulator! \nSystem initialized.');
+    }
+</script>
+
+<head>
+  <title>Mist OS</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="initial-scale=1">
+  </head>
+  
+  <div class="notification-bar">
+      <container style=" position:fixed; left: 5vw; top:0; color:white; " >
+    <p style="margin:3px; position:fixed; left: 5vw; top:0; color:white;" id="clock">Loading...</p>
+      </container>
+    <p id=' THERE IS NO "ID" '  style="margin:3px; position:fixed; right: 5vw; top:0; color:white; ">Mist OS</p>
+  </div>
+  
+  <script>
+      var myVar = setInterval(function() {
+    myTimer();
+  }, 1000);
+  
+  function myTimer() {
+    var d = new Date();
+    document.getElementById("clock").innerHTML = d.toLocaleTimeString();
+      //my confidence is failing me
+  }
+  </script>
+  
+  <div id="UI">
+    <h1>Waiting for JavaScript...</h1>
+  </div>
+  
+  
+  
+  <style>
+  body {
+    background-color: #1b1b1b;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+  }
+  .notification-bar {
+    background-color: #1b1b1b;
+    width:100vw;
+    height: 22px;
+    overflow: hidden;
+    
+    }
+  .myButton {
+    font-weight:bold;
+    font-size: 25px;
+    border: 0px solid black;
+    border-radius: 1px;
+    color:white;
+    background: transparent;
+    height:37px;
+    width:32%;
+    
+  }
+  .iframe{
+    height:calc(100vh - 55px);
+    width:100%;
+  }
+  </style>
+  
+  <body onload="initialize();">
+  <button Style="position:fixed; bottom:0; right:0;" class="mybutton" onclick="alert('No recent items')">|||</button>
+  <button Style="position:fixed; bottom:0; left:34%;" class="mybutton" onclick="window.location.href='./'">▢</button>
+  <button Style="position:fixed; bottom:0; left:0;" class="mybutton" onclick="history.back()">◁</button>
+  </body>

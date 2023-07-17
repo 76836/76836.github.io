@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>home</title>
+</head>
+<body>
+    
+    <div id="drawer">
+<img onclick="alert('app not installed');" class="icon" src="https://icons.iconarchive.com/icons/dtafalonso/android-l/512/Settings-L-icon.png" onerror="this.onerror=null; this.src='./Foreshadowing.jpg'">
+    </div>
+
+
+    <div>
+        <p style="font-size:large; width:100%; text-align: center;">Install an app:</p>
+          <input class="box" id="AppUrlBox" placeholder="https://youtube.com" type=text>
+          <button class="setbutton" onclick="A2HS()">Install</button>
+          <button class="setbutton" onclick="confirm('this will remove all installed apps but still keep their data\n \n use this feature to repair a damaged appindex'); localStorage.setItem('MIST_APPS', null);">reset appindex (wipe disk)</button>
+      </div>
+
+
+</body>
+
+<script>
+console.log('### S E T T I N G S   A P P');
+//###startup
+//Read apps index from localstorage!!
+
+var DEJSONIFY = localStorage.getItem('MIST_APPS');
+var apps = JSON.parse(DEJSONIFY);
+if (apps == null) {
+    console.log('App index is empty, so default apps are being installed. Welcome or Welcome back!');
+
+    var apps = [];
+apps[0]= "https://76836.github.io";
+apps[1]= "https://google.com";
+apps[2]= "https://github.com";
+apps[3]= "https://youtube.com";
+
+//write changes to localstorage
+var JSONIFY = JSON.stringify(apps);
+localStorage.setItem('MIST_APPS', JSONIFY);
+console.log('MIST_APPS='+JSONIFY);
+}
+else {
+    var DEJSONIFY = localStorage.getItem('MIST_APPS');
+    var apps = JSON.parse(DEJSONIFY);
+    console.log('App index read succesful:');
+};
+console.log(apps);
+
+//###functions catalog
+function A2HS()
+        {
+            //read text box contents
+          var A2I=document.getElementById('AppUrlBox').value;
+          console.log('A2HS:'+A2I);
+            //retrieve apps index
+          var DEJSONIFY = localStorage.getItem('MIST_APPS');
+          var apps = JSON.parse(DEJSONIFY)
+            //add subject to apps index
+          apps.push(A2I);
+            //save the updated index
+          var JSONIFY = JSON.stringify(apps)
+          localStorage.setItem('MIST_APPS', JSONIFY);
+        };
+
+
+/* nopez
+apps.splice(2, 1);
+
+for (const app of apps) {
+//create app icon for each app:
+
+
+
+
+
+
+
+
+console.log(' app icon for: \n'+app+'\n loaded');
+};
+
+*/
+
+</script>
+
+<style>
+.icon{
+    width:15vw;
+    height:15vw;
+    border-radius: 7.5vw;
+}
+body {
+    background-color:gray;
+}
+</style>
+</html>
