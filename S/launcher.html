@@ -1,0 +1,33 @@
+<head> 
+     <title>Starting...</title> 
+ </head> 
+  
+ <script> 
+ function sleep(ms) { 
+   return new Promise( 
+     resolve => setTimeout(resolve, ms) 
+   ); 
+ } 
+  
+     async function initialize()  
+     { 
+  
+                 await sleep(4000); 
+     window.location='./Mist'; 
+  
+     } 
+ </script> 
+ <Body onload="initialize()"> 
+ <div id="UI"> 
+     <style> 
+     body  { 
+                         background-image: url("/android.gif"); 
+           background-color: black; 
+                         background-repeat: no-repeat; 
+                         background-size: auto 100%; 
+    background-position: center;  
+                         } 
+ </style> 
+     <h1> </h1> 
+ </div> 
+ </Body>
