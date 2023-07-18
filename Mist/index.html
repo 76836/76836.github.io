@@ -1,10 +1,9 @@
 <script>
     function initialize() 
     {
-        var Frame="<iFrame frameBorder='0' class='iframe' src='./home.html'></iFrame>";
-        document.getElementById("UI").innerHTML=Frame;
+        window.location=('./home');
         //Mhmm yep that'll work... I think.
-        console.log('Welcome to MistOS simulator! \nSystem initialized.');
+        console.log('App started');
     }
 </script>
 
@@ -35,6 +34,9 @@
   
   <div id="UI">
     <h1>Waiting for JavaScript...</h1>
+    <br>
+    <p>If you can read this then there has probably been a problem loading Mist. Try updating using the button below, enable JavaScript, reinstall or update Android System WebView, check your internet connection, upgrade your device, or use a different program similar to Mist OS.</p>
+    <button onclick="window.location='./update';"> Update Mist OS </button>
   </div>
   
   
@@ -64,10 +66,6 @@
     height:37px;
     width:32%;
     
-  }
-  .iframe{
-    height:calc(100vh - 55px);
-    width:100%;
   }
   </style>
   
