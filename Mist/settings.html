@@ -3,38 +3,31 @@
 	<meta name="viewport" content="initial-scale=1">
 <head>
     <meta charset="UTF-8" />
-    <title>home</title>
+    <title>Confguration</title>
 </head>
 <body>
     
+ <h1 style="width:100%; text-align: center;"> SETTINGS </h1>
+ <button class="elementbasic" onclick="alert(' settings version 4 \n launcher version 1');">info</button>
+ <button class="elementbasic" onclick="location.reload();">Reload</button>
 
-    <div>
-        <h1 style="width:100%; text-align: center;"> SETTINGS </h1>
-        <br>
-	     <button class="elementbasic" onclick="Alert('settings version 3 \n launcher version 1');">info</button>
-	    <br>
-        <p style="font-size:large; width:100%; text-align: center;">Install an app:</p>
-        <br>
-          <input class="elementbasic" id="AppUrlBox" placeholder="https://youtube.com" type=text>
-          <button class="elementbasic" onclick="A2HS()">Install</button>
-          <button class="elementbasic" onclick="confirm('This will remove all installed apps but still keep their data. To remove all app data clear MistOS app storage in android settings'); localStorage.setItem('MIST_APPS', null);">reset appindex (wipe disk)</button>
-
-        <div>
-    <p style="font-size:large; width:100%; text-align: center;">Change wallpaper (Gifs supported):</p>
-      <input class="elementbasic" id="bkgurl" placeholder="Leave URL blank for default." type=text>
-      <button class="elementbasic" onclick="setBKG()">set</button>
-  </div>
-    
-    
-    </div>
-
-
+ <p style="font-size:large; width:100%; text-align: center;">Install an app:</p>
+ <input class="elementbasic" id="AppUrlBox" placeholder="https://youtube.com" type=text>
+ <button class="elementbasic" onclick="A2HS();">Install</button>
+ <button class="elementbasic" onclick="confirm('This will remove all installed apps but still keep their data. To remove all app data clear MistOS app storage in android settings'); localStorage.setItem('MIST_APPS', null);">reset appindex (wipe disk)</button>
+ 
+ <p style="font-size:large; width:100%; text-align: center;">Change wallpaper (Gifs supported):</p>
+ <input class="elementbasic" id="bkgurl" placeholder="Leave URL blank for default." type=text>
+ <button class="elementbasic" onclick="setBKG();">set</button>
+ 
+ <p style="font-size:large; width:100%; text-align: center;">Help:</p>
+ <button class="elementbasic" onclick="window.location='./help';">help pages</button>
 </body>
 
 <script>
 console.log('### S E T T I N G S   A P P');
 //###startup
-//Read apps index from localstorage!!
+//Read apps index from localstorage
 
 var DEJSONIFY = localStorage.getItem('MIST_APPS');
 var apps = JSON.parse(DEJSONIFY);
@@ -46,6 +39,7 @@ apps[0]= "https://76836.github.io";
 apps[1]= "https://google.com";
 apps[2]= "https://github.com";
 apps[3]= "https://youtube.com";
+apps[4]= "https://76836.github.io/Mist/internet"
 
 //write changes to localstorage
 var JSONIFY = JSON.stringify(apps);
@@ -60,6 +54,7 @@ else {
 console.log(apps);
 
 
+var BKGURL = localStorage.getItem('selectedBKGURL');
 
         if (BKGURL == "null" || BKGURL == "") {
 BKGURL = "./Foreshadowing.jpg";
@@ -68,12 +63,15 @@ BKGURL = "./Foreshadowing.jpg";
 var ExCSS1 = document.createElement("style");
   ExCSS1.innerHTML =`		body  {
 			background-image: url("`+BKGURL+`");
-  			background-color: black;
+  		background-color: black;
 			background-repeat: no-repeat;
 			background-size: cover;
 			overflow-x: hidden;
-                        color:white;
+      color:white;
 			min-height:100vh;
+      width:100vw;
+      margin:0;
+      padding:0;
 			}`;
 
   var head = document.getElementsByName("head")[0];
@@ -83,33 +81,35 @@ var ExCSS1 = document.createElement("style");
     
     
 //###functions catalog
-function A2HS()
-        {
+function A2HS() {
             //read text box contents
           var A2I=document.getElementById('AppUrlBox').value;
           console.log('A2HS:'+A2I);
+          // confirm install
+          confirm('do you really want to install '+A2I);
             //retrieve apps index
           var DEJSONIFY = localStorage.getItem('MIST_APPS');
-          var apps = JSON.parse(DEJSONIFY)
+          var apps = JSON.parse(DEJSONIFY);
             //add subject to apps index
           apps.push(A2I);
             //save the updated index
-          var JSONIFY = JSON.stringify(apps)
+          var JSONIFY = JSON.stringify(apps);
           localStorage.setItem('MIST_APPS', JSONIFY);
             // alert the user of the change
-	alert('installed '+A2I');
+	        alert('installed '+A2I);
         };
 
- function setBKG()
-        {
+ function setBKG() {
          var Url=document.getElementById('bkgurl').value;
            localStorage.setItem('selectedBKGURL', Url);
-		alert('background image set to: '+Url');
+		alert('background image set to: '+Url);
         };
     
-
-//apps.splice(2, 1);
 </script>
+
+
+
+
 
 <style>
     .elementbasic {
@@ -117,6 +117,10 @@ function A2HS()
         height:10vh;
         background-color:gray;
         border: 3px solid black;
+        margin:0;
+        padding:0px;
+        font-size: xx-large;
     }
 </style>
+
 </html>
