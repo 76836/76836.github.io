@@ -6,17 +6,24 @@
 </head>
 <body>
     
-    <div id="drawer">
-<img onclick="alert('app not installed');" class="icon" src="https://icons.iconarchive.com/icons/dtafalonso/android-l/512/Settings-L-icon.png" onerror="this.onerror=null; this.src='./Foreshadowing.jpg'">
-    </div>
-
 
     <div>
+        <h1 style="width:100%; text-align: center;"> SETTINGS </h1>
+        <br>
         <p style="font-size:large; width:100%; text-align: center;">Install an app:</p>
-          <input class="box" id="AppUrlBox" placeholder="https://youtube.com" type=text>
-          <button class="setbutton" onclick="A2HS()">Install</button>
-          <button class="setbutton" onclick="confirm('this will remove all installed apps but still keep their data\n \n use this feature to repair a damaged appindex'); localStorage.setItem('MIST_APPS', null);">reset appindex (wipe disk)</button>
-      </div>
+        <br>
+          <input class="elementbasic" id="AppUrlBox" placeholder="https://youtube.com" type=text>
+          <button class="elementbasic" onclick="A2HS()">Install</button>
+          <button class="elementbasic" onclick="confirm('This will remove all installed apps but still keep their data. To remove all app data clear MistOS app storage in android settings'); localStorage.setItem('MIST_APPS', null);">reset appindex (wipe disk)</button>
+
+        <div>
+    <p style="font-size:large; width:100%; text-align: center;">Change wallpaper (Gifs supported):</p>
+      <input class="elementbasic" id="bkgurl" placeholder="Leave URL blank for default." type=text>
+      <button class="elementbasic" onclick="setBKG()">set</button>
+  </div>
+    
+    
+    </div>
 
 
 </body>
@@ -49,6 +56,29 @@ else {
 };
 console.log(apps);
 
+
+
+        if (BKGURL == "null" || BKGURL == "") {
+BKGURL = "./Foreshadowing.jpg";
+};
+
+var ExCSS1 = document.createElement("style");
+  ExCSS1.innerHTML =`		body  {
+			background-image: url("`+BKGURL+`");
+  			background-color: black;
+			background-repeat: no-repeat;
+			background-size: cover;
+			overflow-x: hidden;
+                        color:white;
+			min-height:100vh;
+			}`;
+
+  var head = document.getElementsByName("head")[0];
+  document.head.appendChild(ExCSS1);
+
+  console.log('Background image loaded from persistent settings: '+BKGURL);
+    
+    
 //###functions catalog
 function A2HS()
         {
@@ -65,35 +95,22 @@ function A2HS()
           localStorage.setItem('MIST_APPS', JSONIFY);
         };
 
-
-/* nopez
+ function setBKG()
+        {
+         var Url=document.getElementById('bkgurl').value;
+           localStorage.setItem('selectedBKGURL', Url);
+        };
+    
+/* notes for the future...
 apps.splice(2, 1);
-
-for (const app of apps) {
-//create app icon for each app:
-
-
-
-
-
-
-
-
-console.log(' app icon for: \n'+app+'\n loaded');
-};
-
-*/
-
 </script>
 
 <style>
-.icon{
-    width:15vw;
-    height:15vw;
-    border-radius: 7.5vw;
-}
-body {
-    background-color:gray;
-}
+    .elementbasic {
+        width:100%;
+        height:10%;
+        background-color:gray;
+        border: 3px solid black;
+    }
 </style>
 </html>
