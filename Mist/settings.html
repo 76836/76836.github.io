@@ -8,7 +8,7 @@
 <body>
     
  <h1 style="width:100%; text-align: center;"> SETTINGS </h1>
- <button class="elementbasic" onclick="alert(' settings version 4 \n launcher version 1');">info</button>
+ <button class="elementbasic" onclick="alert(' settings version 5 \n launcher version 2');">info</button>
  <button class="elementbasic" onclick="location.reload();">Reload</button>
 
  <p style="font-size:large; width:100%; text-align: center;">Install an app:</p>
@@ -32,15 +32,26 @@ console.log('### S E T T I N G S   A P P');
 var DEJSONIFY = localStorage.getItem('MIST_APPS');
 var apps = JSON.parse(DEJSONIFY);
 if (apps == null) {
-    console.log('App index is empty, so default apps are being installed. Welcome or Welcome back!');
+    console.log('App index is empty, so secret custom apps are being installed. Welcome back!');
 
     var apps = [];
 apps[0]= "https://76836.github.io";
 apps[1]= "https://google.com";
 apps[2]= "https://github.com";
 apps[3]= "https://youtube.com";
-apps[4]= "https://76836.github.io/Mist/internet"
+apps[4]= "https://DustinBrett.com";
+apps[5]= "https://aniwatch.to";
+apps[6]= "https://bing.com";
+apps[7]= "https://amazon.ca";
+apps[8]= "../Akari";
+apps[9]= "https://2048game.com";
+apps[10]= "https://paper-io.com";
+apps[11]= "../Calculator";
+apps[12]= "https://76836.github.io/Mist/internet";
 
+//load up an outstanding wallpaper
+localStorage.setItem('selectedBKGURL', Url);
+alert('\n \nAwesome mode activated!\n \n');
 //write changes to localstorage
 var JSONIFY = JSON.stringify(apps);
 localStorage.setItem('MIST_APPS', JSONIFY);
@@ -62,16 +73,15 @@ BKGURL = "./Foreshadowing.jpg";
 
 var ExCSS1 = document.createElement("style");
   ExCSS1.innerHTML =`		body  {
-			background-image: url("`+BKGURL+`");
-  		background-color: black;
-			background-repeat: no-repeat;
-			background-size: cover;
-			overflow-x: hidden;
-      color:white;
-			min-height:100vh;
-      width:100vw;
-      margin:0;
-      padding:0;
+	background-color: black;
+	background-repeat: no-repeat;
+	background-size: cover;
+	overflow-x: hidden;
+        color:white;
+        min-height:100vh;
+        width:100vw;
+        margin:0;
+        padding:0;
 			}`;
 
   var head = document.getElementsByName("head")[0];
@@ -86,7 +96,10 @@ function A2HS() {
           var A2I=document.getElementById('AppUrlBox').value;
           console.log('A2HS:'+A2I);
           // confirm install
-          confirm('do you really want to install '+A2I);
+          if (confirm('do you really want to install '+A2I) == null) {
+		  alert('install cancelled');
+		  return;
+	  };
             //retrieve apps index
           var DEJSONIFY = localStorage.getItem('MIST_APPS');
           var apps = JSON.parse(DEJSONIFY);
