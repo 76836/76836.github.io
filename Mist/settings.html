@@ -8,13 +8,19 @@
 <body>
     
  <h1 style="width:100%; text-align: center;"> SETTINGS </h1>
- <button class="elementbasic" onclick="alert(' settings version 5 \n launcher version 2');">info</button>
+ <button class="elementbasic" onclick="alert(' settings version 6 \n launcher version 2');">info</button>
  <button class="elementbasic" onclick="location.reload();">Reload</button>
 
  <p style="font-size:large; width:100%; text-align: center;">Install an app:</p>
  <input class="elementbasic" id="AppUrlBox" placeholder="https://youtube.com" type=text>
  <button class="elementbasic" onclick="A2HS();">Install</button>
- <button class="elementbasic" onclick="confirm('This will remove all installed apps but still keep their data. To remove all app data clear MistOS app storage in android settings'); localStorage.setItem('MIST_APPS', null);">reset appindex (wipe disk)</button>
+
+	<p style="font-size:large; width:100%; text-align: center;">Uninstall app by number:</p>
+ <input class="elementbasic" id="AppNUMBox" placeholder="App #1 is settings, the app to the right is #2." type=text>
+ <button class="elementbasic" onclick="uninstall();">Uninstall</button>
+	
+	<p style="font-size:large; width:100%; text-align: center;">Uninstall all apps:</p>
+ <button class="elementbasic" onclick="confirm('This will remove all installed apps but still keep their data. To remove all app data clear MistOS app storage in android settings'); localStorage.setItem('MIST_APPS', null);">uninstall all</button>
  
  <p style="font-size:large; width:100%; text-align: center;">Change wallpaper (Gifs supported):</p>
  <input class="elementbasic" id="bkgurl" placeholder="Leave URL blank for default." type=text>
@@ -96,7 +102,7 @@ function A2HS() {
           var A2I=document.getElementById('AppUrlBox').value;
           console.log('A2HS:'+A2I);
           // confirm install
-          if (confirm('do you really want to install '+A2I) == null) {
+          if (confirm('do you really want to install '+A2I) == false) {
 		  alert('install cancelled');
 		  return;
 	  };
@@ -112,6 +118,25 @@ function A2HS() {
 	        alert('installed '+A2I);
         };
 
+function uninstall() {
+            //read text box contents
+          var NUM=document.getElementById('AppNUMBox').value;
+	  var NUM = Number(NUM);
+          console.log('uninstall:'+NUM);
+            //retrieve apps index
+          var DEJSONIFY = localStorage.getItem('MIST_APPS');
+          var apps = JSON.parse(DEJSONIFY);
+            //add subject to apps index
+          apps.splice(NUM);
+            //save the updated index
+          var JSONIFY = JSON.stringify(apps);
+          localStorage.setItem('MIST_APPS', JSONIFY);
+            // alert the user of the change
+	        alert('Uninstalled app no.'+NUM);
+        };
+
+
+	
  function setBKG() {
          var Url=document.getElementById('bkgurl').value;
            localStorage.setItem('selectedBKGURL', Url);
