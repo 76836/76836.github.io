@@ -70,6 +70,10 @@ var element = document.createElement("img");
      element.setAttribute('onclick', "window.location.href='"+app+"'");
      element.setAttribute('class', "icon");
      element.setAttribute('src', app+"/apple-touch-icon.png");
+    element.setAttribute('ONERROR', "this.onerror=null; this.src='"+app+'/icon152.png'+"'");
+    element.setAttribute('ONERROR', "this.onerror=null; this.src='"+app+'/icon.svg'+"'");
+    element.setAttribute('ONERROR', "this.onerror=null; this.src='"+app+'/icon-512.png'+"'");
+    element.setAttribute('ONERROR', "this.onerror=null; this.src='"+app+'/favicon.png'+"'");
      element.setAttribute('ONERROR', "this.onerror=null; this.src='"+app+'/favicon.ico'+"'");
      var page = document.getElementById("drawer");
      page.appendChild(element);
@@ -90,9 +94,11 @@ console.log(' app icon for: \n'+app+'\n loaded');
 
 <style>
 .icon{
-    width:15vw;
-    height:15vw;
-    border-radius: 7.5vw;
+    width:16vw;
+    height:16vw;
+    border-radius: 1vw;
+    padding: 1.5vw;
+    margin:0;
 }
 </style>
 </html>
