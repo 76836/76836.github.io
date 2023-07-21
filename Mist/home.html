@@ -44,9 +44,6 @@ if (apps == null) {
 
     var apps = [];
 apps[0]= "./market";
-apps[1]= "./calculator";
-apps[2]= "https://youtube.com";
-apps[3]= "https://google.com";
 
 //write changes to localstorage
 var JSONIFY = JSON.stringify(apps);
@@ -96,9 +93,10 @@ console.log(' app icon for: \n'+app+'\n loaded');
 .icon{
     width:16vw;
     height:16vw;
-    border-radius: 8vw;
+    border-radius: 16vw;
     padding: 1.5vw;
     margin:0;
+    background-color:darkgray;
 }
 </style>
 </html>
