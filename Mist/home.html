@@ -26,7 +26,7 @@ ExCSS1.innerHTML =`		body  {
     background-color: black;
     background-repeat: no-repeat;
     background-size: cover;
-    overflow: clip;
+    overflow-x: clip;
     color:white;
     min-height:100vh;
     background-position:center;
@@ -43,10 +43,10 @@ if (apps == null) {
     console.log('App index is empty, so default apps are being installed. Welcome or Welcome back!');
 
     var apps = [];
-apps[0]= "https://76836.github.io";
-apps[1]= "https://google.com";
-apps[2]= "https://github.com";
-apps[3]= "https://youtube.com";
+apps[0]= "./market";
+apps[1]= "./calculator";
+apps[2]= "https://youtube.com";
+apps[3]= "https://google.com";
 
 //write changes to localstorage
 var JSONIFY = JSON.stringify(apps);
@@ -70,10 +70,10 @@ var element = document.createElement("img");
      element.setAttribute('onclick', "window.location.href='"+app+"'");
      element.setAttribute('class', "icon");
      element.setAttribute('src', app+"/apple-touch-icon.png");
-    element.setAttribute('ONERROR', "this.onerror=null; this.src='"+app+'/icon152.png'+"'");
-    element.setAttribute('ONERROR', "this.onerror=null; this.src='"+app+'/icon.svg'+"'");
-    element.setAttribute('ONERROR', "this.onerror=null; this.src='"+app+'/icon-512.png'+"'");
-    element.setAttribute('ONERROR', "this.onerror=null; this.src='"+app+'/favicon.png'+"'");
+    element.setAttribute('ONERROR', " this.src='"+app+'/icon152.png'+"'");
+    element.setAttribute('ONERROR', " this.src='"+app+'/icon.svg'+"'");
+    element.setAttribute('ONERROR', " this.src='"+app+'/icon-512.png'+"'");
+    element.setAttribute('ONERROR', " this.src='"+app+'/favicon.png'+"'");
      element.setAttribute('ONERROR', "this.onerror=null; this.src='"+app+'/favicon.ico'+"'");
      var page = document.getElementById("drawer");
      page.appendChild(element);
@@ -96,7 +96,7 @@ console.log(' app icon for: \n'+app+'\n loaded');
 .icon{
     width:16vw;
     height:16vw;
-    border-radius: 1vw;
+    border-radius: 8vw;
     padding: 1.5vw;
     margin:0;
 }
