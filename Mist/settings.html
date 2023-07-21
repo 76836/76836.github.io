@@ -20,7 +20,7 @@
  <button class="elementbasic" onclick="uninstall();">Uninstall</button>
 	
 	<p style="font-size:large; width:100%; text-align: center;">Uninstall all apps:</p>
- <button class="elementbasic" onclick="confirm('This will remove all installed apps but still keep their data. To remove all app data clear MistOS app storage in android settings'); localStorage.setItem('MIST_APPS', null);">uninstall all</button>
+ <button class="elementbasic" onclick="uninstallall();">uninstall all</button>
  
  <p style="font-size:large; width:100%; text-align: center;">Change wallpaper (Gifs supported):</p>
  <input class="elementbasic" id="bkgurl" placeholder="Leave URL blank for default." type=text>
@@ -97,6 +97,15 @@ var ExCSS1 = document.createElement("style");
     
     
 //###functions catalog
+
+function uninstallall() {
+	          if (confirm('This will remove all installed apps but still keep their data. To remove all app data clear MistOS app storage in android settings') == false) {
+		  alert('operation cancelled');
+		  return;
+	  };
+	localStorage.setItem('MIST_APPS', null);
+	alert('all applications have been uninstalled');
+};
 function A2HS() {
             //read text box contents
           var A2I=document.getElementById('AppUrlBox').value;
@@ -123,7 +132,7 @@ function uninstall() {
           var NUM=document.getElementById('AppNUMBox').value;
 	  var NUM = Number(NUM);
 	         // confirm uninstall
-          if (confirm('do you really want to uninstall #'+A2I) == false) {
+          if (confirm('do you really want to uninstall #'+NUM) == false) {
 		  alert('operation cancelled');
 		  return;
 	  };
