@@ -8,7 +8,7 @@
 <body>
     
  <h1 style="width:100%; text-align: center;"> SETTINGS </h1>
- <button class="elementbasic" onclick="alert(' settings version 6 \n launcher version 2');">info</button>
+ <button class="elementbasic" onclick="alert(' settings version 7 \n launcher version 3 \n market version 1');">info</button>
  <button class="elementbasic" onclick="location.reload();">Reload</button>
 
  <p style="font-size:large; width:100%; text-align: center;">Install an app:</p>
@@ -16,7 +16,7 @@
  <button class="elementbasic" onclick="A2HS();">Install</button>
 
 	<p style="font-size:large; width:100%; text-align: center;">Uninstall app by number:</p>
- <input class="elementbasic" id="AppNUMBox" placeholder="App #1 is settings, the app to the right is #2." type=text>
+ <input class="elementbasic" id="AppNUMBox" placeholder="App #0 is settings, next app right is #2." type=text>
  <button class="elementbasic" onclick="uninstall();">Uninstall</button>
 	
 	<p style="font-size:large; width:100%; text-align: center;">Uninstall all apps:</p>
@@ -52,8 +52,8 @@ apps[7]= "https://amazon.ca";
 apps[8]= "../Akari";
 apps[9]= "https://2048game.com";
 apps[10]= "https://paper-io.com";
-apps[11]= "../Calculator";
-apps[12]= "https://76836.github.io/Mist/internet";
+apps[11]= "./calculator";
+apps[12]= "./market";
 
 //load up an outstanding wallpaper
 localStorage.setItem('selectedBKGURL', "https://ih1.redbubble.net/image.1228757103.6125/st,small,845x845-pad,1000x1000,f8f8f8.jpg");
@@ -122,17 +122,22 @@ function uninstall() {
             //read text box contents
           var NUM=document.getElementById('AppNUMBox').value;
 	  var NUM = Number(NUM);
+	         // confirm uninstall
+          if (confirm('do you really want to uninstall #'+A2I) == false) {
+		  alert('operation cancelled');
+		  return;
+	  };
           console.log('uninstall:'+NUM);
             //retrieve apps index
           var DEJSONIFY = localStorage.getItem('MIST_APPS');
           var apps = JSON.parse(DEJSONIFY);
             //add subject to apps index
-          apps.splice(NUM);
+          apps.splice(NUM, 1);
             //save the updated index
           var JSONIFY = JSON.stringify(apps);
           localStorage.setItem('MIST_APPS', JSONIFY);
             // alert the user of the change
-	        alert('Uninstalled app no.'+NUM);
+	        alert('Uninstalled '+apps[NUM]);
         };
 
 
@@ -154,10 +159,21 @@ function uninstall() {
         width:100vw;
         height:10vh;
         background-color:gray;
-        border: 3px solid black;
+        border: 5px inset black;
         margin:0;
         padding:0px;
         font-size: xx-large;
+	border-radius: 5px;
+    }
+    .elementbasic:hover {
+        width:100vw;
+        height:10vh;
+        background-color:darkgray;
+        border: 5px inset darkcyan;
+        margin:0;
+        padding:0px;
+        font-size: xx-large;
+	border-radius: 0px;
     }
 </style>
 
