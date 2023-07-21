@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+	<meta name="viewport" content="initial-scale=1">
+<head>
+    <meta charset="UTF-8" />
+    <title>Market</title>
+</head>
+<body>
+    
+ <h1 style="width:100%; text-align: center;"> Mist OS Market </h1>
+ <button class="elementbasic" onclick="location.reload();">Update package list.</button>
+
+<p style="font-size:large; width:100%; text-align: center;">Goblin.tools </p>
+ <button class="installbutton" onclick="A2HS('https://goblin.tools');">Install</button>
+
+ <button class="uninstallbutton" onclick="uninstall('https://goblin.tools');">Uninstall</button>
+
+
+ <button class="elementbasic" onclick="window.location='./help';">help</button>
+</body>
+
+<script>
+console.log('### S E T T I N G S   A P P');
+//###startup
+//Read apps index from localstorage
+
+var DEJSONIFY = localStorage.getItem('MIST_APPS');
+var apps = JSON.parse(DEJSONIFY);
+if (apps == null) {
+alert('Mist Market has stopped.');
+window.location="./home";
+}
+else {
+    var DEJSONIFY = localStorage.getItem('MIST_APPS');
+    var apps = JSON.parse(DEJSONIFY);
+    console.log('App index read succesful:');
+};
+console.log(apps);
+
+
+var ExCSS1 = document.createElement("style");
+  ExCSS1.innerHTML =`		body  {
+	background-color: black;
+	background-repeat: no-repeat;
+	background-size: cover;
+	overflow-x: hidden;
+        color:white;
+        min-height:100vh;
+        width:100vw;
+        margin:0;
+        padding:0;
+			}`;
+
+  var head = document.getElementsByName("head")[0];
+  document.head.appendChild(ExCSS1);
+    
+    
+//###functions catalog
+function A2HS(APPURL) {
+            //read text box contents
+          var A2I = APPURL;
+          console.log('A2HS:'+A2I);
+          // confirm install
+          if (confirm('do you really want to install '+A2I) == false) {
+		  alert('install cancelled');
+		  return;
+	  };
+            //retrieve apps index
+          var DEJSONIFY = localStorage.getItem('MIST_APPS');
+          var apps = JSON.parse(DEJSONIFY);
+            //add subject to apps index
+          apps.push(A2I);
+            //note the app's position so it can be uninstalled
+          localStorage.setItem(A2I, apps.indexOf(A2I));
+            //save the updated index
+          var JSONIFY = JSON.stringify(apps);
+          localStorage.setItem('MIST_APPS', JSONIFY);
+            // alert the user of the change
+	        alert('installed '+A2I);
+        };
+
+function uninstall(UNAPPURL) {
+            //read text box contents
+          var NUM=localStorage.getItem(UNAPPURL);
+  if (NUM == null) {
+    alert('Uninstall failed: Specified app does not exist.');
+    return;
+  };
+	  var NUM = Number(NUM);
+          console.log('uninstall:'+NUM);
+            //retrieve apps index
+          var DEJSONIFY = localStorage.getItem('MIST_APPS');
+          var apps = JSON.parse(DEJSONIFY);
+            //add subject to apps index
+          apps.splice(NUM, 1);
+            //save the updated index
+          var JSONIFY = JSON.stringify(apps);
+          localStorage.setItem('MIST_APPS', JSONIFY);
+            // alert the user of the change
+	        alert('Uninstalled app no.'+NUM);
+        };
+
+
+    
+</script>
+
+
+
+
+
+<style>
+    .elementbasic {
+        width:100vw;
+        height:10vh;
+        background-color:gray;
+        border: 3px solid black;
+        margin:0;
+        padding:0px;
+        font-size: xx-large;
+    }
+      .installbutton {
+        width:45vw;
+        height:5vh;
+        background-color:green;
+        border: 3px solid black;
+        margin:0;
+        padding:0px;
+        font-size: xx-large;
+    }
+      .uninstallbutton {
+        width:45vw;
+        height:5vh;
+        background-color: darkred;
+        border: 3px solid black;
+        margin:0;
+        padding:0px;
+        font-size: xx-large;
+      }
+</style>
+
+</html>
