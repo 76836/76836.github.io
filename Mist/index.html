@@ -1,76 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Mist UX</title>
+</head>
+    
 <script>
     function initialize() 
     {
+ var Set = localStorage.getItem('Setup');
+        if (Set == "yessir") {
         window.location=('./home');
-        //Mhmm yep that'll work... I think.
         console.log('App started');
+        };
     }
+function beginSetup() {
+    var Checkbox = document.getElementById("opt_in_data_collection");
+if (Checkbox.checked) {
+  // Checkbox is checked
+    localStorage.setItem('DataCollection', "accepted");
+} else {
+  // Checkbox is not checked
+};
+    localStorage.setItem('Setup', "yessir");
+    window.location=('./market');
+};
+
+    function skipSetup() {
+        localStorage.setItem('Setup', "yessir");
+        window.location=('./home');
+    };
 </script>
 
-<head>
-  <title>Mist OS</title>
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="viewport" content="initial-scale=1">
-  </head>
-  
-  <div class="notification-bar">
-      <container style=" position:fixed; left: 5vw; top:0; color:white; " >
-    <p style="margin:3px; position:fixed; left: 5vw; top:0; color:white;" id="clock">Loading...</p>
-      </container>
-    <p id=' THERE IS NO "ID" '  style="margin:3px; position:fixed; right: 5vw; top:0; color:white; ">Mist OS</p>
-  </div>
-  
-  <script>
-      var myVar = setInterval(function() {
-    myTimer();
-  }, 1000);
-  
-  function myTimer() {
-    var d = new Date();
-    document.getElementById("clock").innerHTML = d.toLocaleTimeString();
-      //my confidence is failing me
-  }
-  </script>
-  
-  <div id="UI">
-    <h1>Waiting for JavaScript...</h1>
-    <br>
-    <p>If you can read this then there has probably been a problem loading Mist. Try updating using the button below, enable JavaScript, reinstall or update Android System WebView, check your internet connection, upgrade your device, or use a different program similar to Mist OS.</p>
-    <button onclick="window.location='./update';"> Update Mist OS </button>
-  </div>
-  
-  
-  
-  <style>
-  body {
-    background-color: #1b1b1b;
-    overflow: hidden;
-    height: 100vh;
-    width: 100vw;
-    margin: 0;
-  }
-  .notification-bar {
-    background-color: #1b1b1b;
-    width:100vw;
-    height: 22px;
-    overflow: hidden;
+
+<body onload="initialize();">
+    <h1 class="title">Welcome to Mist UX!</h1>
+    <p>
+MistUX is an Android UI-styled web browser that offers easy access to your favorite apps and websites.       
+To get started, use the quick setup tool to customize the app to your preferances, or just start using MistUX and customize your experience as you go.
+You can add your favorite apps and websites to the Mist home screen for quick access, and for further customization, you can set a custom wallpaper in the settings app.
+I hope you enjoy using MistUX! If you have any questions or feedback, email me at <strong> to76836@yahoo.com </strong>. 
+    </p>
     
-    }
-  .myButton {
-    font-weight:bold;
-    font-size: 25px;
-    border: 0px solid black;
-    border-radius: 1px;
-    color:white;
-    background: transparent;
-    height:37px;
-    width:32%;
+<input class="checkbox" type="checkbox" id="opt_in_data_collection" for="anonymous_data_collection">
+<label class="checkbox" for="anonymous_data_collection"> &nbsp; Anonymous demographic information collection (optional)</label>
+    <button class="button" onclick="beginSetup()">Begin First-time setup</button>
+    <button class="button" onclick="skipSetup()">Skip Setup</button>
+</body>
     
+<style>
+.button {
+  width: 100%;
+  height: 7vh;
+  margin-top: 3vh;
+  border-radius: 7vh;
+  opacity: .5;
+  border:  1vh inset gray;
+  font-size: large;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight:lighter;
+}
+.checkbox {
+color: smokewhite;
+scale: 200%;
+margin-top: 3vh;
+margin-left: 10px;
+}
+
+.button:hover {
+  cursor: pointer;
+}
+
+
+.title {
+  font-size: 20px;
+}
+body {
+  -webkit-animation: live-fade 1s ease-in-out;
+  -moz-animation: live-fade 1s ease-in-out;
+  -o-animation: live-fade 1s ease-in-out;
+  -ms-animation: live-fade 1s ease-in-out;
+  animation: live-fade 1s ease-in-out;
+
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 20px;
+  color:antiquewhite;
+  background-color: black;
+}
+
+@keyframes live-fade {
+  from {
+    background-color: whitesmoke;
   }
-  </style>
-  
-  <body onload="initialize();">
-  <button Style="position:fixed; bottom:0; right:0;" class="mybutton" onclick="alert('No recent items')">|||</button>
-  <button Style="position:fixed; bottom:0; left:34%;" class="mybutton" onclick="window.location.href='./'">▢</button>
-  <button Style="position:fixed; bottom:0; left:0;" class="mybutton" onclick="history.back()">◁</button>
-  </body>
+
+  to {
+    background-color: black;
+  }
+}
+
+
+
+</style>
+</html>
