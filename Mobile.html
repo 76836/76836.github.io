@@ -1,34 +1,169 @@
+<script>
+  var clicked = "no";
+  var Good = `
+
+
+<!DOCTYPE html>
+<html>
 
 <head>
-    <title>Starting...</title>
+    <meta charset="UTF-8" />
+    <title>Mist for Wear</title>
 </head>
 
-<script>
-function sleep(ms) {
-  return new Promise(
-    resolve => setTimeout(resolve, ms)
-  );
-}
-
-    async function initialize() 
-    {
-
-		await sleep(4000);
-    window.location='./New';
-
-    }
-</script>
-<Body onload="initialize()">
-<div id="UI">
+<body>
     <style>
-    body  {
-			background-image: url("/android.gif");
-  	background-color: black;
-			background-repeat: no-repeat;
-			background-size: auto 100%;
-   background-position: center; 
-			}
+        body {
+            background-color: black;
+        }
+
+
+        #frame {
+            border: 0px solid black;
+            background-color: white;
+            width: 50vh;
+            height: 100vh;
+            padding: 0;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 25vh;
+        }
+
+        .menu {
+            border: 0px solid black;
+            color: white;
+            font-weight: bolder;
+            font-size: xx-large;
+            background-color: black;
+            width: 25vh;
+            height: 50vh;
+            padding: 0;
+            overflow: hidden;
+            position: fixed;
+            top: 25vh;
+            left: 0;
+        }
+        .home {
+            border: 0px solid black;
+            color: white;
+            font-weight: bolder;
+            font-size: xx-large;
+            background-color: black;
+            width: 25vh;
+            height: 50vh;
+            padding: 0;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            right: 0;
+        }
+        .back {
+            border: 0px solid black;
+            color: white;
+            font-weight: bolder;
+            font-size: xx-large;
+            background-color: black;
+            width: 25vh;
+            height: 50vh;
+            padding: 0;
+            overflow: hidden;
+            position: fixed;
+            bottom: 0;
+            right: 0;
+        }
+    </style>
+
+
+
+
+
+    <button class="menu" onclick="var d = new Date(); alert(d.toLocaleTimeString());">|||</button>
+
+    <button class="home" onclick="window.location.reload();">▢</button>
+    <button class="back" onclick="history.back()">◁</button>
+    <div id="wrapper">
+        <iframe id="frame" src="https://76836.github.io/Mist/home"></iframe>
+    </div>
+
+</body>
+
+</body>
+
+</html>
+
+   
+        `;
+  var better = `    <style>
+	    body  {
+		    background-color: black;
+	    }
+
+	    .text {
+		    font-size: x-large;
+		    color: white;
+	    }
 </style>
-    <h1> </h1>
-</div>
+    <p class="text" >
+	Please wait...
+	<br>`
+
+
+  function sleep(ms) {
+    return new Promise(
+      resolve => setTimeout(resolve, ms)
+    );
+  }
+
+
+  async function initialize() {
+    var H = window.innerHeight;
+    var W = window.innerWidth;
+
+
+
+    await sleep(2000);
+    if (clicked == 'no') {
+      window.location = './New';
+    };
+  };
+
+  async function options() {
+    clicked = "yes";
+    document.getElementById("UI").innerHTML = better;
+    await sleep(1000);
+    document.getElementById("UI").innerHTML = Good;
+  };
+</script>
+
+<Body id="EEE" onclick="options(); //openFullscreen(); " onload="initialize()" onmouseover="//openFullscreen();"
+  oncontextmenu="//openFullscreen()">
+
+
+  <script>
+    var elem = document.getElementById("EEE");
+    function openFullscreen() {
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) { /* Safari */
+        elem.webkitRequestFullscreen();
+      } else if (elem.msRequestFullscreen) { /* IE11 */
+        elem.msRequestFullscreen();
+      }
+    }
+  </script>
+
+
+  <div id="UI">
+    <style>
+      body {
+        background-image: url("/android.gif");
+        background-color: black;
+        background-repeat: no-repeat;
+        background-size: auto 100%;
+        background-position: center;
+      }
+    </style>
+
+  </div>
 </Body>
