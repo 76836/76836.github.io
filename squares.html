@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Squares live wallpaper</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: rgb(0, 0, 0);
+        }
+
+        #canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        class Square {
+            constructor(x, y, size, color, lifetime) {
+                this.x = x;
+                this.y = y;
+                this.size = size;
+                this.color = color;
+                this.lifetime = lifetime;
+                this.alpha = 1;
+            }
+            draw() {
+                ctx.fillStyle = `rgba(${this.color}, ${this.alpha})`;
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+            }
+            update() {
+                this.alpha -= 1 / this.lifetime;
+                this.draw();
+            }
+        }
+        function randomIntFromRange(min, max) {
+            return Math.floor(Math.random() * (max - min + 1) + min);
+        }
+        function randomColor() {
+            return `0, ${randomIntFromRange(55, 155)}, ${randomIntFromRange(55, 155)}`;
+        }
+        let squares = [];
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            squares = squares.filter(square => square.alpha > 0);
+            squares.forEach(square => square.update());
+
+            if (Math.random() < 0.06) {
+                var size = randomIntFromRange(1, 100);
+                size = Math.round(size/50)*50
+                var x = randomIntFromRange(0, canvas.width - size);
+                var y = randomIntFromRange(0, canvas.height - size);
+                if (size == 50){
+                x = Math.round(x/50)*50;
+                y = Math.round(y/50)*50;
+                } else {
+                x = Math.round(x/100)*100;
+                y = Math.round(y/100)*100;
+                };
+                const color = randomColor();
+                const lifetime = randomIntFromRange(50, 400);
+                squares.push(new Square(x, y, size, color, lifetime));
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+
+</html>
