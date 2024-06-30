@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html id="html" lang="en">
+
+<head>
+  <link rel="manifest" href="/app.webmanifest">
+  <html manifest=”/Offline.manifest”>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>76836</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 0;
+            align-items: center;
+            background-color: #000;
+            color: #0f0;
+            overflow-x: hidden;
+        }
+
+        #terminal {
+            width: 100%;
+            white-space: pre-wrap;
+            padding-bottom: 40px;
+        }
+
+        #input {
+            position: fixed;
+            bottom: 0;
+            outline: none;
+            border: 3px solid #00f;
+            padding: 5px;
+            width: calc(100vw - 16px);
+            font-family: 'Courier New', monospace;
+            background-color: black;
+            color: cyan;
+            margin: 0;
+            font-size: larger;
+        }
+
+        #input:focus {
+            border: 3px solid #f00;
+        }
+
+        header {
+            text-align: left;
+            padding: 0px;
+            width: 100%;
+            border-bottom: 2px solid #00f;
+        }
+
+        section {
+            margin-top: 20px;
+            margin-left: calc(2.5vw - 2px);
+            padding: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            border: 2px solid #0f0;
+            width: 95vw;
+            text-align: left;
+        }
+
+        .invis {
+            margin-top: 20px;
+            margin-left: calc(2.5vw - 0px);
+            padding: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 0px rgba(0, 255, 0, 0.5);
+            border: 0px solid #0f0;
+            width: 95vw;
+            text-align: left;
+        }
+
+        h1,
+        h2 {
+            margin: 10px;
+        }
+
+        p,
+        a,
+        button {
+            color: #0f0;
+            margin: 10px;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: cyan;
+        }
+
+        a:focus {
+            color: red;
+        }
+
+        button {
+            background-color: transparent;
+            border: 2px solid #0f0;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0f0;
+            color: #000;
+        }
+
+        button:focus {
+            background-color: red;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        header,
+        section {
+            animation: fadeIn 2s ease-in-out;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>76836</h1>
+        <div id="userbadge">
+            <p style="color:red;">Error: System login failed!</p>
+        </div>
+        <button style="color:blue; position:fixed; right:0; top:0;"
+            onclick="localStorage.setItem('userName', prompt('edit username'));">Login Settings</button>
+    </header>
+    <section id="recent-activities">
+        <div id="phone-status">
+            <h2>Recent events:</h2>
+            <p>76836 Homepage update:</p>
+            <p>I've changed this website's index.html to show a (hopefully cool looking) utility panel to get to all of
+                my projects easily, expect more features in the next updates!</p>
+            <br>
+            <a href="https://github.com/76836">[Link] 76836 on GitHub</a>
+            <br>
+            <br>
+            <h2>Latest message from Akari System:</h2>
+            <div id="recent-activities-content">
+                <p style="color:red;">Error: No messages.</p>
+                <br>
+            </div>
+
+        </div>
+
+    </section>
+    <section style="text-align:left;" id="quick-access">
+        <h2>Active projects:</h2>
+        <button onclick="location.href='./Akari'">Akari (virtual assistant)</button>
+        <button onclick="location.href='./webdesk'">Webdesk (iFrame webtop)</button>
+        <button onclick="location.href='./animaxxer'">Animaxxer (anime launcher)</button>
+        <button onclick="location.href='./404'">404 (bypass data URI bans with this one simple trick)</button>
+        <button onclick="location.href='./ctrlbox'">CtrlBox (MacroDroid webhook controller)</button>
+        <button onclick="location.href='./Wanderer'">Wanderer (Backrooms game prototype)</button>
+        <button onclick="location.href='./Squares'">Squares (JS live wallpaper)</button>
+    </section>
+
+
+
+    <section class="invis" id="term-out">
+        <div id="terminal"></div>
+    </section>
+    <input id="input" placeholder=">>>" type="text" autofocus onkeydown="handleInput(event)">
+    <script>
+
+
+        function sleep(ms) {
+            return new Promise(
+                resolve => setTimeout(resolve, ms)
+            );
+        }
+
+        async function respond(outcome) {
+
+            outcome = outcome.toLowerCase();
+
+            if (outcome.includes("exit") && outcome.length < 12 == true) {
+                say('exiting...');
+                await sleep(1000);
+                window.location = '../launcher'
+
+                return;
+            };
+
+
+            if (outcome.includes("time") && outcome.length < 5 == true) {
+                var d = new Date();
+                say(d.toLocaleTimeString())
+
+                return;
+            };
+
+
+            if (outcome.includes("directions ") && (outcome.includes(" to ") || outcome.includes("get ") == true)) {
+                console.log('keywords "directions" & "to"/"get" found');
+                var location = outcome.replace('directions', "");
+                location = location.replace(' to ', " ");
+                location = location.replace('get ', " ");
+                say('getting directions to ' + location);
+                window.location.href = 'https://www.google.com/maps/search/' + outcome;
+                return;
+            };
+
+            if (outcome.includes("say ")) {
+                printout = outcome.replace('say ', "");
+                say(printout);
+                return;
+            };
+
+            if (outcome.includes("help") && outcome.length < 5 == true) {
+                say('Available commands are:\n[Url]\n\nopen [app] (this will redirect you to [app].com)\n\ndirections to | get directions to | get directions [location]\n\ncalc [simple equation]\n\nhelp\n\ntime\n\nsearch [query]\n\nsay [text]\n\ntest\n\nreload (reloads page)\n\nrestart (reloads page embeddor if applicable)');
+                return;
+            };
+
+
+            if (outcome.includes("open") && outcome.length < 20 == true) {
+                var appname = outcome.replace('open', "");
+                appname = appname.replace(/\s+/g, '')
+                appname = appname.replace('.', "");
+                if (appname.includes("settings")) { say('Error: Please launch into a project to change project-specific settings.'); return; };
+                say('Opening ' + appname + ".com");
+                await sleep(300);
+                window.location.href = 'https://' + appname + '.com';
+                return;
+            };
+
+
+            if (outcome.includes("destruct") && outcome.includes("self") && outcome.length < 30 == true) {
+                if (outcome.includes("6193")) { say('Access Granted!\nProgram launching...'); } else { say('Access denied. (invalid passcode)'); return; };
+                await sleep(500);
+                document.getElementById('html').innerHTML = '';
+                console.clear()
+                return;
+            };
+
+            if (outcome.includes("version notes") && outcome.length < 18 == true) {
+                say('subNatural Language Terminal release notes. 2nd update: v1.1.\nThe password is 6193.\nRemoved dead functions.\nAdded new functions, and revised old ones.');
+                return;
+            };
+
+            if (outcome.includes("version") && outcome.length < 18 == true) {
+                say('subNatural Language Terminal, v1.1.\nType "version notes" for information on this release.');
+                return;
+            };
+
+            if (outcome.includes("hello there") && outcome.length < 19 == true) {
+                console.log(' I will deal with this Jedi slime myself. \n   Your move.');
+                say('General Kenobi. You are a bold one.');
+
+                return;
+            };
+
+            if (outcome.includes("hello") || outcome.includes("hi") && outcome.length < 10 == true) {
+                console.log('keword "hello" or "hi" found.');
+                if (outcome.includes("hi")) {
+                    say('Hello there.');
+                } else {
+                    say('Hi!');
+                }
+
+
+                return;
+            };
+
+            if (outcome.includes("search") == true) {
+                console.log('keyword "search" found.');
+                var query = outcome.replace('search', "");
+                query = query.replace(' for ', " ");
+                say("searching for " + query);
+                await sleep(300);
+                window.location.href = 'https://bing.com/search?q=' + query;
+                return;
+            };
+
+            if (outcome.includes("calc ")) {
+                const mathExpression = outcome.replace("calc ", "");
+                try {
+                    const result = eval(mathExpression);
+                    say(result);
+                } catch (error) {
+                    say('Syntax Error.')
+                }
+                return;
+            };
+
+            if (outcome.includes("test") && outcome.length < 5 == true) {
+                respond('say test beginning.');
+                respond('say testing version...')
+                respond('version');
+                respond('say testing time...')
+                respond('time');
+                respond('say testing calc...');
+                respond('calc 1+1');
+                respond('say test finished.')
+                return;
+            };
+
+            if (outcome.includes("reload") && outcome.length < 8 == true) {
+                window.location.reload();
+                return;
+            };
+
+            if (outcome.includes("restart") && outcome.length < 9 == true) {
+                window.top.location.reload();
+                return;
+            };
+
+
+
+            console.log('no keywords found, too bad.');
+            say("Error: command not found.");
+
+        };
+
+
+
+
+
+
+        function inputsay(text) {
+            text = "<b style='color:blue;'>" + text + "</b>"
+            document.getElementById('terminal').innerHTML = text + '\n';
+            document.getElementById('input').value = '';
+        }
+        function say(text) {
+            document.getElementById('terminal').innerHTML = text + '\n';
+            document.getElementById('input').value = '';
+        }
+
+        function handleInput(event) {
+            if (event.key === 'Enter') {
+                const inputElement = document.getElementById('input');
+                const command = inputElement.value.trim();
+                inputsay(command);
+                if (isValidURL(command)) {
+                    window.location.href = command;
+                } else {
+                    respond(command);
+                }
+            }
+        }
+
+        function isValidURL(url) {
+            try {
+                new URL(url);
+                return true;
+            } catch (error) {
+                return false;
+            }
+        }
+        say('subNatural Language Terminal, v1.1 (integrated)\nType "help" for more info.')
+    </script>
+
+    <script>
+        var userName = localStorage.getItem("userName");
+        if (userName != 'null' && userName != null && userName != '') {
+            document.getElementById('userbadge').innerHTML = "<p class='thetext'> Hello " + userName + "!</p>";
+        };
+
+
+        function textbubble(message) {
+            if (message == '') {
+                return;
+            };
+            document.getElementById('recent-activities-content').innerHTML = "<p class='thetext'>" + message + "</p>";
+
+        };
+
+        localStorage.setItem("emote", "Hello World");
+        // Get a reference to the local storage item
+        var emoteStorage = localStorage.getItem("emote");
+
+        // This function checks for changes in the emote storage and runs the textbubble function
+        function checkEmoteChange() {
+            var newEmote = localStorage.getItem("emote");
+            var reaction = '';
+            // If the emote has changed, run the textbubble function with the new content
+            if (newEmote !== emoteStorage) {
+                if (newEmote.includes("?")) {
+                    reaction = "?";
+                }
+                if (newEmote.includes("!")) {
+                    reaction = "!";
+                }
+                textbubble(reaction);
+                emoteStorage = newEmote; // Update the stored value to avoid future mismatches
+            }
+        }
+        // Call the checkEmoteChange function initially
+        checkEmoteChange();
+        // Set up an interval to call the checkEmoteChange function regularly
+        setInterval(checkEmoteChange, 300);
+    </script>
+</body>
+
+</html>
