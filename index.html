@@ -162,7 +162,7 @@
         <button onclick="location.href='./404'">404 (bypass data URI bans with this one simple trick)</button>
         <button onclick="location.href='./ctrlbox'">CtrlBox (MacroDroid webhook controller)</button>
         <button onclick="location.href='./Wanderer'">Wanderer (Backrooms game prototype)</button>
-        <button onclick="location.href='./Squares'">Squares (JS live wallpaper)</button>
+        <button onclick="location.href='./squares'">Squares (JS live wallpaper)</button>
     </section>
 
 
@@ -358,7 +358,7 @@
                 return false;
             }
         }
-        say('subNatural Language Terminal, v1.1 (integrated)\nType "help" for more info.')
+        say('subNatural Language Terminal, v1.1 (integrated)\nType "help" or "version" for more info.')
     </script>
 
     <script>
@@ -386,13 +386,7 @@
             var reaction = '';
             // If the emote has changed, run the textbubble function with the new content
             if (newEmote !== emoteStorage) {
-                if (newEmote.includes("?")) {
-                    reaction = "?";
-                }
-                if (newEmote.includes("!")) {
-                    reaction = "!";
-                }
-                textbubble(reaction);
+                textbubble(newEmote);
                 emoteStorage = newEmote; // Update the stored value to avoid future mismatches
             }
         }
