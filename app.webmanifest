@@ -1,24 +1,29 @@
 {
-  "name": "VirtualOS",
+  "name": "76836",
   "prefer_related_applications": false,
-  "short_name": "VirtualOS",
+  "short_name": "76836",
   "icons": [{
-      "src": "/icon512.png",
+      "src": "/2icon1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "maskable"
+    },{
+      "src": "/2icon512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     },{
-      "src": "/icon192.png",
-      "sizes": "192x192",
+      "src": "/2icon256.png",
+      "sizes": "256x256",
       "type": "image/png",
       "purpose": "maskable"
     },{
-      "src": "/icon144.png",
+      "src": "/2icon144.png",
       "sizes": "144x144",
       "type": "image/png",
       "purpose": "any"
     }],
-  "start_url": "/",
+  "start_url": "/pwa",
   "scope": "/",
   "display": "fullscreen",
   "background_color": "black",
