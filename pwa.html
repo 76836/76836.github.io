@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>76836 prolauncher</title>
+</head>
+
+<body>
+  <h2 style="position:fixed; top:4px; left:8px;">This is a work in progress...</h1>
+    <button class="panel"></button>
+
+    <div id="drawer" class="app-grid">
+      
+	   
+	    </div>
+    </div>
+
+    <script>
+
+        async function fetchIcon(url) {
+            let iconTypes = [
+                'apple-touch-icon.png',
+                'favicon.ico',
+                'favicon.png',
+                'icon.png',
+                'icon512.png',
+                'icon256.png',
+                'icon.jpg',
+                'icon.jpeg',
+                'icon.gif'
+            ];
+
+            for (let iconType of iconTypes) {
+                let iconUrl = `${url}/${iconType}`;
+                let iconSrc = await checkIconExists(iconUrl);
+                if (iconSrc) return iconSrc;
+            }
+
+            // If none found, return default image
+            return './webdesk/images/icons/error.jpg';
+        }
+
+        function checkIconExists(url) {
+            return new Promise((resolve) => {
+                let img = new Image();
+                img.onload = () => resolve(img.src);
+                img.onerror = () => resolve(null);
+                img.src = url;
+            });
+        }
+
+
+
+ 
+            var apps = [];
+            apps[0] = "./Akari/";
+            apps[1] = "./webdesk/";
+            apps[2] = "./CalculatorXP/";
+            apps[3] = "./meatsalad/";
+            apps[4] = "./animaxxer/";
+
+
+        // Iterate through apps and create icons
+        apps.forEach(async (appUrl) => {
+            let iconSrc = await fetchIcon(appUrl);
+
+            // Create icon element
+            var appElement = document.createElement("div");
+            appElement.setAttribute('class', "app");
+
+            var iconElement = document.createElement("img");
+            iconElement.setAttribute('onclick', `window.location.href='${appUrl}'`);
+            iconElement.setAttribute('class', "icon");
+            iconElement.setAttribute('src', iconSrc);
+
+            var nameElement = document.createElement("div");
+            nameElement.setAttribute('class', "app-name");
+
+            let aptext = appUrl.replace("https://", "");
+            aptext = aptext.replace("Https://", "");
+            aptext = aptext.replace("Http://", "");
+            aptext = aptext.replace("http://", "");
+            aptext = aptext.replace("./", "");
+            aptext = aptext.replace("/", "");
+            nameElement.textContent = aptext;
+
+            appElement.appendChild(iconElement);
+            appElement.appendChild(nameElement);
+
+            var page = document.getElementById("drawer");
+            page.appendChild(appElement);
+        });
+
+    </script>
+
+    <style>
+        body {
+            overflow-x: clip;
+            color: white;
+            min-height: 100vh;
+            background-color: black;
+            font-family: 'Ubuntu', sans-serif;
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .panel {
+            border: 0;
+            background-color: rgba(0, 0, 0, 0.4);
+            opacity: 0.4;
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            transition-duration: 1s;
+            z-index: 1;
+        }
+
+        .panel:hover {
+            opacity: 0.8;
+        }
+
+        #drawer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            align-items: flex-start;
+            max-width: 100vw;
+            margin-top: 10vh;
+            margin-bottom: 10vh;
+            margin-left: 0;
+        }
+
+        .app {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0px;
+            z-index: 2;
+        }
+
+        .icon {
+            width: 18vw;
+            height: 18vw;
+            border-radius: 20%;
+            padding: 2vw;
+            background-color: transparent;
+            margin-bottom: 5px;
+            transition-duration: 0.2s;
+            cursor: pointer;
+        }
+
+        .app-name {
+            font-size:17px;
+            text-align: center;
+            line-break: anywhere;
+            width: 20vw;
+        }
+
+        .icon:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+            margin-bottom: 15px;
+        }
+    </style>
+</body>
+
+</html>
