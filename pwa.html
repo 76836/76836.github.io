@@ -2,99 +2,131 @@
 <html>
 
 <head>
-    <meta charset="UTF-8" />
-    <title>76836 prolauncher</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>76836 software launcher</title>
 </head>
 
 <body>
-  <h2 style="position:fixed; top:4px; left:8px;">This is a work in progress...</h1>
-    <button class="panel"></button>
-
     <div id="drawer" class="app-grid">
-      
-	   
-	    </div>
+        <div class="app"><img onclick="newwindow('./Akari');" class="icon"
+                src="https://76836.github.io/Akari//apple-touch-icon.png">
+            <div class="app-name">Akari</div>
+        </div>
+        <div class="app"><img onclick="document.exitFullscreen(); window.location.href='./animaxxer';" class="icon"
+                src="https://76836.github.io/animaxxer/icon-512.png">
+            <div class="app-name">animaxxer</div>
+        </div>
+        <div class="app"><img onclick="newwindow('./CalculatorXP/');" class="icon"
+                src="https://76836.github.io/CalculatorXP/icon.png">
+            <div class="app-name">CalculatorXP</div>
+        </div>
+        <div class="app"><img onclick="newwindow('./webdesk/');" class="icon" src="https://76836.github.io/icon512.png">
+            <div class="app-name">WebDesk</div>
+        </div>
+        <div class="app"><img onclick="newwindow('./meatsalad/');" class="icon"
+                src="https://76836.github.io/meatsalad/meatsalad.jpg">
+            <div class="app-name">meatsalad</div>
+        </div>
+        <div class="app"><img onclick="window.location.href='./'" class="icon"
+                src="https://76836.github.io/2icon1024.png">
+            <div class="app-name">76836</div>
+        </div>
+        <div class="app"><img onclick="newwindow('./ctrlbox');" class="icon"
+                src="https://76836.github.io/ctrlbox/apple-touch-icon.png">
+            <div class="app-name">CTRLBox</div>
+        </div>
     </div>
-
+    <div id="windowspot"></div>
     <script>
 
-        async function fetchIcon(url) {
-            let iconTypes = [
-                'apple-touch-icon.png',
-                'favicon.ico',
-                'favicon.png',
-                'icon.png',
-                'icon512.png',
-                'icon256.png',
-                'icon.jpg',
-                'icon.jpeg',
-                'icon.gif'
-            ];
-
-            for (let iconType of iconTypes) {
-                let iconUrl = `${url}/${iconType}`;
-                let iconSrc = await checkIconExists(iconUrl);
-                if (iconSrc) return iconSrc;
+        const isMobile = {
+            Android: function () {
+                return navigator.userAgent.match(/Android/i);
+            },
+            BlackBerry: function () {
+                return navigator.userAgent.match(/BlackBerry/i);
+            },
+            iOS: function () {
+                return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+            },
+            Opera: function () {
+                return navigator.userAgent.match(/Opera Mini/i);
+            },
+            Windows: function () {
+                return navigator.userAgent.match(/IEMobile/i) || navigator.userAgent.match(/WPDesktop/i);
+            },
+            any: function () {
+                return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows());
             }
+        };
 
-            // If none found, return default image
-            return './webdesk/images/icons/error.jpg';
+        if (isMobile.any()) {
+            console.log('Who is Rem?')
         }
+        else {
 
-        function checkIconExists(url) {
-            return new Promise((resolve) => {
-                let img = new Image();
-                img.onload = () => resolve(img.src);
-                img.onerror = () => resolve(null);
-                img.src = url;
-            });
-        }
+            window.location = './';
+
+        };
 
 
 
- 
-            var apps = [];
-            apps[0] = "./Akari/";
-            apps[1] = "./webdesk/";
-            apps[2] = "./CalculatorXP/";
-            apps[3] = "./meatsalad/";
-            apps[4] = "./animaxxer/";
+        function newwindow(weblocation) {
+            var windowcode = '<div class="wall"><div><iframe src="' + weblocation + '" class="windowstyle"></iframe><button class="buttonstyle" onclick="closewindow();">close</button>';
+            var spot = document.getElementById('windowspot');
+            spot.innerHTML = windowcode;
+        };
+        function closewindow() {
+            var spot = document.getElementById('windowspot');
+            spot.innerHTML = '';
+        };
 
-
-        // Iterate through apps and create icons
-        apps.forEach(async (appUrl) => {
-            let iconSrc = await fetchIcon(appUrl);
-
-            // Create icon element
-            var appElement = document.createElement("div");
-            appElement.setAttribute('class', "app");
-
-            var iconElement = document.createElement("img");
-            iconElement.setAttribute('onclick', `window.location.href='${appUrl}'`);
-            iconElement.setAttribute('class', "icon");
-            iconElement.setAttribute('src', iconSrc);
-
-            var nameElement = document.createElement("div");
-            nameElement.setAttribute('class', "app-name");
-
-            let aptext = appUrl.replace("https://", "");
-            aptext = aptext.replace("Https://", "");
-            aptext = aptext.replace("Http://", "");
-            aptext = aptext.replace("http://", "");
-            aptext = aptext.replace("./", "");
-            aptext = aptext.replace("/", "");
-            nameElement.textContent = aptext;
-
-            appElement.appendChild(iconElement);
-            appElement.appendChild(nameElement);
-
-            var page = document.getElementById("drawer");
-            page.appendChild(appElement);
-        });
 
     </script>
-
     <style>
+        .windowstyle {
+            border: 4px solid #111111;
+            box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.5);
+            background-color: white;
+            margin: 0%;
+            width: calc(100vw - 68px);
+            height: calc(100vh - 8px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 30;
+            border-radius: 30px;
+        }
+
+        .wall {
+            margin: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: black;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 20;
+        }
+
+        .buttonstyle {
+            border: 0px;
+            margin: 0;
+            width: 60px;
+            height: 100vh;
+            background-color: transparent;
+            font-size: large;
+            color: white;
+            z-index: 31;
+            position: fixed;
+            top: 0;
+            right: 0;
+            transition-duration: 0.3s;
+            align-content: bottom;
+            align-items: end;
+        }
+
         body {
             overflow-x: clip;
             color: white;
@@ -105,24 +137,7 @@
             justify-content: flex-start;
             align-items: flex-start;
             margin: 0;
-            padding: 20px;
-        }
-
-        .panel {
-            border: 0;
-            background-color: rgba(0, 0, 0, 0.4);
-            opacity: 0.4;
-            width: 100vw;
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            transition-duration: 1s;
-            z-index: 1;
-        }
-
-        .panel:hover {
-            opacity: 0.8;
+            padding: 0px;
         }
 
         #drawer {
@@ -131,20 +146,20 @@
             justify-content: flex-start;
             align-items: flex-start;
             max-width: 100vw;
-            margin-top: 10vh;
-            margin-bottom: 10vh;
-            margin-left: 0;
+            padding: 2.5px;
         }
 
         .app {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 0px;
+            margin: 5px;
             z-index: 2;
         }
 
         .icon {
+            max-height: 20vh;
+            max-width: 20vh;
             width: 18vw;
             height: 18vw;
             border-radius: 20%;
@@ -156,7 +171,8 @@
         }
 
         .app-name {
-            font-size:17px;
+            max-width: 20vh;
+            font-size: 17px;
             text-align: center;
             line-break: anywhere;
             width: 20vw;
