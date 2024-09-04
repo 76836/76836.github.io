@@ -1,0 +1,370 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fakedroid</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            font-family: 'Roboto', sans-serif;
+            background-color: cyan;
+            user-select: none;
+            transition-duration: 1s;
+        }
+
+        h3 {
+            font-weight: 100;
+        }
+
+        .phone-container {
+            width: 100vw;
+            height: 100vh;
+            background-color: black;
+            border-radius: 0px;
+            overflow: hidden;
+            position: fixed;
+            margin: 0px;
+        }
+
+        .status-bar {
+            height: 24px;
+            background-color: #000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+            color: #fff;
+            font-size: 12px;
+        }
+
+        .home-screen {
+            height: calc(100% - 24px - 48px);
+            /* Subtract status bar and navigation bar */
+            background-image: url('https://storage.googleapis.com/support-forums-api/attachment/message-9148024-6309957967654298136.png');
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .app-drawer {
+            height: 80px;
+            background-color: rgba(255, 255, 255, 0.4);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .app-row {
+            height: 80px;
+            background-color: transparent;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .app-icon {
+            width: 50px;
+            height: 50px;
+            background-color: #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .search-bar {
+            width: 80vw;
+            height: 50px;
+            background-color: #ffffff9c;
+            border-radius: 50px;
+            display: flex;
+            padding-left:15px;
+            justify-content: left;
+            align-items: center;
+            font-size: 24px;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        .app-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .time {
+            font-size: 72px;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .date {
+            font-size: 18px;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 40px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .notification-panel,
+        .quick-settings {
+            position: absolute;
+            top: 24px;
+            left: 0;
+            right: 0;
+            bottom: 48px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 20px;
+            display: none;
+            overflow-y: auto;
+            transition: transform 0.3s ease-out;
+        }
+
+        .notification-panel {
+            transform: translateY(-100%);
+        }
+
+        .quick-settings {
+            transform: translateY(100%);
+        }
+
+        .notification-panel.active,
+        .quick-settings.active {
+            transform: translateY(0);
+            display: block;
+        }
+
+        .notification {
+            background-color: #333;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .quick-setting {
+            display: inline-block;
+            width: 85px;
+            height: 80px;
+            margin: 10px;
+            background-color: #444;
+            border-radius: 20px;
+            text-align: center;
+            padding-top: 10px;
+            font-size: 12px;
+        }
+
+        .quick-setting i {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .navigation-bar {
+            height: 48px;
+            background-color: #000;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .nav-button {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="phone-container">
+        <div class="status-bar">
+            <span class="carrier">76836</span>
+            <span class="clock">12:34</span>
+            <span class="battery">0%</span>
+        </div>
+        <div class="home-screen">
+            <div class="time">12:34</div>
+            <div class="date">Tuesday, October 15</div>
+            <div class="app-row">
+                <div class="app-icon"><i class="fab fa-youtube"></i></div>
+                <div class="app-icon"><i class="fab fa-github"></i></div>
+                <div class="app-icon"><i class="fas fa-folder"></i></i></div>
+                <div class="app-icon"><i class="fab fa-google-play"></i></i></div>
+            </div>
+            <div class="app-row">
+                <i class="fas fa-chevron-up"></i>
+            </div>
+            <div class="app-drawer">
+                <div class="app-icon"><i class="fas fa-phone"></i></div>
+                <div class="app-icon"><i class="fas fa-comment"></i></div>
+                <div class="app-icon"><i class="fas fa-camera"></i></div>
+                <div class="app-icon"><i class="fab fa-chrome"></i></div>
+            </div>
+        <div class="app-drawer">
+            <div class="search-bar"><i class="fab fa-chrome"></i></div>
+        </div>
+        </div>
+        <div class="notification-panel">
+            <div class="app-row">
+                <div class="app-icon"><i class="fas fa-phone"></i></div>
+                <div class="app-icon"><i class="fas fa-comment"></i></div>
+                <div class="app-icon"><i class="fas fa-camera"></i></div>
+                <div class="app-icon"><i class="fab fa-chrome"></i></div>
+            </div>
+
+        </div>
+        <div class="quick-settings">
+            <div class="quick-setting"><i class="fas fa-wifi"></i><br>Wi-Fi</div>
+            <div class="quick-setting"><i class="fab fa-bluetooth"></i><br>Bluetooth</div>
+            <div class="quick-setting"><i class="fas fa-plane"></i><br>Airplane</div>
+            <div class="quick-setting"><i class="fas fa-moon"></i><br>Do Not Disturb</div>
+            <div class="quick-setting"><i class="fas fa-lightbulb"></i><br>Flashlight</div>
+            <div class="quick-setting"><i class="fas fa-location-arrow"></i><br>Location</div>
+            <h2>Notifications:</h2>
+            <div class="notification"><i class="fas fa-wifi"></i> WiFI<br>
+                <h3>Connected to network: null</h3>
+            </div>
+            <div class="notification"><i class="fas fa-cog"></i> Settings<br>
+                <h3>Finish setting up your device.</h3>
+            </div>
+        </div>
+        <div class="navigation-bar">
+            <div class="nav-button back-button"><i class="fas fa-angle-left"></i></div>
+            <div class="nav-button home-button"><i class="fas fa-circle-notch"></i></div>
+            <div class="nav-button recent-button"><i class="far fa-square"></i></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const homeScreen = document.querySelector('.home-screen');
+            const notificationPanel = document.querySelector('.notification-panel');
+            const quickSettings = document.querySelector('.quick-settings');
+            const statusBar = document.querySelector('.status-bar');
+            const clock = document.querySelector('.time');
+            const date = document.querySelector('.date');
+            const statusClock = document.querySelector('.status-bar .clock');
+            const backButton = document.querySelector('.back-button');
+            const homeButton = document.querySelector('.home-button');
+            const recentButton = document.querySelector('.recent-button');
+
+            function updateTime() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+                const dateString = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+                clock.textContent = timeString;
+                date.textContent = dateString;
+                statusClock.textContent = timeString;
+
+                navigator.getBattery().then(function (battery) {
+                    var level = battery.level;
+                    document.querySelector('.battery').innerHTML = level + '%';
+                });
+            };
+
+            setInterval(updateTime, 1000);
+            updateTime();
+
+            let startY;
+            let currentPanel = null;
+
+            function openPanel(panel) {
+                panel.classList.add('active');
+                currentPanel = panel;
+            }
+
+            function closePanel() {
+                if (currentPanel) {
+                    currentPanel.classList.remove('active');
+                    currentPanel = null;
+                }
+            }
+
+            homeScreen.addEventListener('touchstart', function (e) {
+                startY = e.touches[0].clientY;
+            });
+
+            homeScreen.addEventListener('touchmove', function (e) {
+                const deltaY = e.touches[0].clientY - startY;
+                if (deltaY < -250 && !currentPanel) {
+                    openPanel(notificationPanel);
+                } else if (deltaY > 250 && !currentPanel) {
+                    openPanel(quickSettings);
+                }
+            });
+
+            homeScreen.addEventListener('touchend', function () {
+                startY = null;
+            });
+
+            notificationPanel.addEventListener('touchstart', function (e) {
+                startY = e.touches[0].clientY;
+            });
+
+            notificationPanel.addEventListener('touchmove', function (e) {
+                const deltaY = e.touches[0].clientY - startY;
+                if (deltaY > 50) {
+                    closePanel();
+                }
+            });
+
+            quickSettings.addEventListener('touchstart', function (e) {
+                startY = e.touches[0].clientY;
+            });
+
+            quickSettings.addEventListener('touchmove', function (e) {
+                const deltaY = e.touches[0].clientY - startY;
+                if (deltaY < -50) {
+                    closePanel();
+                }
+            });
+
+            document.addEventListener('click', function (e) {
+                if (currentPanel && !currentPanel.contains(e.target) && e.target !== statusBar) {
+                    closePanel();
+                }
+            });
+
+            const appIcons = document.querySelectorAll('.app-icon');
+            appIcons.forEach(icon => {
+                icon.addEventListener('click', function () {
+                    alert('Opening ' + this.querySelector('i').className.split(' ')[1].substring(3) + ' app');
+                });
+            });
+
+            backButton.addEventListener('click', function () {
+                closePanel();
+            });
+
+            homeButton.addEventListener('click', function () {
+                closePanel();
+            });
+
+            recentButton.addEventListener('click', function () {
+                alert('Opening recent apps');
+            });
+        });
+    </script>
+</body>
+
+</html>
