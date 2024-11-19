@@ -1,114 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="AI29">
-  <title>AI chat for IOS 9. (experimental)</title>
-  <style>
-    /* General reset */
-    body, html {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      font-family: Arial, sans-serif;
-      background-color: #1a1a1a;
-      color: #eaeaea;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* Center box */
-    .chat-container {
-      width: 90%;
-      max-width: 600px;
-      text-align: center;
-    }
-
-    /* Text input box */
-    #chatInput {
-      width: 100%;
-      padding: 10px;
-      border: 2px solid #343541;
-      border-radius: 5px;
-      background-color: #343541;
-      color: white;
-      font-size: 16px;
-      box-sizing: border-box;
-    }
-
-    /* Chat display area */
-    #chatDisplay {
-      margin: 20px 0;
-      padding: 10px;
-      max-height: 50vh;
-      overflow-y: auto;
-      border: 1px solid #343541;
-      border-radius: 5px;
-      background-color: #262626;
-      text-align: left;
-      display: none;
-    }
-
-    .message {
-      margin: 5px 0;
-    }
-
-    .user {
-      color: #34a853;
-    }
-
-    .ai {
-      color: #4285f4;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#202124">
+    <title>AI Chat for Legacy Browsers</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #202124;
+            color: #e8eaed;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        #chat {
+            width: 90%;
+            max-width: 600px;
+        }
+        .message {
+            background: #303134;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            word-wrap: break-word;
+        }
+        .user {
+            text-align: right;
+        }
+    </style>
 </head>
 <body>
-  <div class="chat-container">
-    <div id="chatDisplay"></div>
-    <input type="text" id="chatInput" placeholder="Ask me anything...">
-  </div>
+    <div id="chat">
+        <div class="message">Welcome! Ask me anything.</div>
+    </div>
+    <input type="text" id="input" placeholder="Type your message..." style="width: 90%; padding: 10px; margin-top: 10px;">
+    <script>
 
-  <script>
-    // Elements
-    const chatDisplay = document.getElementById('chatDisplay');
-    const chatInput = document.getElementById('chatInput');
+(function () {
+    var chatContainer = document.getElementById('chat');
+    var input = document.getElementById('input');
 
-    // Function to add a message
-    function addMessage(content, type) {
-      const message = document.createElement('div');
-      message.className = 'message ' + type;
-      message.textContent = content;
-      chatDisplay.appendChild(message);
-      chatDisplay.style.display = 'block';
-      chatDisplay.scrollTop = chatDisplay.scrollHeight;
+    function appendMessage(text, className) {
+        var div = document.createElement('div');
+        div.className = 'message ' + (className || '');
+        div.textContent = text;
+        chatContainer.appendChild(div);
     }
 
-    // Function to handle sending the message
-    async function sendMessage(query) {
-      addMessage(query, 'user');
-      try {
-        const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`, {
-          headers: { 'Accept': 'application/json' }
-        });
-        const data = await response.json();
-        const reply = data.Abstract || data.RelatedTopics[0]?.Text || "I couldn't find an answer. Try something else!";
-        addMessage(reply, 'ai');
-      } catch (error) {
-        addMessage('Error fetching data. Please try again.', 'ai');
-      }
+    function sendMessage(query) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'https://duckduckgo.com/duckchat/v1/chat', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                var response = JSON.parse(xhr.responseText);
+                appendMessage(response.answer || 'Sorry, I could not understand.', '');
+            }
+        };
+        xhr.send(JSON.stringify({ question: query }));
     }
 
-    // Handle input
-    chatInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter' && chatInput.value.trim()) {
-        sendMessage(chatInput.value.trim());
-        chatInput.value = '';
-      }
+    input.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter' && input.value.trim()) {
+            var userMessage = input.value.trim();
+            appendMessage(userMessage, 'user');
+            sendMessage(userMessage);
+            input.value = '';
+        }
     });
-  </script>
+})();
+
+</script>
 </body>
 </html>
