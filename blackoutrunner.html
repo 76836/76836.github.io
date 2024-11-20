@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Vertical Lane Dodging Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            touch-action: none;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #game-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            position: relative;
+        }
+        .lane {
+            flex: 1;
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        .character {
+            width: 40px;
+            height: 40px;
+            background-color: green;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .obstacle {
+            width: 30px;
+            height: 30px;
+            background-color: red;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        #status {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            font-size: 18px;
+            z-index: 10;
+        }
+        #blackout-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 20;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .blackout {
+            background-color: black !important;
+        }
+        .blackout .lane {
+            background-color: black !important;
+            border: none !important;
+        }
+        .blackout .character, .blackout .obstacle {
+            background-color: transparent !important;
+            border: 2px solid white !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <button id="blackout-toggle">Toggle Blackout</button>
+        <div id="status">Dodge the obstacles!</div>
+        <div id="lane1" class="lane">
+            <div class="character" data-lane="1"></div>
+        </div>
+        <div id="lane2" class="lane">
+            <div class="character" data-lane="2"></div>
+        </div>
+        <div id="lane3" class="lane">
+            <div class="character" data-lane="3"></div>
+        </div>
+    </div>
+
+    <script>
+        class VibrationLaneGame {
+            constructor() {
+                this.gameContainer = document.getElementById('game-container');
+                this.lanes = [
+                    document.getElementById('lane1'),
+                    document.getElementById('lane2'),
+                    document.getElementById('lane3')
+                ];
+                this.characters = document.querySelectorAll('.character');
+                this.statusDisplay = document.getElementById('status');
+                this.blackoutToggle = document.getElementById('blackout-toggle');
+                
+                this.currentLane = 1;
+                this.obstacles = [];
+                this.gameSpeed = 3;
+                this.isGameOver = false;
+                this.lastTapTime = 0;
+                this.doubleTapDelay = 300;
+
+                this.initializeGame();
+            }
+
+            initializeGame() {
+                // Hide non-current lane characters
+                this.characters.forEach((char, index) => {
+                    if (index + 1 !== this.currentLane) {
+                        char.style.display = 'none';
+                    }
+                });
+
+                // Add touch listeners to each lane
+                this.lanes.forEach((lane, index) => {
+                    lane.addEventListener('touchstart', this.handleTouch.bind(this, index + 1));
+                });
+
+                // Blackout toggle
+                this.blackoutToggle.addEventListener('click', this.toggleBlackout.bind(this));
+
+                // Start obstacle generation
+                this.startObstacleGeneration();
+            }
+
+            toggleBlackout() {
+                this.gameContainer.classList.toggle('blackout');
+            }
+
+            handleTouch(laneTouched, event) {
+                const currentTime = new Date().getTime();
+                
+                // Check for double tap
+                if (currentTime - this.lastTapTime < this.doubleTapDelay) {
+                    // Double tap occurred
+                    this.switchLane(this.getNextLane());
+                } else {
+                    // Single tap - check for vibration feedback
+                    this.provideLaneVibrationFeedback(laneTouched);
+                }
+
+                // Update last tap time
+                this.lastTapTime = currentTime;
+                
+                // Prevent default touch behavior
+                event.preventDefault();
+            }
+
+            getNextLane() {
+                // Cycle through lanes: 1 -> 2 -> 3 -> 1
+                return this.currentLane % 3 + 1;
+            }
+
+            provideLaneVibrationFeedback(laneIndex) {
+                if (this.isGameOver) return;
+
+                const lane = this.lanes[laneIndex - 1];
+                const obstacles = lane.querySelectorAll('.obstacle');
+                
+                if (obstacles.length > 0) {
+                    const nearestObstacle = obstacles[0];
+                    const laneHeight = lane.clientHeight;
+                    const obstaclePosition = nearestObstacle.getBoundingClientRect().top;
+                    
+                    // Calculate distance from bottom of lane
+                    const distanceFromBottom = laneHeight - obstaclePosition;
+                    
+                    // Vibration pattern based on proximity
+                    // Closer obstacles = shorter intervals, farther = longer intervals
+                    const proximityFactor = Math.max(50, Math.min(500, 500 - (distanceFromBottom / laneHeight * 500)));
+                    
+                    try {
+                        // More precise vibration pattern
+                        navigator.vibrate([proximityFactor, 50, proximityFactor, 50]);
+                    } catch (error) {
+                        console.log('Vibration not supported');
+                    }
+                }
+            }
+
+            switchLane(newLane) {
+                if (this.isGameOver) return;
+
+                // Hide current lane character
+                this.characters[this.currentLane - 1].style.display = 'none';
+                
+                // Show new lane character
+                this.characters[newLane - 1].style.display = 'block';
+                
+                this.currentLane = newLane;
+            }
+
+            startObstacleGeneration() {
+                setInterval(() => {
+                    if (this.isGameOver) return;
+
+                    // Randomly choose a lane
+                    const randomLane = this.lanes[Math.floor(Math.random() * this.lanes.length)];
+                    
+                    // Create obstacle
+                    const obstacle = document.createElement('div');
+                    obstacle.classList.add('obstacle');
+                    obstacle.style.top = '-30px';
+                    randomLane.appendChild(obstacle);
+
+                    // Move obstacle
+                    this.moveObstacle(obstacle);
+                }, 2000);
+            }
+
+            moveObstacle(obstacle) {
+                const moveInterval = setInterval(() => {
+                    const currentPos = parseInt(obstacle.style.top || '-30');
+                    obstacle.style.top = `${currentPos + this.gameSpeed}px`;
+
+                    // Check for collision
+                    const obstacleRect = obstacle.getBoundingClientRect();
+                    const characterRect = this.lanes[this.currentLane - 1].querySelector('.character').getBoundingClientRect();
+
+                    if (this.checkCollision(obstacleRect, characterRect)) {
+                        this.gameOver();
+                        clearInterval(moveInterval);
+                    }
+
+                    // Remove obstacle if out of screen
+                    if (currentPos > window.innerHeight) {
+                        obstacle.remove();
+                        clearInterval(moveInterval);
+                    }
+                }, 50);
+            }
+
+            checkCollision(obstacleRect, characterRect) {
+                return !(obstacleRect.left > characterRect.right || 
+                         obstacleRect.right < characterRect.left || 
+                         obstacleRect.top > characterRect.bottom || 
+                         obstacleRect.bottom < characterRect.top);
+            }
+
+            gameOver() {
+                this.isGameOver = true;
+                this.statusDisplay.textContent = 'Game Over! Obstacles got you!';
+                
+                // Optional: Add restart functionality
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            }
+        }
+
+        // Initialize game on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            new VibrationLaneGame();
+        });
+    </script>
+</body>
+</html>
