@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Vertical Lane Dodging Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            touch-action: none;
+        }
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            position: fixed;
+        }
+        #game-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .lane {
+            flex: 1;
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.1);
+            touch-action: none;
+        }
+        .character {
+            width: 40px;
+            height: 40px;
+            background-color: green;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+        .obstacle {
+            width: 30px;
+            height: 30px;
+            background-color: red;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        #blackout-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            z-index: 1000;
+            display: none;
+        }
+        #debug-info {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: white;
+            z-index: 2000;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="lane1" class="lane">
+            <div class="character" data-lane="1"></div>
+        </div>
+        <div id="lane2" class="lane">
+            <div class="character" data-lane="2"></div>
+        </div>
+        <div id="lane3" class="lane">
+            <div class="character" data-lane="3"></div>
+        </div>
+    </div>
+    <div id="blackout-overlay"></div>
+    <div id="debug-info"></div>
+
+    <script>
+        class VibrationLaneGame {
+            constructor() {
+                this.gameContainer = document.getElementById('game-container');
+                this.blackoutOverlay = document.getElementById('blackout-overlay');
+                this.debugInfo = document.getElementById('debug-info');
+                
+                this.lanes = [
+                    document.getElementById('lane1'),
+                    document.getElementById('lane2'),
+                    document.getElementById('lane3')
+                ];
+                this.characters = document.querySelectorAll('.character');
+                
+                this.currentLane = 1;
+                this.isGameOver = false;
+                this.gameSpeed = 3;
+                
+                // Touch tracking
+                this.touchStartX = 0;
+                this.touchStartY = 0;
+                this.lastTapTime = 0;
+                this.doubleTapDelay = 300;
+                this.isBlackoutMode = false;
+
+                this.initializeGame();
+            }
+
+            initializeGame() {
+                // Hide non-current lane characters
+                this.characters.forEach((char, index) => {
+                    if (index + 1 !== this.currentLane) {
+                        char.style.display = 'none';
+                    }
+                });
+
+                // Global touch listeners
+                document.addEventListener('touchstart', this.handleTouchStart.bind(this));
+                document.addEventListener('touchmove', this.handleTouchMove.bind(this));
+                document.addEventListener('touchend', this.handleTouchEnd.bind(this));
+
+                // Start obstacle generation
+                this.startObstacleGeneration();
+            }
+
+            handleTouchStart(event) {
+                if (this.isGameOver) return;
+                
+                // Store initial touch position
+                this.touchStartX = event.touches[0].clientX;
+                this.touchStartY = event.touches[0].clientY;
+                
+                const currentTime = new Date().getTime();
+                
+                // Check for double tap
+                if (currentTime - this.lastTapTime < this.doubleTapDelay) {
+                    this.toggleBlackoutMode();
+                }
+                
+                this.lastTapTime = currentTime;
+            }
+
+            handleTouchMove(event) {
+                if (this.isGameOver) return;
+                
+                const touchX = event.touches[0].clientX;
+                const laneWidth = window.innerWidth / 3;
+                
+                // Determine which lane we're over
+                const touchedLane = Math.floor(touchX / laneWidth) + 1;
+                
+                // Provide lane-specific vibration feedback
+                this.provideLaneVibrationFeedback(touchedLane);
+            }
+
+            handleTouchEnd(event) {
+                if (this.isGameOver) return;
+                
+                const touchX = event.changedTouches[0].clientX;
+                const laneWidth = window.innerWidth / 3;
+                
+                // Determine which lane we're over
+                const touchedLane = Math.floor(touchX / laneWidth) + 1;
+                
+                // Switch to the touched lane
+                this.switchLane(touchedLane);
+            }
+
+            toggleBlackoutMode() {
+                this.isBlackoutMode = !this.isBlackoutMode;
+                
+                if (this.isBlackoutMode) {
+                    this.blackoutOverlay.style.display = 'block';
+                    this.performHapticFeedback('medium');
+                } else {
+                    this.blackoutOverlay.style.display = 'none';
+                }
+            }
+
+            provideLaneVibrationFeedback(laneIndex) {
+                if (this.isGameOver || this.isBlackoutMode) return;
+
+                const lane = this.lanes[laneIndex - 1];
+                const obstacles = lane.querySelectorAll('.obstacle');
+                
+                if (obstacles.length > 0) {
+                    const nearestObstacle = obstacles[0];
+                    const laneHeight = lane.clientHeight;
+                    const obstaclePosition = nearestObstacle.getBoundingClientRect().top;
+                    
+                    // Calculate distance from bottom of lane (0 = very close, 1 = far)
+                    const proximityFactor = 1 - (obstaclePosition / laneHeight);
+                    
+                    // Convert proximity to vibration intensity
+                    const vibrationIntensity = Math.floor(proximityFactor * 200);
+                    
+                    try {
+                        // Intensity-based vibration
+                        navigator.vibrate(vibrationIntensity);
+                    } catch (error) {
+                        console.log('Vibration not supported');
+                    }
+                }
+            }
+
+            switchLane(newLane) {
+                if (this.isGameOver || this.isBlackoutMode) return;
+
+                // Prevent switching to the same lane
+                if (newLane === this.currentLane) return;
+
+                // Hide current lane character
+                this.characters[this.currentLane - 1].style.display = 'none';
+                
+                // Show new lane character
+                this.characters[newLane - 1].style.display = 'block';
+                
+                // Perform lane change haptic feedback
+                this.performHapticFeedback('light');
+                
+                this.currentLane = newLane;
+            }
+
+            performHapticFeedback(type = 'light') {
+                try {
+                    // Different feedback patterns
+                    const patterns = {
+                        'light': [20],
+                        'medium': [50, 30, 20],
+                        'heavy': [100, 50, 30]
+                    };
+                    
+                    navigator.vibrate(patterns[type] || patterns['light']);
+                } catch (error) {
+                    console.log('Haptic feedback not supported');
+                }
+            }
+
+            startObstacleGeneration() {
+                setInterval(() => {
+                    if (this.isGameOver || this.isBlackoutMode) return;
+
+                    // Randomly choose a lane
+                    const randomLane = this.lanes[Math.floor(Math.random() * this.lanes.length)];
+                    
+                    // Ensure minimum spacing between obstacles
+                    const laneHeight = randomLane.clientHeight;
+                    const existingObstacles = randomLane.querySelectorAll('.obstacle');
+                    
+                    // Check if there's enough space for a new obstacle
+                    const canGenerateObstacle = !existingObstacles.length || 
+                        (existingObstacles[0].getBoundingClientRect().top > laneHeight / 2);
+                    
+                    if (canGenerateObstacle) {
+                        // Create obstacle
+                        const obstacle = document.createElement('div');
+                        obstacle.classList.add('obstacle');
+                        obstacle.style.top = '-30px';
+                        randomLane.appendChild(obstacle);
+
+                        // Move obstacle
+                        this.moveObstacle(obstacle);
+                    }
+                }, 2000);
+            }
+
+            moveObstacle(obstacle) {
+                const moveInterval = setInterval(() => {
+                    if (this.isBlackoutMode) {
+                        clearInterval(moveInterval);
+                        return;
+                    }
+
+                    const currentPos = parseInt(obstacle.style.top || '-30');
+                    obstacle.style.top = `${currentPos + this.gameSpeed}px`;
+
+                    // Check for collision
+                    const obstacleRect = obstacle.getBoundingClientRect();
+                    const characterRect = this.lanes[this.currentLane - 1].querySelector('.character').getBoundingClientRect();
+
+                    if (this.checkCollision(obstacleRect, characterRect)) {
+                        this.gameOver();
+                        clearInterval(moveInterval);
+                    }
+
+                    // Remove obstacle if out of screen
+                    if (currentPos > window.innerHeight) {
+                        obstacle.remove();
+                        clearInterval(moveInterval);
+                    }
+                }, 50);
+            }
+
+            checkCollision(obstacleRect, characterRect) {
+                return !(obstacleRect.left > characterRect.right || 
+                         obstacleRect.right < characterRect.left || 
+                         obstacleRect.top > characterRect.bottom || 
+                         obstacleRect.bottom < characterRect.top);
+            }
+
+            gameOver() {
+                this.isGameOver = true;
+                this.performHapticFeedback('heavy');
+                
+                // Restart after delay
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            }
+        }
+
+        // Initialize game on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            new VibrationLaneGame();
+        });
+    </script>
+</body>
+</html>
