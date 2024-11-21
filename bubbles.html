@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html data-theme="light">
+<head>
+  <style>
+    :root {
+      --bg-light: hsl(230, 50%, 95%);
+      --bg-dark: hsl(230, 30%, 15%);
+      --text-light: rgba(0, 0, 0, 0.7);
+      --text-dark: rgba(255, 255, 255, 0.9);
+    }
+
+    [data-theme="light"] {
+      --bg-color: var(--bg-light);
+      --text-color: var(--text-light);
+    }
+
+    [data-theme="dark"] {
+      --bg-color: var(--bg-dark);
+      --text-color: var(--text-dark);
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--bg-color);
+      transition: background-color 0.5s ease;
+    }
+
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      mix-blend-mode: multiply;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 2s ease-in-out, background-color 1s ease;
+    }
+
+    .cursor-trail {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      pointer-events: none;
+      mix-blend-mode: multiply;
+      filter: blur(5px);
+      opacity: 0.7;
+      transition: all 0.3s ease;
+    }
+
+    .blur-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      backdrop-filter: blur(30px);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    [data-theme="dark"] .bubble,
+    [data-theme="dark"] .cursor-trail {
+      mix-blend-mode: screen;
+    }
+  </style>
+</head>
+<body>
+  <div class="blur-overlay"></div>
+ 
+
+  <script>
+    const getTime = (() => {
+      try {
+        return window.performance?.now?.bind(window.performance) || Date.now.bind(Date);
+      } catch (e) {
+        return Date.now.bind(Date);
+      }
+    })();
+
+    const requestFrame = window.requestAnimationFrame || (callback => setTimeout(callback, 1000 / 60));
+
+    const state = {
+      currentX: 0,
+      currentY: 0,
+      targetX: window.innerWidth / 2,
+      targetY: window.innerHeight / 2,
+      isMouseMoving: false,
+      lastMouseMoveTime: getTime(),
+      performanceScore: 0.5,
+      lastLoop: getTime(),
+      frameCount: 0,
+      bubbles: [],
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight,
+      isDarkMode: false,
+      isHighLoad: false
+    };
+
+    class Bubble {
+      constructor() {
+        this.element = document.createElement('div');
+        this.element.className = 'bubble';
+        
+        this.size = Math.random() * 200 + 100;
+        this.blurAmount = Math.random() * 10 + 2;
+        
+        // Properly distribute initial positions across the screen
+        this.x = Math.random() * state.windowWidth;
+        this.y = Math.random() * state.windowHeight;
+        
+        // Random velocities with better distribution
+        this.vx = (Math.random() - 0.5) * 4;
+        this.vy = (Math.random() - 0.5) * 4;
+        this.ax = 0;
+        this.ay = 0;
+
+        this.baseHue = Math.random() * 360;
+        this.targetHue = this.baseHue;
+
+        this.setupElement();
+        this.fadeIn();
+      }
+
+      setupElement() {
+        this.element.style.width = `${this.size}px`;
+        this.element.style.height = `${this.size}px`;
+        this.element.style.filter = `blur(${this.blurAmount}px)`;
+        this.updateColor();
+        this.updatePosition();
+        document.body.appendChild(this.element);
+      }
+
+      fadeIn() {
+        setTimeout(() => this.element.style.opacity = '0.3', 100);
+      }
+
+      getColor() {
+        if (state.isHighLoad) {
+          return state.isDarkMode ? 
+            'hsla(0, 100%, 65%, 0.3)' :
+            'hsla(0, 100%, 50%, 0.3)';
+        }
+
+        const saturation = state.isDarkMode ? '70%' : '70%';
+        const lightness = state.isDarkMode ? '65%' : '80%';
+        const hue = state.isDarkMode ? 
+          (this.baseHue + 180) % 360 : // Shift hue for dark mode
+          this.baseHue;
+
+        return `hsla(${hue}, ${saturation}, ${lightness}, 0.3)`;
+      }
+
+      updateColor() {
+        this.element.style.background = this.getColor();
+      }
+
+      updatePosition() {
+        this.element.style.transform = `translate(${this.x}px, ${this.y}px)`;
+      }
+
+      move() {
+        if (state.isMouseMoving) {
+          const dx = state.targetX - state.currentX;
+          const dy = state.targetY - state.currentY;
+          const angle = Math.atan2(dy, dx);
+          
+          // Stronger influence from mouse movement
+          this.vx = (Math.cos(angle) * 5 + (Math.random() - 0.5)) * 0.8;
+          this.vy = (Math.sin(angle) * 5 + (Math.random() - 0.5)) * 0.8;
+        } else {
+          // Random acceleration changes
+          if (Math.random() < 0.02) {
+            this.ax = (Math.random() - 0.5) * 0.4;
+            this.ay = (Math.random() - 0.5) * 0.4;
+          }
+          
+          this.vx += this.ax;
+          this.vy += this.ay;
+          
+          // Stronger damping
+          this.vx *= 0.98;
+          this.vy *= 0.98;
+        }
+        
+        // Update position with bounds checking
+        this.x += this.vx;
+        this.y += this.vy;
+        
+        // Bounce off walls with energy preservation
+        if (this.x < (-0.5 * window.innerWidth)) {
+          this.x = (-0.5 * window.innerWidth);
+          this.vx = Math.abs(this.vx) * 0.8;
+        }
+        if (this.x > state.windowWidth - this.size) {
+          this.x = state.windowWidth - this.size;
+          this.vx = -Math.abs(this.vx) * 0.8;
+        }
+        if (this.y < (-0.5 * window.innerHeight)) {
+          this.y = (-0.5 * window.innerHeight);
+          this.vy = Math.abs(this.vy) * 0.8;
+        }
+        if (this.y > state.windowHeight - this.size) {
+          this.y = state.windowHeight - this.size;
+          this.vy = -Math.abs(this.vy) * 0.8;
+        }
+        
+        this.updatePosition();
+      }
+
+      remove() {
+        this.element.style.opacity = '0';
+        setTimeout(() => this.element.remove(), 2000);
+      }
+    }
+
+    function createTrailElement(x, y, size, opacity) {
+      const trail = document.createElement('div');
+      trail.className = 'cursor-trail';
+      trail.style.left = `${x}px`;
+      trail.style.top = `${y}px`;
+      trail.style.width = `${size}px`;
+      trail.style.height = `${size}px`;
+      trail.style.opacity = opacity;
+      
+      const hue = state.isDarkMode ? 180 : 0;
+      trail.style.background = state.isHighLoad ?
+        `hsla(0, 100%, 50%, ${opacity})` :
+        `hsla(${hue}, 70%, 80%, ${opacity})`;
+      
+      document.body.appendChild(trail);
+      
+      setTimeout(() => {
+        trail.style.opacity = '0';
+        setTimeout(() => trail.remove(), 300);
+      }, 100);
+    }
+
+    function animate() {
+      state.currentX += (state.targetX - state.currentX) * 0.1;
+      state.currentY += (state.targetY - state.currentY) * 0.1;
+      
+      const now = getTime();
+      state.isMouseMoving = now - state.lastMouseMoveTime < 100;
+      
+      state.bubbles.forEach(bubble => bubble.move());
+      
+      if (state.isMouseMoving) {
+        createTrailElement(
+          state.currentX,
+          state.currentY,
+          Math.random() * 40 + 20,
+          Math.random() * 0.3 + 0.1
+        );
+      }
+      
+      // Performance monitoring
+      state.frameCount++;
+      if (now > state.lastLoop + 1000) {
+        const newPerformanceScore = Math.min(state.frameCount / 60, 1);
+        state.isHighLoad = newPerformanceScore < 0.5;
+        state.frameCount = 0;
+        state.lastLoop = now;
+        
+        if (state.isHighLoad !== state.wasHighLoad) {
+          state.wasHighLoad = state.isHighLoad;
+          state.bubbles.forEach(bubble => bubble.updateColor());
+        }
+      }
+      
+      requestFrame(animate);
+    }
+
+    function createBubble() {
+      const bubble = new Bubble();
+      state.bubbles.push(bubble);
+      
+      setTimeout(() => {
+        const index = state.bubbles.indexOf(bubble);
+        if (index > -1) {
+          state.bubbles.splice(index, 1);
+          bubble.remove();
+        }
+      }, Math.random() * 15000 + 15000);
+    }
+
+    // Initialize
+    for (let i = 0; i < 15; i++) {
+      createBubble();
+    }
+    setInterval(createBubble, 3000);
+
+    // Event listeners
+    window.addEventListener('mousemove', (e) => {
+      state.targetX = e.clientX;
+      state.targetY = e.clientY;
+      state.lastMouseMoveTime = getTime();
+    });
+
+    window.addEventListener('resize', () => {
+      state.windowWidth = window.innerWidth;
+      state.windowHeight = window.innerHeight;
+    });
+
+      state.isDarkMode = !state.isDarkMode;
+      document.documentElement.setAttribute('data-theme', state.isDarkMode ? 'dark' : 'light');
+      state.bubbles.forEach(bubble => bubble.updateColor());
+
+
+    // Start animation
+    animate();
+  </script>
+</body>
+</html>
