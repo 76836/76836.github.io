@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      color: #fff;
+      background: #000;
+    }
+
+    #game {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      background: #111;
+    }
+
+    .lane {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      width: 33.33%;
+      border-right: 1px solid #333;
+    }
+
+    #lane0 { left: 0; }
+    #lane1 { left: 33.33%; }
+    #lane2 { left: 66.66%; }
+
+    .obstacle {
+      position: absolute;
+      width: 100%;
+      height: 50px;
+      background: #fff;
+      top: -50px;
+    }
+
+    #player {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background: #0f0;
+      border-radius: 50%;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: left 0.2s ease;
+    }
+
+    #blackout {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      opacity: 0;
+      color:black;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    #blackout.active {
+      opacity: 1;
+    }
+
+    .score-display {
+      position: fixed;
+      font-family: Arial;
+      font-size: 24px;
+      z-index: 100;
+    }
+
+    #current-score {
+      top: 20px;
+      right: 20px;
+    }
+
+    #high-score {
+      top: 20px;
+      left: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <div id="current-score" class="score-display">Score: 0</div>
+    <div id="high-score" class="score-display">Best: 0</div>
+    <div class="lane" id="lane0"></div>
+    <div class="lane" id="lane1"></div>
+    <div class="lane" id="lane2"></div>
+    <div id="player"></div>
+    <div id="blackout"></div>
+  </div>
+
+  <script>
+    class Game {
+      constructor() {
+        this.score = 0;
+        this.highScore = parseInt(localStorage.getItem('highScore') || '0');
+        this.currentLane = 1;
+        this.isBlackout = false;
+        this.lastTapTime = 0;
+        this.gameSpeed = 1;
+        this.obstacles = [];
+        this.isGameOver = false;
+        this.touchStartY = 0;
+        this.touchStartTime = 0;
+        this.exploredLane = null;
+        this.isVibrating = false;
+        
+        this.player = document.getElementById('player');
+        this.blackout = document.getElementById('blackout');
+        this.currentScoreElement = document.getElementById('current-score');
+        this.highScoreElement = document.getElementById('high-score');
+        this.lanes = document.querySelectorAll('.lane');
+        
+        this.updateScoreDisplay();
+        this.setupEventListeners();
+        this.gameLoop();
+        this.obstacleGenerator();
+      }
+
+      setupEventListeners() {
+        document.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          const touch = e.touches[0];
+          this.touchStartY = touch.clientY;
+          this.touchStartTime = Date.now();
+          
+          // Determine which lane was touched
+          const laneWidth = window.innerWidth / 3;
+          const touchedLane = Math.floor(touch.clientX / laneWidth);
+          
+          // Start lane exploration vibration
+          this.exploredLane = touchedLane;
+          this.exploreVibration();
+        });
+
+        document.addEventListener('touchmove', (e) => {
+          e.preventDefault();
+          const touch = e.touches[0];
+          
+          // Check for vertical swipe
+          const deltaY = touch.clientY - this.touchStartY;
+          if (Math.abs(deltaY) > window.innerHeight * 0.25) {
+            if (deltaY > 0) { // Swipe down
+              this.enableBlackout();
+            } else { // Swipe up
+              this.disableBlackout();
+            }
+            return;
+          }
+          
+          // Update explored lane
+          const laneWidth = window.innerWidth / 3;
+          const newLane = Math.floor(touch.clientX / laneWidth);
+          if (newLane !== this.exploredLane) {
+            this.exploredLane = newLane;
+            this.exploreVibration();
+          }
+        });
+
+        document.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          this.exploredLane = null;
+          this.isVibrating = false;
+          
+          // Check for double tap
+          const currentTime = Date.now();
+          if (currentTime - this.touchStartTime < 300) {
+            if (currentTime - this.lastTapTime < 300) {
+              if (this.isGameOver) {
+                this.restart();
+              } else {
+                const touch = e.changedTouches[0];
+                const laneWidth = window.innerWidth / 3;
+                const tappedLane = Math.floor(touch.clientX / laneWidth);
+                this.switchLane(tappedLane);
+              }
+            }
+            this.lastTapTime = currentTime;
+          }
+        });
+      }
+
+      exploreVibration() {
+        if (this.isVibrating || this.exploredLane === null) return;
+        
+        this.isVibrating = true;
+        const checkObstacles = () => {
+          if (!this.isVibrating || this.exploredLane === null) return;
+          
+          const closestDistance = this.getClosestObstacleDistance(this.exploredLane);
+          if (closestDistance < 300) {
+            const intensity = Math.floor((1 - closestDistance / 300) * 200);
+            navigator.vibrate(intensity);
+          }
+          
+          setTimeout(checkObstacles, 100);
+        };
+        
+        checkObstacles();
+      }
+
+      enableBlackout() {
+        if (!this.isBlackout) {
+          this.isBlackout = true;
+          this.blackout.classList.add('active');
+          document.body.style.color = 'black';
+          navigator.vibrate([100, 50, 100]);
+        }
+      }
+
+      disableBlackout() {
+        if (this.isBlackout) {
+          this.isBlackout = false;
+          this.blackout.classList.remove('active');
+          document.body.style.color = 'white';
+          navigator.vibrate([50, 25, 50]);
+        }
+      }
+
+      switchLane(newLane) {
+        if (newLane !== this.currentLane) {
+          this.currentLane = newLane;
+          this.player.style.left = (33.33 * this.currentLane + 16.665) + '%';
+          navigator.vibrate(100);
+        }
+      }
+
+      getClosestObstacleDistance(lane) {
+        let minDistance = 1000;
+        for (const obstacle of this.obstacles) {
+          if (obstacle.lane === lane) {
+            const distance = obstacle.element.offsetTop - (window.innerHeight - 80);
+            if (distance > 0 && distance < minDistance) {
+              minDistance = distance;
+            }
+          }
+        }
+        return minDistance;
+      }
+
+      updateScoreDisplay() {
+        this.currentScoreElement.textContent = `Score: ${this.score}`;
+        this.highScoreElement.textContent = `Best: ${this.highScore}`;
+      }
+
+      createObstacle() {
+        const lane = Math.floor(Math.random() * 3);
+        const obstacle = document.createElement('div');
+        obstacle.className = 'obstacle';
+        this.lanes[lane].appendChild(obstacle);
+        
+        return {
+          element: obstacle,
+          lane: lane,
+          position: -50
+        };
+      }
+
+      obstacleGenerator() {
+        if (this.isGameOver) return;
+        
+        const canAdd = !this.obstacles.some(obs => 
+          obs.position < window.innerHeight / 2
+        );
+        
+        if (canAdd) {
+          this.obstacles.push(this.createObstacle());
+        }
+        
+        setTimeout(() => this.obstacleGenerator(), 1000 / this.gameSpeed);
+      }
+
+      checkCollisions() {
+        const playerBox = {
+          top: window.innerHeight - 80,
+          bottom: window.innerHeight - 50,
+          lane: this.currentLane
+        };
+
+        for (const obstacle of this.obstacles) {
+          if (obstacle.lane === playerBox.lane) {
+            if (obstacle.position >= playerBox.top && 
+                obstacle.position <= playerBox.bottom) {
+              this.gameOver();
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      gameOver() {
+        this.isGameOver = true;
+        this.isVibrating = false;
+        
+        if (this.score > this.highScore) {
+          this.highScore = this.score;
+          localStorage.setItem('highScore', this.highScore.toString());
+          this.updateScoreDisplay();
+        }
+        
+        // Long game over vibration
+        navigator.vibrate(1000);
+      }
+
+      restart() {
+        // Clear obstacles
+        this.obstacles.forEach(obstacle => obstacle.element.remove());
+        this.obstacles = [];
+        
+        // Reset game state
+        this.score = 0;
+        this.currentLane = 1;
+        this.gameSpeed = 1;
+        this.isGameOver = false;
+        
+        // Reset player position
+        this.player.style.left = '50%';
+        
+        // Update display
+        this.updateScoreDisplay();
+        
+        // Restart game systems
+        this.gameLoop();
+        this.obstacleGenerator();
+        
+        // Confirmation vibration
+        navigator.vibrate([50, 50, 50]);
+      }
+
+      updateObstacles() {
+        for (let i = this.obstacles.length - 1; i >= 0; i--) {
+          const obstacle = this.obstacles[i];
+          obstacle.position += this.gameSpeed;
+          obstacle.element.style.top = obstacle.position + 'px';
+          
+          if (obstacle.position > window.innerHeight) {
+            obstacle.element.remove();
+            this.obstacles.splice(i, 1);
+            this.score++;
+            this.updateScoreDisplay();
+            this.gameSpeed = Math.min(8, 1 + this.score / 20);
+          }
+        }
+      }
+
+      gameLoop() {
+        if (this.isGameOver) return;
+        
+        this.updateObstacles();
+        this.checkCollisions();
+        
+        requestAnimationFrame(() => this.gameLoop());
+      }
+    }
+
+    // Start the game when the page loads
+    window.onload = () => new Game();
+  </script>
+</body>
+</html>
