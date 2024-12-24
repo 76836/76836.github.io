@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: black;
+        }
+
+        .content {
+            opacity: 0;
+            padding: 20px;
+            color:aliceblue;
+        }
+
+        .white-flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            opacity: 0;
+            pointer-events: none;
+
+        }
+
+        .teleport-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .energy-pill {
+            width: 30px;
+            height: 80px;
+            background: rgb(255, 255, 0);
+            border-radius: 15px;
+            position: absolute;
+            will-change: transform;
+            z-index: 1000;
+            bottom: -80px;
+            /* Start below the viewport */
+        }
+
+        @keyframes pillFloat {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(calc(-100vh - 160px));
+                /* Move up beyond viewport */
+            }
+        }
+
+        @keyframes overlayFadeIn {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes overlayFadeOut {
+            0% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        @keyframes fadeToWhite {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes revealContent {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="content">
+        <h1>Touch/click anywhere to activate</h1>
+        <p>This is the page content that will be revealed after the teleport effect.</p>
+    </div>
+
+    <div class="white-flash"></div>
+    <div class="teleport-overlay" id="teleportOverlay"></div>
+
+    <script>
+        const overlay = document.getElementById('teleportOverlay');
+        const content = document.querySelector('.content');
+        const whiteFlash = document.querySelector('.white-flash');
+        const numRows = 10;
+        let activeColumns = new Set();
+        const frameInterval = 1000 / 20;
+
+        function getRandomPosition() {
+            const containerWidth = window.innerWidth;
+            const columnWidth = 30;
+            return Math.random() * (containerWidth - columnWidth);
+        }
+
+        function createPill() {
+            const pill = document.createElement('div');
+            pill.className = 'energy-pill';
+            pill.style.left = `${getRandomPosition()}px`;
+            overlay.appendChild(pill);
+            return pill;
+        }
+
+        function getOpacityProgress() {
+            const computedStyle = window.getComputedStyle(overlay);
+            return parseFloat(computedStyle.opacity) || 0;
+        }
+
+        async function animatePill(pill, phase) {
+            const opacityProgress = getOpacityProgress();
+            const baseSpeed = phase === 1 ? 4 : 10.5;
+            const speedMultiplier = baseSpeed + (opacityProgress * 2);
+
+            // Randomize height
+            const height = 60 + Math.random() * 600;
+            pill.style.height = `${height}px`;
+
+            // Duration decreases as animation progresses
+            const duration = (2000 + Math.random() * 1000) / speedMultiplier;
+
+            pill.style.animation = `pillFloat ${duration}ms linear forwards`;
+
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    if (activeColumns.has(pill)) {
+                        pill.remove();
+                        activeColumns.delete(pill);
+                    }
+                    resolve();
+                }, duration);
+            });
+        }
+
+        async function spawnPill(phase) {
+            const pill = createPill();
+            activeColumns.add(pill);
+            animatePill(pill, phase);
+        }
+
+        function part1() {
+            content.style.opacity = '0';
+            overlay.innerHTML = '';
+            activeColumns.clear();
+            overlay.style.animation = 'overlayFadeIn 3000ms ease-out forwards';
+            for (let time = 0; time < 3000; time += 120) {
+            setTimeout(() => {
+                // Spawn 3-5 pills each wave
+                const pillCount = Math.floor(Math.random() * 3) + 3;
+                for (let i = 0; i < pillCount; i++) {
+                    spawnPill(1);
+                }
+            }, time);}
+        };
+
+        function part2() {
+            const spawnInterval = 40;
+            const phase2Duration = 500;
+
+            for (let time = 0; time < phase2Duration; time += spawnInterval) {
+                setTimeout(() => {
+                    // Spawn 5-8 pills each wave
+                    const pillCount = Math.floor(Math.random() * 4) + 5;
+                    for (let i = 0; i < pillCount; i++) {
+                        spawnPill(2);
+                    }
+                }, time);
+            }      // Start fading to white
+            whiteFlash.style.animation = 'fadeToWhite 300ms ease-out forwards';
+        };
+
+        function part3() {
+            
+            overlay.style.animation = 'overlayFadeOut 1000ms ease-out forwards';
+            whiteFlash.style.animation = 'overlayFadeOut 1000ms ease-out forwards';
+
+            // Clean up and reveal content
+            setTimeout(() => {
+                activeColumns.clear();
+                overlay.innerHTML = '';
+                content.style.animation = 'revealContent 500ms ease-out forwards';
+            }, 1000);
+        };
+
+        async function playTeleportAnimation() {
+            
+
+            // Phase 1: Initial slower spawn
+            part1();
+
+            // Phase 2: Rapid spawn
+            setTimeout(() => {
+                part2();
+            }, 3000);
+
+            // Final fade out
+            setTimeout(() => {
+                part3();
+            }, 4000);
+        }
+
+        // Start animation on any interaction
+        document.addEventListener('click', playTeleportAnimation);
+        document.addEventListener('touchstart', playTeleportAnimation);
+
+        // Initial animation
+        //setTimeout(playTeleportAnimation, 500);
+        
+        part2();
+        part3();
+    </script>
+</body>
+
+</html>
