@@ -110,6 +110,7 @@
     </style>
 </head>
 <body>
+    
     <div id="clock">00:00:00</div>
     <div id="date">Monday, January 1</div>
     <div id="message">Loading...</div>
@@ -198,6 +199,30 @@
                 keepAwake();
             }
         });
+
+
+        // Function to toggle full-screen mode
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // Event listener to detect double-tap
+        let lastTapTime = 0;
+        document.body.addEventListener('touchend', function(event) {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTapTime;
+            if (tapLength < 500 && tapLength > 0) {
+                toggleFullScreen();
+            }
+            lastTapTime = currentTime;
+        });
+
     </script>
 </body>
 </html>
