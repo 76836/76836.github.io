@@ -19,7 +19,8 @@
             transition: all 1.5s ease;
         }
 
-        #clock {
+  
+          #clock {
             font-size: 4rem;
             font-weight: 200;
             margin-bottom: 10px;
@@ -107,14 +108,41 @@
         .night-mode .dim-overlay {
             background-color: rgba(0, 0, 0, 0.5);
         }
+  
+  
+        #noise-widget {
+            display: none;
+            position: absolute;
+            z-index: 9999;
+        }
     </style>
 </head>
 <body>
-    
     <div id="clock">00:00:00</div>
     <div id="date">Monday, January 1</div>
     <div id="message">Loading...</div>
     <div class="dim-overlay"></div>
+    <div id="noise-widget" style="background:#000000;color:#fff;font-family:system-ui,sans-serif;padding:10px;border-radius:8px;width:300px;max-width:90vw">
+  <canvas id="viz" style="width:100%;height:60px;background:#222;border-radius:4px;margin:5px 0"></canvas>
+  <button id="toggleBtn" style="width:100%;background:#333;color:#fff;border:none;padding:8px;border-radius:4px;margin:5px 0;cursor:pointer">Start</button>
+  <div style="display:grid;gap:8px;font-size:14px">
+    <div>
+      <label for="bassLevel">Bass</label>
+      <input type="range" id="bassLevel" min="0" max="10" step="1" value="7" style="width:100%">
+    </div>
+    <div>
+      <label for="blanketLevel">Blanket</label>
+      <input type="range" id="blanketLevel" min="0" max="10" step="1" value="3" style="width:100%">
+    </div>
+    <div>
+      <label for="volume">Volume</label>
+      <input type="range" id="volume" min="0" max="10" step="1" value="7" style="width:100%">
+    </div>
+  </div>
+</div>
+<script type="module">
+const DEFAULT_SETTINGS={bassLevel:7,blanketLevel:3,volume:7};const audioCtx=new(window.AudioContext||window.webkitAudioContext);let isPlaying=false,noiseNode=null,blanketNoiseNode=null,bassFilter=null,blanketFilter=null,gainNode=null,blanketGainNode=null,analyser=null;const settings=JSON.parse(localStorage.getItem('noiseSettings'))||DEFAULT_SETTINGS;const canvas=document.getElementById('viz');const canvasCtx=canvas.getContext('2d');const WIDTH=canvas.width=300;const HEIGHT=canvas.height=60;if('mediaSession'in navigator){navigator.mediaSession.metadata=new MediaMetadata({title:'Deep White Noise',artist:'Noise Generator',album:'Ambient Sounds',artwork:[{src:'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNDgiIGN5PSI0OCIgcj0iNDgiIGZpbGw9IiMxYTFhMWEiLz48L3N2Zz4=',sizes:'96x96',type:'image/svg+xml'}]});navigator.mediaSession.setActionHandler('play',()=>startNoise());navigator.mediaSession.setActionHandler('pause',()=>stopNoise());navigator.mediaSession.setActionHandler('stop',()=>stopNoise());navigator.mediaSession.setActionHandler('seekbackward',()=>{});navigator.mediaSession.setActionHandler('seekforward',()=>{});navigator.mediaSession.setActionHandler('previoustrack',()=>{});navigator.mediaSession.setActionHandler('nexttrack',()=>{});}function createNoiseBuffer(){const bufferSize=2*audioCtx.sampleRate;const noiseBuffer=audioCtx.createBuffer(1,bufferSize,audioCtx.sampleRate);const output=noiseBuffer.getChannelData(0);for(let i=0;i<bufferSize;i++)output[i]=Math.random()*2-1;return noiseBuffer}function createNoiseNodes(){noiseNode=audioCtx.createBufferSource();noiseNode.buffer=createNoiseBuffer();noiseNode.loop=true;bassFilter=audioCtx.createBiquadFilter();bassFilter.type='lowpass';bassFilter.frequency.value=Math.exp((settings.bassLevel/10)*Math.log(1000))+20;bassFilter.Q.value=0.5;gainNode=audioCtx.createGain();gainNode.gain.value=settings.volume/10;blanketNoiseNode=audioCtx.createBufferSource();blanketNoiseNode.buffer=createNoiseBuffer();blanketNoiseNode.loop=true;blanketFilter=audioCtx.createBiquadFilter();blanketFilter.type='bandpass';blanketFilter.frequency.value=1000;blanketFilter.Q.value=0.5;blanketGainNode=audioCtx.createGain();blanketGainNode.gain.value=(settings.blanketLevel/10)*0.3;analyser=audioCtx.createAnalyser();analyser.fftSize=2048;noiseNode.connect(bassFilter);bassFilter.connect(gainNode);gainNode.connect(analyser);blanketNoiseNode.connect(blanketFilter);blanketFilter.connect(blanketGainNode);blanketGainNode.connect(analyser);analyser.connect(audioCtx.destination)}function draw(){requestAnimationFrame(draw);const bufferLength=analyser.frequencyBinCount;const dataArray=new Uint8Array(bufferLength);analyser.getByteTimeDomainData(dataArray);canvasCtx.fillStyle='#222';canvasCtx.fillRect(0,0,WIDTH,HEIGHT);canvasCtx.lineWidth=2;canvasCtx.strokeStyle='#0f0';canvasCtx.beginPath();const sliceWidth=WIDTH*1.0/bufferLength;let x=0;for(let i=0;i<bufferLength;i++){const v=dataArray[i]/128.0;const y=v*HEIGHT/2;if(i===0)canvasCtx.moveTo(x,y);else canvasCtx.lineTo(x,y);x+=sliceWidth}canvasCtx.lineTo(WIDTH,HEIGHT/2);canvasCtx.stroke()}function startNoise(){if(audioCtx.state==='suspended')audioCtx.resume();createNoiseNodes();noiseNode.start();blanketNoiseNode.start();isPlaying=true;document.getElementById('toggleBtn').textContent='Stop';draw();navigator.mediaSession.playbackState='playing'}function stopNoise(){noiseNode.stop();blanketNoiseNode.stop();isPlaying=false;document.getElementById('toggleBtn').textContent='Start';navigator.mediaSession.playbackState='paused'}document.getElementById('toggleBtn').addEventListener('click',()=>{if(isPlaying)stopNoise();else startNoise()});document.getElementById('bassLevel').addEventListener('input',(e)=>{const value=parseInt(e.target.value);settings.bassLevel=value;if(bassFilter)bassFilter.frequency.value=Math.exp((value/10)*Math.log(1000))+20;localStorage.setItem('noiseSettings',JSON.stringify(settings))});document.getElementById('blanketLevel').addEventListener('input',(e)=>{const value=parseInt(e.target.value);settings.blanketLevel=value;if(blanketGainNode)blanketGainNode.gain.value=(value/10)*0.3;localStorage.setItem('noiseSettings',JSON.stringify(settings))});document.getElementById('volume').addEventListener('input',(e)=>{const value=parseInt(e.target.value);settings.volume=value;if(gainNode)gainNode.gain.value=value/10;localStorage.setItem('noiseSettings',JSON.stringify(settings))});document.getElementById('bassLevel').value=settings.bassLevel;document.getElementById('blanketLevel').value=settings.blanketLevel;document.getElementById('volume').value=settings.volume;if('wakeLock'in navigator){let wakeLock=null;const requestWakeLock=async()=>{try{wakeLock=await navigator.wakeLock.request('screen')}catch(err){console.log(`Wake Lock error: ${err.name}, ${err.message}`)}};document.getElementById('toggleBtn').addEventListener('click',()=>{if(isPlaying)requestWakeLock();else if(wakeLock){wakeLock.release();wakeLock=null}});}
+</script>
 
     <script>
         const messages = {
@@ -200,7 +228,6 @@
             }
         });
 
-
         // Function to toggle full-screen mode
         function toggleFullScreen() {
             if (!document.fullscreenElement) {
@@ -223,6 +250,20 @@
             lastTapTime = currentTime;
         });
 
+        // Function to show noise widget
+        function showNoiseWidget() {
+            const noiseWidget = document.getElementById('noise-widget');
+            noiseWidget.style.display = 'block';
+            setTimeout(() => {
+                noiseWidget.style.display = 'none';
+            }, 3000);
+        }
+
+        // Event listener to show noise widget on tap
+        document.body.addEventListener('click', function() {
+            showNoiseWidget();
+        });
     </script>
 </body>
 </html>
+
