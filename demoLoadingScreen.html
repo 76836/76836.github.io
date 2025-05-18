@@ -133,6 +133,13 @@
             box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
         }
 
+         video {
+            object-fit: cover;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+        }
+
         .status-text {
             color: white;
             font-size: 3rem;
@@ -196,7 +203,11 @@
 <body>
     <div class="container">
         <div class="iframe-container">
-            <iframe class="iframe" id="backgroundFrame" title="Background" sandbox="allow-scripts"></iframe>
+            <!--<iframe class="iframe" id="backgroundFrame" title="Background" sandbox="allow-scripts"></iframe>-->
+            <video autoplay loop muted playsinline>
+        <source src="https://76836.github.io/Digita/logo/DigitaIntro.mp4" type="video/mp4">
+        bruh
+        </video>
         </div>
         <div class="overlay"></div>
         <div class="content">
@@ -231,25 +242,107 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const savedUrl = localStorage.getItem('backgroundUrl') || 'https://76836.github.io/bubbles';
-            document.getElementById('backgroundFrame').src = savedUrl;
+            //const savedUrl = localStorage.getItem('backgroundUrl') || 'https://76836.github.io/bubbles';
+            //document.getElementById('backgroundFrame').src = savedUrl;
 
             let currentProgress = 0;
             const progressFill = document.getElementById('progressFill');
             const percentage = document.getElementById('percentage');
 
-            const interval = setInterval(() => {
-                currentProgress += Math.random() * 10;
-                if (currentProgress > 100) currentProgress = 100;
-                const progress = Math.floor(currentProgress);
+          // Track progress of individual processes
+const processStates = {};
+let overallProgress = 0;
 
-                progressFill.style.width = `${progress}%`;
-                percentage.textContent = `${progress}%`;
+// Extract PID and percentage from globalLoadingStatus string
+function extractProgressInfo(statusString) {
+    if (!statusString) return null;
+    
+    // Match pattern like "PID1234:75%" or just find PID and percentage separately
+    const fullMatch = statusString.match(/PID(\d+):(\d+)%/);
+    if (fullMatch) {
+        return {
+            pid: fullMatch[1],
+            progress: parseInt(fullMatch[2], 10)
+        };
+    }
+    
+    // Try to find PID and percentage separately
+    const pidMatch = statusString.match(/PID(\d+)/);
+    const percentMatch = statusString.match(/(\d+)%/);
+    
+    if (pidMatch && percentMatch) {
+        return {
+            pid: pidMatch[1],
+            progress: parseInt(percentMatch[1], 10)
+        };
+    }
+    
+    return null;
+}
 
-                if (currentProgress === 100) {
-                    clearInterval(interval);
-                }
-            }, 800);
+// Calculate overall progress based on the least progressed process
+function calculateOverallProgress() {
+    // If no processes are tracked yet, return 0
+    if (Object.keys(processStates).length === 0) return 0;
+    
+    // Find the minimum progress among all tracked processes
+    return Math.min(...Object.values(processStates));
+}
+
+// Update a specific process's progress
+function updateProcessProgress(pid, progress) {
+    if (pid && !isNaN(progress)) {
+        // Only update if progress increased or process is new
+        if (!processStates[pid] || progress > processStates[pid]) {
+            processStates[pid] = progress;
+            // Recalculate overall progress
+            overallProgress = calculateOverallProgress();
+        }
+    }
+}
+
+// Create interval that replaces the original one
+const interval = setInterval(() => {
+    // Get progress info from localStorage
+    const statusString = localStorage.getItem('globalLoadingStatus');
+    const progressInfo = extractProgressInfo(statusString);
+    
+    // Update process tracking if valid info found
+    if (progressInfo) {
+        updateProcessProgress(progressInfo.pid, progressInfo.progress);
+    }
+    
+    // Progress animation logic (from original code)
+    currentProgress += Math.random() * 10;
+    
+    // Ensure we never exceed the overall progress of the slowest process
+    if (currentProgress > overallProgress) {
+        currentProgress = overallProgress;
+    }
+    
+    // Cap at 100%
+    if (currentProgress > 100) currentProgress = 100;
+    
+    // Update UI elements
+    const progress = Math.floor(currentProgress);
+    progressFill.style.width = `${progress}%`;
+    percentage.textContent = `${progress}%`;
+    
+    // Clear interval when all processes complete
+    if (currentProgress === 100) {
+        clearInterval(interval);
+    }
+}, 800);
+
+// Add a storage event listener to catch updates from other tabs/windows
+window.addEventListener('storage', (event) => {
+    if (event.key === 'globalLoadingStatus') {
+        const progressInfo = extractProgressInfo(event.newValue);
+        if (progressInfo) {
+            updateProcessProgress(progressInfo.pid, progressInfo.progress);
+        }
+    }
+});
         });
     </script>
 </body>
