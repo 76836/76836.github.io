@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Image Generation Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        :root {
+            --m3-surface: #1d1b20;
+            --m3-on-surface: #e6e1e5;
+            --m3-primary: #d0bcff;
+            --m3-on-primary: #381e72;
+            --m3-secondary-container: #4a4458;
+            --m3-on-secondary-container: #e8def8;
+            --m3-outline: #938f99;
+        }
+
+        body {
+            background-color: #141218;
+            color: var(--m3-on-surface);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overscroll-behavior: none;
+            touch-action: none; /* Disables browser gestures like pull-to-refresh */
+        }
+
+        .m3-card {
+            background-color: var(--m3-surface);
+            border-radius: 24px;
+            padding: 16px;
+        }
+
+        .m3-input {
+            background-color: transparent;
+            border: 1px solid var(--m3-outline);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: white;
+            transition: border-color 0.2s;
+            font-size: 16px; 
+        }
+
+        .m3-input:focus {
+            border-color: var(--m3-primary);
+            outline: none;
+        }
+
+        .m3-btn-primary {
+            background-color: var(--m3-primary);
+            color: var(--m3-on-primary);
+            border-radius: 100px;
+            padding: 10px 24px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .m3-btn-primary:active { transform: scale(0.95); opacity: 0.9; }
+
+        .m3-btn-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--m3-secondary-container);
+            color: var(--m3-on-secondary-container);
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        #canvas-container {
+            position: relative;
+            background-image: radial-gradient(#2b2930 1px, transparent 1px);
+            background-size: 20px 20px;
+            overflow: hidden;
+        }
+
+        /* Container for the transformable content */
+        #zoom-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-origin: center center;
+            transition: transform 0.1s ease-out;
+        }
+
+        .resize-handle {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            background: var(--m3-primary);
+            border: 3px solid white;
+            border-radius: 50%;
+            cursor: nwse-resize;
+            touch-action: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--m3-on-primary);
+            font-size: 12px;
+            z-index: 50;
+        }
+
+        .history-item {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .history-item:active { transform: scale(0.9); }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .adjustment-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: var(--m3-outline);
+            border-radius: 2px;
+        }
+
+        .adjustment-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--m3-primary);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Mobile Sidebar Styles */
+        aside {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-hide { display: none; }
+            aside {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                z-index: 100;
+                transform: translateX(-100%);
+                width: 85% !important;
+                background: #141218;
+                padding: 1rem;
+                box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+            }
+            aside.open {
+                transform: translateX(0);
+            }
+            /* Overlay when sidebar is open */
+            #sidebar-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 90;
+                display: none;
+                backdrop-filter: blur(2px);
+            }
+            #sidebar-overlay.open {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body class="h-screen overflow-hidden flex flex-col p-2 md:p-4 gap-2 md:gap-4">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Header -->
+    <header class="flex justify-between items-center px-2 shrink-0">
+        <div class="flex items-center gap-2 md:gap-3">
+            <button onclick="toggleSidebar()" class="m3-btn-icon md:hidden"><i class="fa-solid fa-bars"></i></button>
+            <div class="m3-btn-icon mobile-hide"><i class="fa-solid fa-wand-sparkles"></i></div>
+            <h1 class="text-lg md:text-xl font-medium tracking-tight">Image Generation Studio v1.0</h1>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="exportHistory()" class="m3-btn-icon !bg-transparent text-xs" title="Export History"><i class="fa-solid fa-file-export"></i></button>
+            <button onclick="document.getElementById('import-file').click()" class="m3-btn-icon !bg-transparent text-xs" title="Import History"><i class="fa-solid fa-file-import"></i></button>
+            <input type="file" id="import-file" class="hidden" accept=".json" onchange="importHistory(this)">
+            <div class="flex items-center gap-2 bg-[#2b2930] rounded-full px-3 py-1 ml-2">
+                <input type="password" id="api_key" placeholder="Key" class="bg-transparent text-xs outline-none w-16 md:w-32">
+                <i class="fa-solid fa-key text-[10px] text-gray-500"></i>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 gap-2 md:gap-4 overflow-hidden relative">
+        
+        <!-- Sidebar -->
+        <aside id="main-sidebar" class="w-80 flex flex-col gap-4 no-scrollbar h-full">
+            <div class="m3-card flex flex-col gap-4 shrink-0">
+                <textarea id="prompt" placeholder="Describe your vision..." class="m3-input h-20 md:h-24 resize-none text-sm"></textarea>
+                <button onclick="generate()" class="m3-btn-primary w-full">Generate</button>
+            </div>
+
+            <div class="m3-card flex-1 overflow-y-auto no-scrollbar space-y-4">
+                <!-- Resolution -->
+                <div class="space-y-3">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Resolution Control</label>
+                    <select id="aspect_ratio" class="w-full m3-input text-sm" onchange="updateDimensions()">
+                        <option value="1:1">1:1 Square</option>
+                        <option value="16:9">16:9 Cinematic</option>
+                        <option value="9:16">9:16 Portrait</option>
+                        <option value="4:3">4:3 Classic</option>
+                    </select>
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-[10px]">
+                            <span>Size Scale</span>
+                            <span id="scale_label">1.0x</span>
+                        </div>
+                        <input type="range" id="res_scale" min="0.25" max="2.0" step="0.25" value="1" class="adjustment-slider" oninput="updateDimensions()">
+                    </div>
+                    <div class="space-y-1 pt-2">
+                        <div class="flex justify-between text-[10px]">
+                            <span>Quality Profile</span>
+                            <span id="quality_label">Standard</span>
+                        </div>
+                        <input type="range" id="quality_slider" min="0" max="3" step="1" value="1" class="adjustment-slider" oninput="updateQualityLabel()">
+                    </div>
+                </div>
+
+                <!-- Engine -->
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="space-y-1">
+                        <label class="text-[10px] text-gray-400 uppercase">Engine</label>
+                        <select id="model" class="w-full m3-input text-xs">
+                            <option value="flux">Flux</option>
+                            <option value="turbo">Turbo</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] text-gray-400 uppercase">Steps</label>
+                        <input type="number" id="steps" value="4" class="w-full m3-input text-xs">
+                    </div>
+                </div>
+
+                <!-- Adjustments -->
+                <div class="space-y-3 pt-2 border-t border-gray-800">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Image Adjustments</label>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[10px]"><span>Brightness</span><span id="v_bright">100%</span></div>
+                            <input type="range" id="adj_bright" min="0" max="200" value="100" class="adjustment-slider" oninput="applyFilters()">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[10px]"><span>Contrast</span><span id="v_contrast">100%</span></div>
+                            <input type="range" id="adj_contrast" min="0" max="200" value="100" class="adjustment-slider" oninput="applyFilters()">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[10px]"><span>Saturation</span><span id="v_sat">100%</span></div>
+                            <input type="range" id="adj_sat" min="0" max="200" value="100" class="adjustment-slider" oninput="applyFilters()">
+                        </div>
+                        <!-- New Options -->
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[10px]"><span>Blur</span><span id="v_blur">0px</span></div>
+                            <input type="range" id="adj_blur" min="0" max="20" value="0" step="1" class="adjustment-slider" oninput="applyFilters()">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[10px]"><span>Tint (Hue)</span><span id="v_hue">0°</span></div>
+                            <input type="range" id="adj_hue" min="0" max="360" value="0" step="5" class="adjustment-slider" oninput="applyFilters()">
+                        </div>
+                    </div>
+                </div>
+                <button onclick="resetAdjustments()" class="text-[10px] text-blue-400 uppercase w-full text-center">Reset All Filters</button>
+            </div>
+        </aside>
+
+        <!-- Workspace -->
+        <main class="flex-1 flex flex-col gap-2 md:gap-4 overflow-hidden relative">
+            
+            <!-- Zoom Controls -->
+            <div class="absolute top-4 right-4 z-40 flex flex-col gap-2 bg-black/40 backdrop-blur rounded-full p-2 border border-white/10">
+                <button onclick="adjustZoom(0.1)" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white text-xs"><i class="fa-solid fa-plus"></i></button>
+                <div id="zoom-indicator" class="text-[10px] text-center font-mono">100%</div>
+                <button onclick="adjustZoom(-0.1)" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white text-xs"><i class="fa-solid fa-minus"></i></button>
+                <button onclick="resetZoom()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white text-[10px]">1:1</button>
+            </div>
+
+            <div id="canvas-container" class="flex-1 m3-card relative">
+                <div id="zoom-container">
+                    <div id="image-wrapper" class="relative transition-shadow duration-300 shadow-2xl">
+                        <img id="main-image" src="" class="block w-full h-full rounded-lg select-none pointer-events-none" style="filter: brightness(100%) contrast(100%) saturate(100%);">
+                        <!-- Resize Handle -->
+                        <div id="resize-handle" class="resize-handle -bottom-4 -right-4 hidden">
+                            <i class="fa-solid fa-expand"></i>
+                        </div>
+                        <!-- Dimensions Overlay -->
+                        <div id="dim-overlay" class="absolute -top-8 left-1/2 -translate-x-1/2 bg-black/80 px-3 py-1 rounded-full text-[10px] hidden font-mono border border-white/10 whitespace-nowrap z-50">1024 x 1024</div>
+                    </div>
+                </div>
+
+                <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-gray-600 pointer-events-none">
+                    <i class="fa-solid fa-mountain-sun text-4xl mb-2 opacity-20"></i>
+                    <p class="text-xs uppercase tracking-widest">Ready for input</p>
+                </div>
+
+                <div id="action-bar" class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-[#2b2930]/90 backdrop-blur-md rounded-full p-1.5 flex gap-1 hidden shadow-2xl border border-white/5 z-50">
+                    <button id="resize-confirm" onclick="triggerResize()" class="bg-blue-500 px-4 py-2 rounded-full text-[10px] font-bold text-white hidden whitespace-nowrap">REGENERATE AT NEW SIZE</button>
+                    <button onclick="downloadImage()" class="m3-btn-icon !bg-transparent hover:bg-white/5"><i class="fa-solid fa-download"></i></button>
+                    <button onclick="copyLink()" class="m3-btn-icon !bg-transparent hover:bg-white/5"><i class="fa-solid fa-link"></i></button>
+                    <button onclick="clearHistory()" class="m3-btn-icon !bg-transparent text-red-400/50 hover:text-red-400"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+
+                <!-- History Tray (Mobile Only) -->
+                <div class="absolute bottom-20 left-4 right-4 h-16 md:hidden flex gap-2 overflow-x-auto no-scrollbar pointer-events-none z-40">
+                    <div id="history-tray-mobile" class="flex gap-2 pointer-events-auto"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- History Sidebar (Desktop) -->
+        <aside class="w-20 md:w-24 bg-black/20 rounded-3xl p-3 flex flex-col gap-3 overflow-y-auto no-scrollbar mobile-hide">
+            <div id="history-list" class="flex flex-col gap-3"></div>
+        </aside>
+    </div>
+
+    <!-- Loader -->
+    <div id="global-loading" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-[100] flex flex-col items-center justify-center hidden">
+        <div class="w-12 h-12 border-4 border-blue-400/20 border-t-blue-400 rounded-full animate-spin"></div>
+        <p id="loading-msg" class="text-[10px] uppercase tracking-[0.3em] mt-6 text-blue-400 font-bold">Summoning Pixels</p>
+    </div>
+
+    <script>
+        let currentData = {
+            width: 1024,
+            height: 1024,
+            seed: null,
+            prompt: "",
+            quality: 'standard'
+        };
+        
+        let zoomLevel = 1.0;
+
+        const elements = {
+            sidebar: document.getElementById('main-sidebar'),
+            overlay: document.getElementById('sidebar-overlay'),
+            mainImg: document.getElementById('main-image'),
+            wrapper: document.getElementById('image-wrapper'),
+            zoomContainer: document.getElementById('zoom-container'),
+            handle: document.getElementById('resize-handle'),
+            dimOverlay: document.getElementById('dim-overlay'),
+            actionBar: document.getElementById('action-bar'),
+            resizeBtn: document.getElementById('resize-confirm'),
+            empty: document.getElementById('empty-state'),
+            loader: document.getElementById('global-loading'),
+            historyList: document.getElementById('history-list'),
+            historyTray: document.getElementById('history-tray-mobile'),
+            zoomInd: document.getElementById('zoom-indicator')
+        };
+
+        function toggleSidebar() {
+            elements.sidebar.classList.toggle('open');
+            elements.overlay.classList.toggle('open');
+        }
+
+        function adjustZoom(delta) {
+            zoomLevel = Math.max(0.1, Math.min(3.0, zoomLevel + delta));
+            updateZoomUI();
+        }
+
+        function resetZoom() {
+            zoomLevel = 1.0;
+            updateZoomUI();
+        }
+
+        function updateZoomUI() {
+            elements.zoomContainer.style.transform = `scale(${zoomLevel})`;
+            elements.zoomInd.innerText = `${Math.round(zoomLevel * 100)}%`;
+        }
+
+        function updateQualityLabel() {
+            const val = document.getElementById('quality_slider').value;
+            const labels = ['Draft', 'Standard', 'High', 'Ultra HD'];
+            const qualities = ['low', 'standard', 'high', 'ultra'];
+            document.getElementById('quality_label').innerText = labels[val];
+            currentData.quality = qualities[val];
+        }
+
+        function updateDimensions() {
+            const ratioStr = document.getElementById('aspect_ratio').value;
+            const scale = parseFloat(document.getElementById('res_scale').value);
+            const [rw, rh] = ratioStr.split(':').map(Number);
+            
+            let baseW, baseH;
+            if (rw >= rh) {
+                baseW = 1024;
+                baseH = Math.round((rh / rw) * 1024);
+            } else {
+                baseH = 1024;
+                baseW = Math.round((rw / rh) * 1024);
+            }
+
+            currentData.width = Math.round((baseW * scale) / 16) * 16;
+            currentData.height = Math.round((baseH * scale) / 16) * 16;
+            document.getElementById('scale_label').innerText = `${scale.toFixed(2)}x (${currentData.width}px)`;
+        }
+
+        async function generate(isResize = false) {
+            const prompt = document.getElementById('prompt').value.trim();
+            if (!prompt) return;
+
+            elements.loader.classList.remove('hidden');
+            if(window.innerWidth < 768) {
+                elements.sidebar.classList.remove('open');
+                elements.overlay.classList.remove('open');
+            }
+            
+            const params = new URLSearchParams();
+            params.append('width', currentData.width);
+            params.append('height', currentData.height);
+            params.append('model', document.getElementById('model').value);
+            params.append('steps', document.getElementById('steps').value);
+            params.append('nologo', 'true');
+            params.append('private', 'true');
+          
+            
+            if (!isResize) {
+                currentData.seed = Math.floor(Math.random() * 1e9);
+            }
+            params.append('seed', currentData.seed);
+
+            const q = currentData.quality;
+            if (q === 'low') params.append('quality', 'low');
+            if (q === 'high' || q === 'ultra') params.append('quality', 'hd');
+
+            const token = document.getElementById('api_key').value;
+            if (token) params.append('key', token);
+
+            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?${params.toString()}`;
+
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.src = url;
+            
+            img.onload = async () => {
+                elements.mainImg.src = url;
+                elements.empty.classList.add('hidden');
+                elements.actionBar.classList.remove('hidden');
+                elements.handle.classList.remove('hidden');
+                elements.loader.classList.add('hidden');
+                elements.resizeBtn.classList.add('hidden');
+                
+                fitImageToScreen();
+
+                const base64 = await imageToBase64(img);
+                addToHistory(base64, prompt, { ...currentData });
+            };
+            img.onerror = () => {
+                elements.loader.classList.add('hidden');
+                alert("Generation failed. Check network or API key.");
+            };
+        }
+
+        function fitImageToScreen() {
+            // Logic: Fit the wrapper inside the container 
+            // We do NOT use zoomLevel here; zoomLevel is applied on top via CSS
+            const container = document.getElementById('canvas-container');
+            const pad = 64; // More padding for handles
+            const maxW = container.clientWidth - pad;
+            const maxH = container.clientHeight - pad;
+            const ratio = currentData.width / currentData.height;
+
+            let finalW = maxW;
+            let finalH = maxW / ratio;
+
+            if (finalH > maxH) {
+                finalH = maxH;
+                finalW = maxH * ratio;
+            }
+
+            elements.wrapper.style.width = `${finalW}px`;
+            elements.wrapper.style.height = `${finalH}px`;
+        }
+
+        async function imageToBase64(img) {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            return canvas.toDataURL('image/webp', 0.8);
+        }
+
+        function addToHistory(dataUrl, prompt, meta) {
+            const entry = { dataUrl, prompt, meta, timestamp: Date.now() };
+            const history = JSON.parse(localStorage.getItem('pollinations_history') || '[]');
+            history.unshift(entry);
+            localStorage.setItem('pollinations_history', JSON.stringify(history.slice(0, 50)));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem('pollinations_history') || '[]');
+            const html = history.map((item, index) => `
+                <img src="${item.dataUrl}" 
+                     class="history-item w-12 md:w-full border-2 border-white/5" 
+                     onclick="restoreFromHistory(${index})">
+            `).join('');
+            elements.historyList.innerHTML = html;
+            elements.historyTray.innerHTML = html;
+        }
+
+        function restoreFromHistory(index) {
+            const history = JSON.parse(localStorage.getItem('pollinations_history') || '[]');
+            const item = history[index];
+            document.getElementById('prompt').value = item.prompt;
+            currentData = { ...item.meta };
+            elements.mainImg.src = item.dataUrl;
+            elements.empty.classList.add('hidden');
+            elements.actionBar.classList.remove('hidden');
+            fitImageToScreen();
+        }
+
+        function clearHistory() {
+            if(confirm("Wipe entire history?")) {
+                localStorage.removeItem('pollinations_history');
+                renderHistory();
+            }
+        }
+
+        function exportHistory() {
+            const data = localStorage.getItem('pollinations_history');
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pollinations-gallery-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        function importHistory(input) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    localStorage.setItem('pollinations_history', e.target.result);
+                    renderHistory();
+                    alert("History imported!");
+                } catch(err) { alert("Invalid file."); }
+            };
+            reader.readAsText(file);
+        }
+
+        // Resize Logic
+        let isResizing = false;
+        
+        const startResize = (e) => {
+            if(e.type === 'touchstart') e.preventDefault(); // Stop scroll
+            isResizing = true;
+            document.addEventListener('mousemove', handleResize);
+            document.addEventListener('touchmove', handleResize, { passive: false });
+            document.addEventListener('mouseup', endResize);
+            document.addEventListener('touchend', endResize);
+        };
+
+        elements.handle.addEventListener('mousedown', startResize);
+        elements.handle.addEventListener('touchstart', startResize);
+
+        function handleResize(e) {
+            if (!isResizing) return;
+            if (e.type === 'touchmove') e.preventDefault();
+            
+            const rect = elements.wrapper.getBoundingClientRect();
+            // Coordinates
+            const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+            const ratio = currentData.width / rect.width;
+
+            // Distance from top-left of wrapper
+            const visualW = clientX - rect.left;
+            const visualH = clientY - rect.top;
+            
+            // Calculate target Pollinations Resolution
+            let targetWidth = Math.round(visualW * ratio);
+            let targetHeight = Math.round(visualH * ratio);
+
+            // Snap to 16
+            targetWidth = Math.round(targetWidth / 16) * 16;
+            targetHeight = Math.round(targetHeight / 16) * 16;
+
+            if (targetWidth > 128 && targetHeight > 128) {
+                elements.wrapper.style.width = `${visualW / zoomLevel}px`;
+                elements.wrapper.style.height = `${visualH / zoomLevel}px`;
+                
+                elements.dimOverlay.innerText = `${targetWidth} x ${targetHeight}`;
+                elements.dimOverlay.classList.remove('hidden');
+                
+                // Store for regeneration
+                currentData.width = targetWidth;
+                currentData.height = targetHeight;
+            }
+        }
+
+        function endResize() {
+            isResizing = false;
+            document.removeEventListener('mousemove', handleResize);
+            document.removeEventListener('touchmove', handleResize);
+            elements.resizeBtn.classList.remove('hidden');
+        }
+
+        function triggerResize() {
+            generate(true);
+            elements.dimOverlay.classList.add('hidden');
+        }
+
+        function applyFilters() {
+            const b = document.getElementById('adj_bright').value;
+            const c = document.getElementById('adj_contrast').value;
+            const s = document.getElementById('adj_sat').value;
+            const bl = document.getElementById('adj_blur').value;
+            const h = document.getElementById('adj_hue').value;
+            
+            document.getElementById('v_bright').innerText = b + '%';
+            document.getElementById('v_contrast').innerText = c + '%';
+            document.getElementById('v_sat').innerText = s + '%';
+            document.getElementById('v_blur').innerText = bl + 'px';
+            document.getElementById('v_hue').innerText = h + '°';
+            
+            elements.mainImg.style.filter = `brightness(${b}%) contrast(${c}%) saturate(${s}%) blur(${bl}px) hue-rotate(${h}deg)`;
+        }
+
+        function resetAdjustments() {
+            ['adj_bright', 'adj_contrast', 'adj_sat'].forEach(id => document.getElementById(id).value = 100);
+            ['adj_blur', 'adj_hue'].forEach(id => document.getElementById(id).value = 0);
+            applyFilters();
+        }
+
+        async function downloadImage() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = elements.mainImg.naturalWidth;
+            canvas.height = elements.mainImg.naturalHeight;
+            ctx.filter = elements.mainImg.style.filter;
+            ctx.drawImage(elements.mainImg, 0, 0);
+            const link = document.createElement('a');
+            link.download = `art-${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function copyLink() {
+            navigator.clipboard.writeText(elements.mainImg.src);
+            alert("Direct link copied!");
+        }
+
+        window.onresize = () => {
+            if(window.innerWidth >= 768) {
+                elements.sidebar.classList.remove('open');
+                elements.overlay.classList.remove('open');
+            }
+            fitImageToScreen();
+        };
+        
+        updateDimensions();
+        updateQualityLabel();
+        renderHistory();
+    </script>
+</body>
+</html>
