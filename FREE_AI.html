@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>chat</title>
+    <style>
+        body {
+            background: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            margin: 0px;
+            padding: 0px;
+            overflow: hidden;
+        }
+
+        #log {
+            height: 85vh;
+            overflow-y: auto;
+            border: none;
+            padding: 1vh;
+            margin-bottom: 0px;
+            background: rgba(0, 10, 0, 0.3);
+        }
+
+        .input-line {
+            display: flex;
+            border: 3px solid #040;
+            padding:1vh;
+            padding-top: calc(6.5vh - 11px);
+            padding-bottom: calc(6.5vh - 11px);
+            font-size: 14px;
+        }
+
+        #prompt {
+            color: #0f0;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        input {
+            background: transparent;
+            border: none;
+            color: #0f0;
+            outline: none;
+            font-family: inherit;
+            flex: 1;
+            width: 100%;
+        }
+
+        .sys {
+            color: #fff;
+            font-style: italic;
+        }
+
+        .usr {
+            color: #0af;
+        }
+
+        .bot {
+            color: #0f0;
+            white-space: pre-wrap;
+            margin-bottom: 10px;
+        }
+
+        .err {
+            color: #f00;
+            font-weight: bold;
+        }
+
+        img {
+            max-width: 400px;
+            border: 1px solid #040;
+            margin: 10px 0;
+            display: block;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #040;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="log">
+        <div class="sys">Free AI chat by 76836, powered by https://pollinations.ai/
+            <br>v1.2, type /help to see available commands.
+        </div>
+    </div>
+    <div class="input-line">
+        <span id="prompt">Anon >>></span>
+        <input id="cmd" autofocus spellcheck="false">
+    </div>
+
+    <script>
+        const log = document.getElementById('log');
+        const cmd = document.getElementById('cmd');
+        let allModels = []; 
+        let anonymousModels = []; 
+        let activeFilters = [];
+        let activeModel = 'openai';
+        let systemPrompt = ''; 
+        let history = [];
+        let controller = null;
+
+        async function refreshModels() {
+            try {
+                const res = await fetch('https://text.pollinations.ai/models');
+                const models = await res.json();
+                allModels = models;
+                anonymousModels = models.filter(m => m.tier === 'anonymous').map(m => m.name);
+                write(`[INFO] ${allModels.length} TOTAL MODELS, ${anonymousModels.length} FREE MODELS AVAILABLE.`, 'sys');
+                if (anonymousModels.length > 0) {
+                    activeModel = anonymousModels[0];
+                    write(`[OK] System chose: ${activeModel}`, 'sys');
+                }
+            } catch (err) {
+                write('[ERROR] API_SYNC_FAILED. USING FAILSAFE.', 'err');
+                anonymousModels = ['openai', 'mistral', 'llama'];
+            }
+        }
+
+        function getFilteredPool() {
+            let pool = allModels.map(m => m.name);
+            if (activeFilters.length > 0) {
+                pool = pool.filter(name => activeFilters.some(f => name.toLowerCase().includes(f)));
+            }
+            return pool;
+        }
+
+        function write(text, style = '') {
+            const div = document.createElement('div');
+            div.className = style;
+            div.innerHTML = text;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        async function exec() {
+            const val = cmd.value.trim();
+            if (!val) return;
+            cmd.value = '';
+            write(`> ${val}`, 'usr');
+            if (val.startsWith('/')) {
+                const parts = val.split(' ');
+                const action = parts[0].toLowerCase();
+                const sub = parts[1] ? parts[1].toLowerCase() : null;
+                const arg = parts.slice(2).join(' ');
+
+                switch (action) {
+                    case '/personality':
+                        if (sub === 'view') {
+                            write(`[INFO] Current personality: "${systemPrompt || 'NONE'}"`, 'sys');
+                        } else {
+                            const newPrompt = parts.slice(1).join(' ');
+                            if (newPrompt) {
+                                systemPrompt = newPrompt;
+                                write(`[OK] System prompt set to: "${systemPrompt}"`, 'sys');
+                            } else write(`[ERROR] Usage: /personality [text|view]`, 'err');
+                        }
+                        break;
+                    case '/filter':
+                        if (sub === 'add') {
+                            activeFilters.push(arg.toLowerCase()); write(`[OK] Filter added: ${arg}`, 'sys');
+                        } else if (sub === 'remove') {
+                            activeFilters = activeFilters.filter(f => f !== arg.toLowerCase()); write(`[OK] Filter removed: ${arg}`, 'sys');
+                        } else if (sub === 'clear') {
+                            activeFilters = []; write('[OK] Filters cleared.', 'sys');
+                        } else if (sub === 'list') {
+                            write('[INFO] Current model name filters: <br>' + (activeFilters.join(', ') || 'NONE'), 'sys');
+                        }
+                        break;
+                    case '/list':
+                        if (sub === 'free') {
+                            write('[INFO] Free models:<br>' + anonymousModels.join('<br>'), 'sys');
+                        } else {
+                            write('[INFO] All models:<br>' + getFilteredPool().join('<br>'), 'sys');
+                        }
+                        break;
+                    case '/auto':
+                        activeModel = anonymousModels[Math.floor(Math.random() * anonymousModels.length)];
+                        write(`[OK] System chose: ${activeModel}`, 'sys');
+                        break;
+                    case '/set':
+                        if (allModels.some(m => m.name === sub)) {
+                            activeModel = sub;
+                            write(`[OK] Using model: ${activeModel}`, 'sys');
+                        } else write(`[ERROR] ${sub} NOT FOUND.`, 'err');
+                        break;
+                    case '/img':
+                        const p = parts.slice(1).join(' ');
+                        write(`<img src="https://image.pollinations.ai/prompt/${encodeURIComponent(p)}?nologo=true&seed=${Date.now()}">`, 'bot');
+                        break;
+                    case '/reset':
+                        if (sub === 'personality') {
+                            systemPrompt = '';
+                            write('[OK] Personality cleared.', 'sys');
+                        } else if (sub === 'chat') {
+                            history = [];
+                            write('[OK] Chat context reset.', 'sys');
+                        } else if (sub === 'all') {
+                            systemPrompt = '';
+                            history = [];
+                            activeFilters = [];
+                            write('[OK] Everything reset (chat, personality, filters).', 'sys');
+                        } else {
+                            systemPrompt = '';
+                            history = [];
+                            write('[OK] Chat and personality reset.', 'sys');
+                        }
+                        break;
+                    case '/stop':
+                        if (controller) { controller.abort(); write('[OK] Generation stopped.', 'err'); }
+                        break;
+                    case '/help':
+                        write('[INFO] Commands: <br>/personality [{text}|view] (set or view the system prompt)<br>/reset [personality|chat|all] (this resets things, run without arguments to reset system prompt and chat)<br>/filter [add {tag}|remove|clear|list] (add a list of strings that a model name must contain in order for auto selection to pick it)<br>/list [free] (list available models, run without arguments to view non-free options)<br>/set [id] (choose a model manually)<br>/auto (have the system choose a free model)<br>/img (generate an image)<br>/stop (attempt to stop the AI from responding)', 'sys');
+                        break;
+                    default: write('[ERROR] Invalid command!', 'err');
+                }
+                return;
+            }
+
+            const messages = [];
+            if (systemPrompt) messages.push({ role: 'system', content: systemPrompt });
+            history.push({ role: 'user', content: val });
+            
+            controller = new AbortController();
+
+            try {
+                const res = await fetch('https://text.pollinations.ai/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        messages: [...messages, ...history], 
+                        model: activeModel 
+                    }),
+                    signal: controller.signal
+                });
+
+                if (res.status === 402) {
+                    write(`[ERROR] Got code 402 when requesting: [${activeModel}] `, 'err');
+                } else {
+                    const text = await res.text();
+                    write(text, 'bot');
+                    history.push({ role: 'assistant', content: text });
+                }
+            } catch (e) {
+                if (e.name !== 'AbortError') write('[ERROR] NO_CARRIER_SIGNAL', 'err');
+            }
+        }
+
+        cmd.addEventListener('keypress', (e) => { if (e.key === 'Enter') exec(); });
+        refreshModels();
+    </script>
+</body>
+
+</html>
