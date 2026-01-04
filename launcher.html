@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>76836 Immersive Launcher</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #1f1f1f;
+            font-family: 'Inter', sans-serif;
+            color: white;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: -30vh;
+            left: 0;
+            width: 100vw;
+            height: 130vh;
+            display: flex;
+            justify-content: space-around;
+            perspective: 1000px;
+        }
+
+        .belt {
+            position: relative;
+            height: 100%;
+            width: 18vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .app-card {
+            position: absolute;
+            width: 16vw;
+            height: 22vh;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.4s ease,
+                filter 0.4s ease,
+                box-shadow 0.3s ease,
+                border-color 0.3s ease;
+            cursor: pointer;
+            user-select: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+            text-decoration: none;
+            will-change: transform;
+        }
+
+        .app-card:hover {
+            z-index: 100;
+            background: rgba(20, 20, 20, 0.15);
+            backdrop-filter: blur(20px);
+            transform: scale(1.15) !important;
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .app-card.misted {
+            opacity: 0.15;
+            filter: blur(8px);
+            transform: scale(0.85);
+            pointer-events: none;
+        }
+
+        .app-icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 15px;
+            border-radius: 14px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            font-size: 32px;
+        }
+
+        .app-icon img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+        }
+
+        .search-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        #search-input {
+            background: rgba(220, 220, 220, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
+            border-radius: 50px;
+            color: white;
+            font-size: 1.1rem;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
+            width: 600px;
+            pointer-events: all;
+        }
+
+        #search-input:focus {
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.05);
+        }
+
+
+
+
+        :root {
+            --glow-speed: 6s;
+            --glow-thickness: 100px;
+            /* How far from the edge it reaches */
+            --glow-softness: 80px;
+            /* How much it blurs into the center */
+            --glow-opacity: 0.25;
+            /* Overall transparency */
+        }
+
+        .vignette {
+            position: fixed;
+            /* We pull the edges out so the blur doesn't show the hard corner of the div */
+            top: calc(var(--glow-thickness) * -1);
+            left: calc(var(--glow-thickness) * -1);
+            right: calc(var(--glow-thickness) * -1);
+            bottom: calc(var(--glow-thickness) * -1);
+
+            pointer-events: none;
+            z-index: 500;
+
+            /* Creates the rectangular frame */
+            border: var(--glow-thickness) solid;
+            border-image-source: conic-gradient(from var(--angle),
+                    red, orange, yellow, green, cyan, blue, magenta, white, grey, darkgray, black);
+            border-image-slice: 1;
+
+            /* Adjusting visibility and smoothness */
+            opacity: var(--glow-opacity);
+            filter: blur(var(--glow-softness));
+            animation: rotate-glow var(--glow-speed) linear infinite;
+        }
+
+        @property --angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+
+        @keyframes rotate-glow {
+            from {
+                --angle: 0deg;
+            }
+
+            to {
+                --angle: 360deg;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="vignette"></div>
+
+    <div class="search-overlay">
+        <input type="text" id="search-input" placeholder="Search apps..." spellcheck="false">
+    </div>
+
+    <div id="canvas-container">
+        <!-- Belts will be injected here -->
+    </div>
+
+    <script>
+        const apps = [
+            { name: "76836 Akari", url: "https://76836.github.io/Akari/app", icon: "https://76836.github.io/Akari/logo512.png" },
+            { name: "76836 Digita", url: "https://76836.github.io/Digita", icon: "https://76836.github.io/Digita/logo/512.png" },
+           // { name: "76836 side-glow", url: "https://76836.github.io/side-glow" },
+            { name: "76836 Lunabot", url: "https://76836.github.io/lunabot/app", icon: "https://76836.github.io/lunabot/app/icon-512.png" },
+           // { name: "76836 Terminal", url: "https://76836.github.io/webdesk/programs/terminal", icon: "https://76836.github.io/webdesk/programs/terminal/apple-touch-icon.png" },
+            { name: "76836 Animaxxer", url: "https://76836.github.io/animaxxer", icon: "https://76836.github.io/animaxxer/icon-512.png" },
+           // { name: "76836 CtrlBox", url: "https://76836.github.io/ctrlbox", icon: "https://76836.github.io/ctrlbox/icon.png" },
+            { name: "76836 Calculator", url: "https://76836.github.io/CalculatorXP", icon: "https://76836.github.io/CalculatorXP/icon.png" },
+           // { name: "76836 Simple AI", url: "https://76836.github.io/FREE_AI.html" },
+            { name: "76836 Image Studio", url: "https://76836.github.io/pollinations_image_client.html" },
+
+
+
+            { name: "YouTube", url: "https://youtube.com", icon: "https://www.gstatic.com/marketing-cms/assets/images/fc/f4/a754801e43b5a8eb0ee7d8b780f6/yt-external-thumbnail-icon-01.jpg=n-w1920-h1080-fcrop64=1,00000000ffffffff-rw" },
+            { name: "GitHub", url: "https://github.com", icon: "https://github.githubassets.com/favicons/favicon.png" },
+            { name: "Twitter (x)", url: "https://twitter.com", icon: "https://abs.twimg.com/favicons/twitter.2.ico" },
+            { name: "Reddit", url: "https://reddit.com", icon: "https://www.redditstatic.com/desktop2x/img/favicon/android-icon-192x192.png" },
+            { name: "Netflix", url: "https://netflix.com", icon: "https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.png" },
+            { name: "Spotify", url: "https://spotify.com", icon: "https://open.spotifycdn.com/cdn/images/favicon32.b64ecc03.png" },
+            { name: "Gmail", url: "https://mail.google.com", icon: "https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico" },
+            { name: "Amazon", url: "https://amazon.com", icon: "https://www.amazon.com/favicon.ico" },
+            { name: "Wikipedia", url: "https://wikipedia.org", icon: "https://en.wikipedia.org/static/favicon/wikipedia.ico" },
+            { name: "Twitch", url: "https://twitch.tv", icon: "https://static.twitchcdn.net/assets/favicon-32-e29e246c157142c94346.png" },
+            { name: "Discord", url: "https://discord.com", icon: "https://di8m9w6rqrh5d.cloudfront.net/1zObrQ89Q4wHhgFCfYIUhMUvmNf4XjxO/resizable_6380c098-4f1d-4e74-8816-6d13b0b382da.png?width=1600" },
+            { name: "Stack Overflow", url: "https://stackoverflow.com", icon: "https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico" },
+            { name: "Anthropic Claude AI", url: "https://claude.ai", icon: "https://claude.ai/favicon.ico" },
+            { name: "Pinterest", url: "https://pinterest.com", icon: "https://images.ctfassets.net/h67z7i6sbjau/5zteWRcC1qbgLZoClcMmYl/a0391fdc321eddce7de41152108723b5/Brand_Guidelines_hero_2x.jpg?fm=webp&q=85" },
+            { name: "Dropbox", url: "https://dropbox.com", icon: "https://cfl.dropboxstatic.com/static/images/favicon-vflUeLeeY.ico" },
+            { name: "Google Drive", url: "https://drive.google.com", icon: "https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png" },
+
+
+
+            { name: "VS Code Web", url: "https://vscode.dev", icon: "https://code.visualstudio.com/favicon.ico" },
+            { name: "Canva", url: "https://www.canva.com", icon: "https://static.canva.com/static/images/favicon.ico" },
+            { name: "Google Keep Notes", url: "https://keep.google.com", icon: "https://www.gstatic.com/images/branding/product/1x/keep_32dp.png" },
+            { name: "Google Calendar", url: "https://calendar.google.com", icon: "https://www.gstatic.com/images/branding/product/1x/calendar_32dp.png" },
+            { name: "Google Docs", url: "https://docs.google.com", icon: "https://www.gstatic.com/images/branding/product/1x/docs_32dp.png" },
+            { name: "Google Sheets", url: "https://sheets.google.com", icon: "https://www.gstatic.com/images/branding/product/1x/sheets_32dp.png" },
+            { name: "Google Slides", url: "https://slides.google.com", icon: "https://www.gstatic.com/images/branding/product/1x/slides_32dp.png" },
+            { name: "Photopea", url: "https://www.photopea.com", icon: "https://www.photopea.com/promo/icon512.png" },
+            { name: "Excalidraw", url: "https://excalidraw.com", icon: "https://excalidraw.com/favicon.ico" },
+            { name: "GeForce NOW", url: "https://play.geforcenow.com", icon: "https://www.nvidia.com/favicon.ico" },
+            { name: "Kirka.io", url: "https://kirka.io", icon: "https://kirka.io/favicon.ico" },
+            { name: "CrazyGames", url: "https://www.crazygames.com", icon: "https://www.crazygames.com/images/logo/logo-ziggy.svg" },
+            { name: "Itch.io", url: "https://itch.io", icon: "https://itch.io/favicon.ico" },
+            { name: "ChatGPT", url: "https://chat.openai.com", icon: "https://chat.openai.com/favicon.ico" },
+
+
+
+            { name: "Google Search", url: "https://www.google.com", icon: "https://www.google.com/favicon.ico" },
+            { name: "Google Maps", url: "https://maps.google.com", icon: "https://www.gstatic.com/images/branding/product/1x/maps_32dp.png" },
+            { name: "Google Photos", url: "https://photos.google.com", icon: "https://www.gstatic.com/images/branding/product/1x/photos_32dp.png" }
+        ];
+
+        const container = document.getElementById('canvas-container');
+        const searchInput = document.getElementById('search-input');
+
+        const BELT_COUNT = 5;
+        const CARDS_PER_BELT = 5;
+        const CARD_HEIGHT_VH = 22;
+        const CARD_SPACING_VH = 4;
+        const TOTAL_CARD_UNIT = CARD_HEIGHT_VH + CARD_SPACING_VH;
+
+        let belts = [];
+        let isSearching = false;
+        let lastFrameTime = Date.now();
+
+        // Queue of apps waiting to be shown
+        let availableQueue = [];
+
+        // Shuffle helper
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Get all apps currently visible on screen across ALL belts
+        function getOnScreenApps() {
+            const onScreen = [];
+            belts.forEach(belt => {
+                belt.cards.forEach(card => {
+                    if (card.isVisible) {
+                        onScreen.push(card.url);
+                    }
+                });
+            });
+            return onScreen;
+        }
+
+        // Get next app that isn't on screen
+        function getNextAvailableApp() {
+            const onScreenUrls = getOnScreenApps();
+
+            // If queue is getting low, refill it with shuffled apps
+            if (availableQueue.length < 5) {
+                const newApps = shuffleArray([...apps]);
+                newApps.forEach(app => {
+                    if (!availableQueue.some(a => a.url === app.url)) {
+                        const randomIndex = Math.floor(Math.random() * (availableQueue.length + 1));
+                        availableQueue.splice(randomIndex, 0, app);
+                    }
+                });
+            }
+
+            // Find an app in the queue that's not currently on screen
+            for (let i = 0; i < availableQueue.length; i++) {
+                const app = availableQueue[i];
+
+                if (!onScreenUrls.includes(app.url)) {
+                    // Remove from queue and return it
+                    availableQueue.splice(i, 1);
+                    return app;
+                }
+            }
+
+            // Edge case: exhausted queue without finding unique app
+            // Use last app in queue (may create duplicate)
+            if (availableQueue.length > 0) {
+                return availableQueue.pop();
+            }
+
+            // Failsafe: return random app
+            return apps[Math.floor(Math.random() * apps.length)];
+        }
+
+        // Return app to queue at random position
+        function returnAppToQueue(app) {
+            const randomIndex = Math.floor(Math.random() * (availableQueue.length + 1));
+            availableQueue.splice(randomIndex, 0, app);
+        }
+
+        class Belt {
+            constructor(index) {
+                this.index = index;
+                this.direction = index % 2 === 0 ? 1 : -1;
+                this.speed = 0.05 + (Math.random() * 0.03);
+                this.baseSpeed = this.speed;
+                this.currentOffset = Math.random() * 100;
+                this.isHovered = false;
+
+                this.element = document.createElement('div');
+                this.element.className = 'belt';
+                container.appendChild(this.element);
+
+                this.cards = [];
+                this.initCards();
+
+                this.element.addEventListener('mouseenter', () => this.isHovered = true);
+                this.element.addEventListener('mouseleave', () => this.isHovered = false);
+            }
+
+            initCards() {
+                for (let i = 0; i < CARDS_PER_BELT; i++) {
+                    const app = getNextAvailableApp();
+                    this.createCard(i, app);
+                }
+            }
+
+            createCard(iterator, app) {
+                const card = document.createElement('div');
+                card.className = 'app-card';
+
+                card.innerHTML = `
+                    <div class="app-icon">
+                        <img src="${app.icon}" alt="${app.name}" onerror="this.style.display='none'; this.parentElement.innerHTML='🌐';">
+                    </div>
+                    <div class="font-medium tracking-wide">${app.name}</div>
+                `;
+
+                card.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    window.open(app.url, '_blank', 'noopener,noreferrer');
+                });
+
+                this.element.appendChild(card);
+
+                const cardObj = {
+                    el: card,
+                    name: app.name.toLowerCase(),
+                    url: app.url,
+                    y: iterator * TOTAL_CARD_UNIT,
+                    app: app,
+                    isVisible: true,
+                    lastDisplayY: iterator * TOTAL_CARD_UNIT
+                };
+
+                this.cards.push(cardObj);
+            }
+
+            replaceCard(cardObj) {
+                // Return old app to queue
+                returnAppToQueue(cardObj.app);
+
+                // Get new app (checks all visible cards automatically)
+                const newApp = getNextAvailableApp();
+
+                // Update card
+                cardObj.app = newApp;
+                cardObj.url = newApp.url;
+                cardObj.name = newApp.name.toLowerCase();
+
+                cardObj.el.innerHTML = `
+                    <div class="app-icon">
+                        <img src="${newApp.icon}" alt="${newApp.name}" onerror="this.style.display='none'; this.parentElement.innerHTML='🌐';">
+                    </div>
+                    <div class="font-medium tracking-wide">${newApp.name}</div>
+                `;
+
+                // Update click handler
+                const oldCard = cardObj.el;
+                const newCard = oldCard.cloneNode(true);
+                newCard.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    window.open(newApp.url, '_blank', 'noopener,noreferrer');
+                });
+                oldCard.parentNode.replaceChild(newCard, oldCard);
+                cardObj.el = newCard;
+            }
+
+            update(deltaTime) {
+                // Normalize speed based on actual frame time (60fps baseline)
+                const speedMultiplier = 3 * Math.min(deltaTime / 16.67, 3);
+
+                // Brake Pedal Logic: Slow down smoothly when hovered
+                const targetSpeed = this.isHovered ? this.baseSpeed * 0.15 : this.baseSpeed;
+                this.speed += (targetSpeed - this.speed) * 0.08;
+
+                // Search magneting: Pull matching cards toward visible area
+                if (isSearching) {
+                    const term = searchInput.value.toLowerCase();
+                    const matchingCards = this.cards.filter(card => card.name.includes(term));
+
+                    if (matchingCards.length > 0) {
+                        let closestCard = matchingCards[0];
+                        let minDistance = Infinity;
+
+                        matchingCards.forEach(card => {
+                            let tempY = (card.y + this.currentOffset) % (CARDS_PER_BELT * TOTAL_CARD_UNIT);
+                            if (tempY < 0) tempY += CARDS_PER_BELT * TOTAL_CARD_UNIT;
+
+                            const distance = Math.abs(tempY - 50);
+                            if (distance < minDistance) {
+                                minDistance = distance;
+                                closestCard = card;
+                            }
+                        });
+
+                        let closestY = (closestCard.y + this.currentOffset) % (CARDS_PER_BELT * TOTAL_CARD_UNIT);
+                        if (closestY < 0) closestY += CARDS_PER_BELT * TOTAL_CARD_UNIT;
+
+                        const centerPull = (50 - closestY) * 0.015 * speedMultiplier;
+                        this.currentOffset += centerPull;
+                    }
+                }
+
+                this.currentOffset += this.speed * this.direction * speedMultiplier;
+
+                this.cards.forEach((card) => {
+                    let displayY = (card.y + this.currentOffset) % (CARDS_PER_BELT * TOTAL_CARD_UNIT);
+
+                    // Normalize displayY to always be positive
+                    while (displayY < 0) displayY += CARDS_PER_BELT * TOTAL_CARD_UNIT;
+                    while (displayY >= CARDS_PER_BELT * TOTAL_CARD_UNIT) displayY -= CARDS_PER_BELT * TOTAL_CARD_UNIT;
+
+                    // Detect wrap-around (large jump in position indicates card wrapped)
+                    const lastY = card.lastDisplayY;
+                    const jumpSize = Math.abs(displayY - lastY);
+                    const didWrap = jumpSize > TOTAL_CARD_UNIT * 3; // Large jump = wrap
+
+                    if (didWrap) {
+                        this.replaceCard(card);
+                    }
+
+                    card.lastDisplayY = displayY;
+
+                    // Physical placement
+                    card.el.style.top = `${displayY}vh`;
+
+                    // Track visibility for duplicate prevention (visible range)
+                    card.isVisible = displayY >= -10 && displayY <= 110;
+
+                    // Hide cards that are way offscreen for performance
+                    card.el.style.visibility = (displayY >= -30 && displayY <= 130) ? 'visible' : 'hidden';
+
+                    // Search Mist Logic
+                    if (isSearching) {
+                        const term = searchInput.value.toLowerCase();
+                        if (card.name.includes(term)) {
+                            card.el.classList.remove('misted');
+                        } else {
+                            card.el.classList.add('misted');
+                        }
+                    } else {
+                        card.el.classList.remove('misted');
+                    }
+                });
+            }
+        }
+
+        // Initialize
+        function init() {
+            availableQueue = shuffleArray([...apps]);
+
+            for (let i = 0; i < BELT_COUNT; i++) {
+                belts.push(new Belt(i));
+            }
+            animate();
+
+
+            // Initial focus
+            maintainFocus();
+        }
+
+        function animate() {
+            const currentTime = Date.now();
+            const deltaTime = currentTime - lastFrameTime;
+            lastFrameTime = currentTime;
+
+            belts.forEach(belt => belt.update(deltaTime));
+            requestAnimationFrame(animate);
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            isSearching = e.target.value.length > 0;
+
+            if (isSearching) {
+                const term = e.target.value.toLowerCase();
+
+                // Find all matching apps
+                const matchingApps = apps.filter(app => app.name.toLowerCase().includes(term));
+
+                // Remove matching apps from queue if they exist
+                availableQueue = availableQueue.filter(app =>
+                    !matchingApps.some(match => match.url === app.url)
+                );
+
+                // Add all matching apps to the FRONT of the queue
+                availableQueue.unshift(...matchingApps);
+            }
+        });
+
+        const textInput = document.getElementById('search-input');
+
+        function maintainFocus() {
+            // Only force focus if width is greater than height (Landscape)
+            const isLandscape = window.innerWidth > window.innerHeight;
+
+            if (isLandscape) {
+                textInput.focus();
+            }
+        }
+
+        // Keep focus when the user clicks away
+        textInput.addEventListener('blur', () => {
+            setTimeout(maintainFocus, 10);
+        });
+
+        // Also try to grab focus on any stray clicks on the page
+        document.addEventListener('click', maintainFocus);
+
+
+        window.onload = init;
+    </script>
+</body>
+
+</html>
