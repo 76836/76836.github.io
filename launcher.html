@@ -33,10 +33,11 @@
         .belt {
             position: relative;
             height: 100%;
-            width: 18vw;
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: all 0.5s ease;
         }
 
         .app-card {
@@ -61,6 +62,22 @@
             z-index: 1;
             text-decoration: none;
             will-change: transform;
+        }
+
+        .belt-count-5 .app-card {
+            width: 16vw;
+        }
+
+        .belt-count-4 .app-card {
+            width: 20vw;
+        }
+
+        .belt-count-3 .app-card {
+            width: 28vw;
+        }
+
+        .belt-count-2 .app-card {
+            width: 40vw;
         }
 
         .app-card:hover {
@@ -102,64 +119,227 @@
             position: fixed;
             top: 50%;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translate(-50%, -50%);
             z-index: 1000;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
             pointer-events: none;
+            width: 90%;
+            max-width: 600px;
         }
 
         #search-input {
             background: rgba(220, 220, 220, 0.15);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 15px 25px;
+            padding: 18px 30px;
             border-radius: 50px;
             color: white;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             outline: none;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-align: center;
-            width: 600px;
+            width: 100%;
             pointer-events: all;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         }
 
         #search-input:focus {
-            border-color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.08);
+            background: rgba(220, 220, 220, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .search-input-wrap {
+            position: relative;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: all;
+        }
+
+        #search-input.addonTop {
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+
+        #search-input.addonBottom {
+            border-bottom-right-radius: 20px;
+            border-bottom-left-radius: 20px;
         }
 
 
+        .suggestion-box,
+        .info-bubble {
+            height: 44px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
+            position: absolute;
+            left: 50%;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .suggestion-box {
+            top: calc(100% + 12px);
+            transform: translateX(-50%) translateY(10px);
+            gap: 12px;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            z-index: 1010;
+            width: auto;
+            padding: 0 20px;
+        }
+
+        .info-bubble {
+            transform: translateX(-50%) translateY(-6px);
+            background: rgba(120, 120, 120, 0.15);
+            backdrop-filter: blur(20px);
+            border: 0px solid rgba(255, 255, 255, 0.1);
+            padding: 0 20px;
+            border-radius: 24px;
+            color: #ccc;
+            font-size: 0.95rem;
+            gap: 10px;
+            transition: opacity 0.22s ease, transform 0.22s ease;
+            will-change: transform, opacity;
+            max-width: calc(100% - 40px);
+            z-index: 1002;
+        }
+
+        .info-bubble.above {
+            bottom: calc(100% + 12px);
+            transform: translateX(-50%) translateY(6px);
+            border-radius: 34px 34px 10px 10px;
+        }
+
+        .info-bubble.below {
+            top: calc(100% + 12px);
+            transform: translateX(-50%) translateY(-6px);
+            border-radius: 10px 10px 34px 34px;
+        }
+
+        .info-bubble.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: all;
+        }
+
+
+        .suggestion-box.active {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: all;
+        }
+
+        .suggestion-box.flip {
+            top: auto;
+            bottom: calc(100% + 12px);
+        }
+
+        .info-bubble strong {
+            color: white;
+            font-weight: bold;
+        }
+
+        .highlight-accent {
+            color: #60a5fa;
+            font-weight: bold;
+        }
+
+        .suggest-btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            margin-top: 7rem;
+        }
+
+        .suggest-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .settings-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1100;
+            background: rgba(220, 220, 220, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+
+        .settings-btn:hover {
+            opacity: 1;
+        }
+
+        .settings-panel {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            width: 300px;
+            background: rgba(220, 220, 220, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            z-index: 1099;
+            transform: translateY(20px) scale(0.95);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .settings-panel.open {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+            pointer-events: all;
+        }
 
         :root {
             --glow-speed: 6s;
             --glow-thickness: 100px;
-            /* How far from the edge it reaches */
             --glow-softness: 80px;
-            /* How much it blurs into the center */
             --glow-opacity: 0.25;
-            /* Overall transparency */
         }
 
         .vignette {
             position: fixed;
-            /* We pull the edges out so the blur doesn't show the hard corner of the div */
             top: calc(var(--glow-thickness) * -1);
             left: calc(var(--glow-thickness) * -1);
             right: calc(var(--glow-thickness) * -1);
             bottom: calc(var(--glow-thickness) * -1);
-
             pointer-events: none;
             z-index: 500;
-
-            /* Creates the rectangular frame */
             border: var(--glow-thickness) solid;
             border-image-source: conic-gradient(from var(--angle),
                     red, orange, yellow, green, cyan, blue, magenta, white, grey, darkgray, black);
             border-image-slice: 1;
-
-            /* Adjusting visibility and smoothness */
             opacity: var(--glow-opacity);
             filter: blur(var(--glow-softness));
             animation: rotate-glow var(--glow-speed) linear infinite;
@@ -184,32 +364,93 @@
 </head>
 
 <body>
-
     <div class="vignette"></div>
 
     <div class="search-overlay">
-        <input type="text" id="search-input" placeholder="Search apps..." spellcheck="false">
+        <div class="search-input-wrap">
+            <input type="text" id="search-input" placeholder="Ask anything..." spellcheck="false" autocomplete="off">
+
+            <div id="inline-answer" class="info-bubble above" aria-hidden="true"></div>
+
+            <div id="enter-suggestion" class="info-bubble below" aria-hidden="true">
+                <span class="opacity-70">Press <span
+                        class="font-bold border border-white/20 rounded px-1 text-xs mx-1">Enter</span> to</span>
+                <span id="enter-action-text" class="text-white font-medium">Search Google</span>
+            </div>
+
+            <div id="suggestions" class="suggestion-box" role="listbox" aria-hidden="true">
+                <button class="suggest-btn" id="search-web-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.3-4.3" />
+                    </svg>
+                    Web search.
+                </button>
+                <button class="suggest-btn" id="ask-ai-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    Ask AI.
+                </button>
+            </div>
+        </div>
     </div>
 
-    <div id="canvas-container">
-        <!-- Belts will be injected here -->
+    <div id="canvas-container"></div>
+
+    <button class="settings-btn" id="toggle-settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3" />
+            <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>
+    </button>
+
+    <div class="settings-panel" id="settings-panel">
+        <div class="flex justify-between items-center mb-4 pb-2">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-white/80">Settings</h2>
+            <button id="close-settings" class="text-white/50 hover:text-white transition">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-xs text-white/50 mb-2 font-medium">Search Engine</label>
+            <select id="engine-select"
+                class="w-full bg-black/40 border border-white/10 p-2 rounded-lg text-white text-sm outline-none focus:border-white/30 transition">
+                <option value="https://google.com/search?q=">Google</option>
+                <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
+                <option value="https://bing.com/search?q=">Bing</option>
+            </select>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-xs text-white/50 mb-2 font-medium">AI Assistant</label>
+            <select id="ai-select"
+                class="w-full bg-black/40 border border-white/10 p-2 rounded-lg text-white text-sm outline-none focus:border-white/30 transition">
+                <option value="https://chatgpt.com/?q=">ChatGPT</option>
+                <option value="https://claude.ai/new?q=">Claude</option>
+                <option value="https://perplexity.ai/?q=">Perplexity</option>
+            </select>
+        </div>
+
+        <div class="text-[10px] text-white/30 text-center mt-4">
+            76836 Launcher v2.0
+        </div>
     </div>
 
     <script>
         const apps = [
             { name: "76836 Akari", url: "https://76836.github.io/Akari/app", icon: "https://76836.github.io/Akari/logo512.png" },
             { name: "76836 Digita", url: "https://76836.github.io/Digita", icon: "https://76836.github.io/Digita/logo/512.png" },
-           // { name: "76836 side-glow", url: "https://76836.github.io/side-glow" },
             { name: "76836 Lunabot", url: "https://76836.github.io/lunabot/app", icon: "https://76836.github.io/lunabot/app/icon-512.png" },
-           // { name: "76836 Terminal", url: "https://76836.github.io/webdesk/programs/terminal", icon: "https://76836.github.io/webdesk/programs/terminal/apple-touch-icon.png" },
             { name: "76836 Animaxxer", url: "https://76836.github.io/animaxxer", icon: "https://76836.github.io/animaxxer/icon-512.png" },
-           // { name: "76836 CtrlBox", url: "https://76836.github.io/ctrlbox", icon: "https://76836.github.io/ctrlbox/icon.png" },
             { name: "76836 Calculator", url: "https://76836.github.io/CalculatorXP", icon: "https://76836.github.io/CalculatorXP/icon.png" },
-           // { name: "76836 Simple AI", url: "https://76836.github.io/FREE_AI.html" },
             { name: "76836 Image Studio", url: "https://76836.github.io/pollinations_image_client.html" },
-
-
-
             { name: "YouTube", url: "https://youtube.com", icon: "https://www.gstatic.com/marketing-cms/assets/images/fc/f4/a754801e43b5a8eb0ee7d8b780f6/yt-external-thumbnail-icon-01.jpg=n-w1920-h1080-fcrop64=1,00000000ffffffff-rw" },
             { name: "GitHub", url: "https://github.com", icon: "https://github.githubassets.com/favicons/favicon.png" },
             { name: "Twitter (x)", url: "https://twitter.com", icon: "https://abs.twimg.com/favicons/twitter.2.ico" },
@@ -226,9 +467,6 @@
             { name: "Pinterest", url: "https://pinterest.com", icon: "https://images.ctfassets.net/h67z7i6sbjau/5zteWRcC1qbgLZoClcMmYl/a0391fdc321eddce7de41152108723b5/Brand_Guidelines_hero_2x.jpg?fm=webp&q=85" },
             { name: "Dropbox", url: "https://dropbox.com", icon: "https://cfl.dropboxstatic.com/static/images/favicon-vflUeLeeY.ico" },
             { name: "Google Drive", url: "https://drive.google.com", icon: "https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png" },
-
-
-
             { name: "VS Code Web", url: "https://vscode.dev", icon: "https://code.visualstudio.com/favicon.ico" },
             { name: "Canva", url: "https://www.canva.com", icon: "https://static.canva.com/static/images/favicon.ico" },
             { name: "Google Keep Notes", url: "https://keep.google.com", icon: "https://www.gstatic.com/images/branding/product/1x/keep_32dp.png" },
@@ -243,9 +481,6 @@
             { name: "CrazyGames", url: "https://www.crazygames.com", icon: "https://www.crazygames.com/images/logo/logo-ziggy.svg" },
             { name: "Itch.io", url: "https://itch.io", icon: "https://itch.io/favicon.ico" },
             { name: "ChatGPT", url: "https://chat.openai.com", icon: "https://chat.openai.com/favicon.ico" },
-
-
-
             { name: "Google Search", url: "https://www.google.com", icon: "https://www.google.com/favicon.ico" },
             { name: "Google Maps", url: "https://maps.google.com", icon: "https://www.gstatic.com/images/branding/product/1x/maps_32dp.png" },
             { name: "Google Photos", url: "https://photos.google.com", icon: "https://www.gstatic.com/images/branding/product/1x/photos_32dp.png" }
@@ -253,8 +488,19 @@
 
         const container = document.getElementById('canvas-container');
         const searchInput = document.getElementById('search-input');
+        const suggestionsBox = document.getElementById('suggestions');
+        const enterSuggestion = document.getElementById('enter-suggestion');
+        const enterActionText = document.getElementById('enter-action-text');
+        const inlineAnswer = document.getElementById('inline-answer');
 
-        const BELT_COUNT = 5;
+        let config = {
+            searchEngine: localStorage.getItem('76836_engine') || "https://google.com/search?q=",
+            aiBot: localStorage.getItem('76836_ai') || "https://chatgpt.com/?q="
+        };
+
+        let currentEnterAction = { type: 'default', value: null };
+
+        let BELT_COUNT = 5;
         const CARDS_PER_BELT = 5;
         const CARD_HEIGHT_VH = 22;
         const CARD_SPACING_VH = 4;
@@ -263,11 +509,8 @@
         let belts = [];
         let isSearching = false;
         let lastFrameTime = Date.now();
-
-        // Queue of apps waiting to be shown
         let availableQueue = [];
 
-        // Shuffle helper
         function shuffleArray(array) {
             const shuffled = [...array];
             for (let i = shuffled.length - 1; i > 0; i--) {
@@ -277,59 +520,36 @@
             return shuffled;
         }
 
-        // Get all apps currently visible on screen across ALL belts
         function getOnScreenApps() {
             const onScreen = [];
             belts.forEach(belt => {
                 belt.cards.forEach(card => {
-                    if (card.isVisible) {
-                        onScreen.push(card.url);
-                    }
+                    if (card.isVisible) onScreen.push(card.url);
                 });
             });
             return onScreen;
         }
 
-        // Get next app that isn't on screen
         function getNextAvailableApp() {
             const onScreenUrls = getOnScreenApps();
-
-            // If queue is getting low, refill it with shuffled apps
             if (availableQueue.length < 5) {
                 const newApps = shuffleArray([...apps]);
                 newApps.forEach(app => {
                     if (!availableQueue.some(a => a.url === app.url)) {
-                        const randomIndex = Math.floor(Math.random() * (availableQueue.length + 1));
-                        availableQueue.splice(randomIndex, 0, app);
+                        availableQueue.splice(Math.floor(Math.random() * (availableQueue.length + 1)), 0, app);
                     }
                 });
             }
-
-            // Find an app in the queue that's not currently on screen
             for (let i = 0; i < availableQueue.length; i++) {
-                const app = availableQueue[i];
-
-                if (!onScreenUrls.includes(app.url)) {
-                    // Remove from queue and return it
-                    availableQueue.splice(i, 1);
-                    return app;
+                if (!onScreenUrls.includes(availableQueue[i].url)) {
+                    return availableQueue.splice(i, 1)[0];
                 }
             }
-
-            // Edge case: exhausted queue without finding unique app
-            // Use last app in queue (may create duplicate)
-            if (availableQueue.length > 0) {
-                return availableQueue.pop();
-            }
-
-            // Failsafe: return random app
             return apps[Math.floor(Math.random() * apps.length)];
         }
 
-        // Return app to queue at random position
         function returnAppToQueue(app) {
-            const randomIndex = Math.floor(Math.random() * (availableQueue.length + 1));
-            availableQueue.splice(randomIndex, 0, app);
+            availableQueue.splice(Math.floor(Math.random() * (availableQueue.length + 1)), 0, app);
         }
 
         class Belt {
@@ -340,44 +560,38 @@
                 this.baseSpeed = this.speed;
                 this.currentOffset = Math.random() * 100;
                 this.isHovered = false;
-
                 this.element = document.createElement('div');
                 this.element.className = 'belt';
                 container.appendChild(this.element);
-
                 this.cards = [];
                 this.initCards();
-
                 this.element.addEventListener('mouseenter', () => this.isHovered = true);
                 this.element.addEventListener('mouseleave', () => this.isHovered = false);
             }
-
             initCards() {
                 for (let i = 0; i < CARDS_PER_BELT; i++) {
-                    const app = getNextAvailableApp();
-                    this.createCard(i, app);
+                    this.createCard(i, getNextAvailableApp());
                 }
             }
-
             createCard(iterator, app) {
                 const card = document.createElement('div');
                 card.className = 'app-card';
-
                 card.innerHTML = `
                     <div class="app-icon">
                         <img src="${app.icon}" alt="${app.name}" onerror="this.style.display='none'; this.parentElement.innerHTML='🌐';">
                     </div>
-                    <div class="font-medium tracking-wide">${app.name}</div>
+                    <div class="font-medium tracking-wide text-xs md:text-base px-2 text-center">${app.name}</div>
                 `;
-
-                card.addEventListener('click', (e) => {
+                card.onclick = (e) => {
                     e.preventDefault();
+                    if (searchInput.value.length < 6) {
+                        searchInput.value = '';
+                        searchInput.dispatchEvent(new Event('input'));
+                    }
                     window.open(app.url, '_blank', 'noopener,noreferrer');
-                });
-
+                };
                 this.element.appendChild(card);
-
-                const cardObj = {
+                this.cards.push({
                     el: card,
                     name: app.name.toLowerCase(),
                     url: app.url,
@@ -385,114 +599,69 @@
                     app: app,
                     isVisible: true,
                     lastDisplayY: iterator * TOTAL_CARD_UNIT
-                };
-
-                this.cards.push(cardObj);
+                });
             }
-
             replaceCard(cardObj) {
-                // Return old app to queue
                 returnAppToQueue(cardObj.app);
-
-                // Get new app (checks all visible cards automatically)
                 const newApp = getNextAvailableApp();
-
-                // Update card
                 cardObj.app = newApp;
                 cardObj.url = newApp.url;
                 cardObj.name = newApp.name.toLowerCase();
-
                 cardObj.el.innerHTML = `
                     <div class="app-icon">
                         <img src="${newApp.icon}" alt="${newApp.name}" onerror="this.style.display='none'; this.parentElement.innerHTML='🌐';">
                     </div>
-                    <div class="font-medium tracking-wide">${newApp.name}</div>
+                    <div class="font-medium tracking-wide text-xs md:text-base px-2 text-center">${newApp.name}</div>
                 `;
-
-                // Update click handler
-                const oldCard = cardObj.el;
-                const newCard = oldCard.cloneNode(true);
-                newCard.addEventListener('click', (e) => {
+                cardObj.el.onclick = (e) => {
                     e.preventDefault();
+                    if (searchInput.value.length < 6) {
+                        searchInput.value = '';
+                        searchInput.dispatchEvent(new Event('input'));
+                    }
                     window.open(newApp.url, '_blank', 'noopener,noreferrer');
-                });
-                oldCard.parentNode.replaceChild(newCard, oldCard);
-                cardObj.el = newCard;
+                };
             }
-
             update(deltaTime) {
-                // Normalize speed based on actual frame time (60fps baseline)
                 const speedMultiplier = 3 * Math.min(deltaTime / 16.67, 3);
-
-                // Brake Pedal Logic: Slow down smoothly when hovered
                 const targetSpeed = this.isHovered ? this.baseSpeed * 0.15 : this.baseSpeed;
                 this.speed += (targetSpeed - this.speed) * 0.08;
 
-                // Search magneting: Pull matching cards toward visible area
                 if (isSearching) {
                     const term = searchInput.value.toLowerCase();
                     const matchingCards = this.cards.filter(card => card.name.includes(term));
-
                     if (matchingCards.length > 0) {
                         let closestCard = matchingCards[0];
                         let minDistance = Infinity;
-
                         matchingCards.forEach(card => {
                             let tempY = (card.y + this.currentOffset) % (CARDS_PER_BELT * TOTAL_CARD_UNIT);
                             if (tempY < 0) tempY += CARDS_PER_BELT * TOTAL_CARD_UNIT;
-
                             const distance = Math.abs(tempY - 50);
-                            if (distance < minDistance) {
-                                minDistance = distance;
-                                closestCard = card;
-                            }
+                            if (distance < minDistance) { minDistance = distance; closestCard = card; }
                         });
-
                         let closestY = (closestCard.y + this.currentOffset) % (CARDS_PER_BELT * TOTAL_CARD_UNIT);
                         if (closestY < 0) closestY += CARDS_PER_BELT * TOTAL_CARD_UNIT;
-
-                        const centerPull = (50 - closestY) * 0.015 * speedMultiplier;
-                        this.currentOffset += centerPull;
+                        this.currentOffset += (50 - closestY) * 0.015 * speedMultiplier;
                     }
                 }
 
                 this.currentOffset += this.speed * this.direction * speedMultiplier;
-
                 this.cards.forEach((card) => {
                     let displayY = (card.y + this.currentOffset) % (CARDS_PER_BELT * TOTAL_CARD_UNIT);
-
-                    // Normalize displayY to always be positive
                     while (displayY < 0) displayY += CARDS_PER_BELT * TOTAL_CARD_UNIT;
                     while (displayY >= CARDS_PER_BELT * TOTAL_CARD_UNIT) displayY -= CARDS_PER_BELT * TOTAL_CARD_UNIT;
 
-                    // Detect wrap-around (large jump in position indicates card wrapped)
-                    const lastY = card.lastDisplayY;
-                    const jumpSize = Math.abs(displayY - lastY);
-                    const didWrap = jumpSize > TOTAL_CARD_UNIT * 3; // Large jump = wrap
-
-                    if (didWrap) {
+                    if (Math.abs(displayY - card.lastDisplayY) > TOTAL_CARD_UNIT * 3) {
                         this.replaceCard(card);
                     }
-
                     card.lastDisplayY = displayY;
-
-                    // Physical placement
                     card.el.style.top = `${displayY}vh`;
-
-                    // Track visibility for duplicate prevention (visible range)
                     card.isVisible = displayY >= -10 && displayY <= 110;
-
-                    // Hide cards that are way offscreen for performance
                     card.el.style.visibility = (displayY >= -30 && displayY <= 130) ? 'visible' : 'hidden';
 
-                    // Search Mist Logic
                     if (isSearching) {
                         const term = searchInput.value.toLowerCase();
-                        if (card.name.includes(term)) {
-                            card.el.classList.remove('misted');
-                        } else {
-                            card.el.classList.add('misted');
-                        }
+                        card.el.classList.toggle('misted', !card.name.includes(term));
                     } else {
                         card.el.classList.remove('misted');
                     }
@@ -500,68 +669,281 @@
             }
         }
 
-        // Initialize
+        function calculateBeltCount() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            let idealCount = 5;
+            if ((width * 0.16) < (height * 0.22)) idealCount = 4;
+            if ((width * 0.20) < (height * 0.22)) idealCount = 3;
+            if ((width * 0.28) < (height * 0.22)) idealCount = 2;
+            return idealCount;
+        }
+
+        function refreshBelts() {
+            const newCount = calculateBeltCount();
+            if (newCount === BELT_COUNT) return;
+
+            BELT_COUNT = newCount;
+            container.innerHTML = '';
+            container.className = `belt-count-${BELT_COUNT}`;
+            belts = [];
+            availableQueue = shuffleArray([...apps]);
+            for (let i = 0; i < BELT_COUNT; i++) {
+                belts.push(new Belt(i));
+            }
+        }
+
         function init() {
             availableQueue = shuffleArray([...apps]);
-
+            BELT_COUNT = calculateBeltCount();
+            container.className = `belt-count-${BELT_COUNT}`;
             for (let i = 0; i < BELT_COUNT; i++) {
                 belts.push(new Belt(i));
             }
             animate();
-
-
-            // Initial focus
             maintainFocus();
+
+            document.getElementById('engine-select').value = config.searchEngine;
+            document.getElementById('ai-select').value = config.aiBot;
+            positionSuggestionBox();
         }
 
         function animate() {
             const currentTime = Date.now();
             const deltaTime = currentTime - lastFrameTime;
             lastFrameTime = currentTime;
-
             belts.forEach(belt => belt.update(deltaTime));
             requestAnimationFrame(animate);
         }
 
-        searchInput.addEventListener('input', (e) => {
-            isSearching = e.target.value.length > 0;
-
-            if (isSearching) {
-                const term = e.target.value.toLowerCase();
-
-                // Find all matching apps
-                const matchingApps = apps.filter(app => app.name.toLowerCase().includes(term));
-
-                // Remove matching apps from queue if they exist
-                availableQueue = availableQueue.filter(app =>
-                    !matchingApps.some(match => match.url === app.url)
-                );
-
-                // Add all matching apps to the FRONT of the queue
-                availableQueue.unshift(...matchingApps);
+        function checkInlineAnswer(text) {
+            text = text.trim();
+            if (!text) {
+                inlineAnswer.classList.remove('visible');
+                searchInput.classList.remove('addonTop');
+                return;
             }
-        });
 
-        const textInput = document.getElementById('search-input');
+            let result = null;
+            let label = "Info";
 
-        function maintainFocus() {
-            // Only force focus if width is greater than height (Landscape)
-            const isLandscape = window.innerWidth > window.innerHeight;
+            const mathRegex = /^[0-9(][0-9+\-*/().\s]*[0-9)]$/;
+            if (mathRegex.test(text) && text.length > 2 && !text.includes('@')) {
+                try {
+                    const safeCalc = new Function('return ' + text);
+                    const calcVal = safeCalc();
+                    if (isFinite(calcVal)) {
+                        result = calcVal;
+                        label = "Math";
+                    }
+                } catch (e) { }
+            }
 
-            if (isLandscape) {
-                textInput.focus();
+            const cmd = text.toLowerCase();
+
+            if (cmd === '@time') {
+                result = new Date().toLocaleTimeString();
+                label = "Time";
+            } else if (cmd === '@date') {
+                result = new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                label = "Date";
+            } else if (cmd === '@year') {
+                result = new Date().getFullYear();
+                label = "Year";
+            } else if (cmd === '@help') {
+                result = "@time, @date, @coin, @dice, @hex, @ua, [math]";
+                label = "Commands";
+            } else if (cmd === '@coin') {
+                result = Math.random() > 0.5 ? "Heads" : "Tails";
+                label = "Coin Flip";
+            } else if (cmd === '@dice') {
+                result = Math.floor(Math.random() * 6) + 1;
+                label = "Dice Roll";
+            } else if (cmd === '@hex') {
+                result = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+                label = "Random Color";
+                inlineAnswer.style.borderColor = result;
+            } else if (cmd === '@ua') {
+                result = navigator.userAgent.substring(0, 30) + "...";
+                label = "User Agent";
+            }
+
+            if (result !== null) {
+                inlineAnswer.innerHTML = `<span class="opacity-50">${label}:</span> <span class="highlight-accent text-lg">${result}</span>`;
+                inlineAnswer.classList.add('visible');
+                positionSuggestionBox();
+            } else {
+                inlineAnswer.classList.remove('visible');
+                inlineAnswer.style.borderColor = "rgba(255, 255, 255, 0.2)";
+                positionSuggestionBox();
             }
         }
 
-        // Keep focus when the user clicks away
-        textInput.addEventListener('blur', () => {
-            setTimeout(maintainFocus, 10);
+        function positionSuggestionBox() {
+            const rect = searchInput.getBoundingClientRect();
+            const sug = suggestionsBox;
+            const enter = enterSuggestion;
+            const inline = inlineAnswer;
+            const sugHeight = (sug.offsetHeight || 56) + 16;
+            const bubbleHeight = Math.max(enter.offsetHeight || 48, inline.offsetHeight || 48) + 16;
+            const needed = Math.max(sugHeight, bubbleHeight);
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const spaceAbove = rect.top;
+
+            if (spaceBelow < needed && spaceAbove > needed) {
+                sug.classList.add('flip');
+                enter.classList.remove('below'); enter.classList.add('above');
+                inline.classList.remove('above'); inline.classList.add('below');
+            } else {
+                sug.classList.remove('flip');
+                enter.classList.remove('above'); enter.classList.add('below');
+                inline.classList.remove('below'); inline.classList.add('above');
+            }
+
+            sug.setAttribute('aria-hidden', !sug.classList.contains('active'));
+            enter.setAttribute('aria-hidden', !enter.classList.contains('visible'));
+            inline.setAttribute('aria-hidden', !inline.classList.contains('visible'));
+
+            const targetWidth = Math.round(rect.width);
+            sug.style.width = targetWidth + 'px';
+            enter.style.maxWidth = targetWidth + 'px';
+            enter.style.width = targetWidth + 'px';
+            inline.style.maxWidth = targetWidth + 'px';
+            inline.style.width = targetWidth + 'px';
+
+            updateInputCorners();
+        }
+
+        function updateInputCorners() {
+            searchInput.classList.remove('addonTop', 'addonBottom');
+
+            if (inlineAnswer.classList.contains('visible')) {
+                if (inlineAnswer.classList.contains('above')) {
+                    searchInput.classList.add('addonTop');
+                } else if (inlineAnswer.classList.contains('below')) {
+                    searchInput.classList.add('addonBottom');
+                }
+            }
+
+            if (enterSuggestion.classList.contains('visible')) {
+                if (enterSuggestion.classList.contains('above')) {
+                    searchInput.classList.add('addonTop');
+                } else if (enterSuggestion.classList.contains('below')) {
+                    searchInput.classList.add('addonBottom');
+                }
+            }
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            const val = e.target.value;
+            const term = val.trim().toLowerCase();
+            isSearching = term.length > 0;
+
+            checkInlineAnswer(val);
+
+            if (isSearching) {
+                const matchingApps = apps.filter(app => app.name.toLowerCase().includes(term));
+
+                enterSuggestion.classList.add('visible');
+
+                if (matchingApps.length > 0) {
+                    matchingApps.sort((a, b) => a.name.localeCompare(b.name));
+                    const bestMatch = matchingApps[0];
+                    enterActionText.textContent = `Open ${bestMatch.name}`;
+                    enterActionText.className = "text-emerald-400 font-medium";
+                    currentEnterAction = { type: 'app', value: bestMatch.url };
+                }
+                else if (val.length > 30 || val.includes('.') || val.includes('?')) {
+                    enterActionText.textContent = "Ask AI Assistant";
+                    enterActionText.className = "text-purple-400 font-medium";
+                    currentEnterAction = { type: 'ai', value: val };
+                }
+                else {
+                    enterActionText.textContent = `Search Web for "${val.substring(0, 15)}${val.length > 15 ? '...' : ''}"`;
+                    enterActionText.className = "text-blue-400 font-medium";
+                    currentEnterAction = { type: 'search', value: val };
+                }
+
+                const hasMatch = matchingApps.length > 0;
+                suggestionsBox.classList.toggle('active', !hasMatch);
+
+                availableQueue = availableQueue.filter(app => !matchingApps.some(match => match.url === app.url));
+                availableQueue.unshift(...matchingApps);
+            } else {
+                suggestionsBox.classList.remove('active');
+                enterSuggestion.classList.remove('visible');
+                currentEnterAction = { type: 'default', value: null };
+            }
+
+            positionSuggestionBox();
         });
 
-        // Also try to grab focus on any stray clicks on the page
-        document.addEventListener('click', maintainFocus);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                searchInput.value = '';
+                searchInput.dispatchEvent(new Event('input'));
+                searchInput.blur();
+            } else if (e.key === 'Enter') {
+                if (currentEnterAction.type !== 'default') {
+                    if (currentEnterAction.type === 'app') {
+                        window.open(currentEnterAction.value, '_blank');
+                    } else if (currentEnterAction.type === 'ai') {
+                        window.open(config.aiBot + encodeURIComponent(currentEnterAction.value), '_blank');
+                    } else if (currentEnterAction.type === 'search') {
+                        window.open(config.searchEngine + encodeURIComponent(currentEnterAction.value), '_blank');
+                    }
+                    searchInput.value = '';
+                    searchInput.dispatchEvent(new Event('input'));
+                }
+            }
+        });
 
+        document.getElementById('search-web-btn').onclick = () => {
+            window.open(config.searchEngine + encodeURIComponent(searchInput.value), '_blank');
+        };
 
+        document.getElementById('ask-ai-btn').onclick = () => {
+            window.open(config.aiBot + encodeURIComponent(searchInput.value), '_blank');
+        };
+
+        const settingsPanel = document.getElementById('settings-panel');
+        const settingsBtn = document.getElementById('toggle-settings');
+        const closeSettingsBtn = document.getElementById('close-settings');
+
+        function toggleSettings() {
+            const isOpen = settingsPanel.classList.contains('open');
+            if (isOpen) {
+                config.searchEngine = document.getElementById('engine-select').value;
+                config.aiBot = document.getElementById('ai-select').value;
+                localStorage.setItem('76836_engine', config.searchEngine);
+                localStorage.setItem('76836_ai', config.aiBot);
+                settingsPanel.classList.remove('open');
+            } else {
+                settingsPanel.classList.add('open');
+            }
+        }
+
+        settingsBtn.onclick = toggleSettings;
+        closeSettingsBtn.onclick = toggleSettings;
+
+        function maintainFocus() {
+            if (window.innerWidth > window.innerHeight && !settingsPanel.classList.contains('open')) {
+                searchInput.focus();
+            }
+        }
+
+        searchInput.addEventListener('blur', () => setTimeout(maintainFocus, 10));
+
+        document.addEventListener('click', (e) => {
+            if (settingsPanel.classList.contains('open') &&
+                !settingsPanel.contains(e.target) &&
+                !settingsBtn.contains(e.target)) {
+                toggleSettings();
+            }
+        });
+
+        window.addEventListener('resize', refreshBelts);
+        window.addEventListener('resize', positionSuggestionBox);
         window.onload = init;
     </script>
 </body>
