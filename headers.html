@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SW Config</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:      #000;
+    --fg:      #e8e8e8;
+    --accent:  #39ff14;
+    --dim:     #444;
+    --red:     #ff3c3c;
+    --font:    'Share Tech Mono', monospace;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.6rem;
+    overflow: hidden;
+  }
+
+  #image-wrap {
+    display: none;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  #image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  #status {
+    font-size: .72rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    min-height: 1.2em;
+    text-align: center;
+    transition: color .2s;
+  }
+  #status.ok    { color: var(--accent); }
+  #status.error { color: var(--red);    }
+
+  #log {
+    font-size: .62rem;
+    color: var(--dim);
+    text-align: center;
+    line-height: 1.7;
+    max-width: 34ch;
+  }
+
+  /* scanline flicker */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,.08) 2px,
+      rgba(0,0,0,.08) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+</style>
+</head>
+<body>
+
+<div id="image-wrap"><img id="hero" alt=""/></div>
+<div id="status">initializing…</div>
+<div id="log"></div>
+
+<script>
+(async () => {
+  /* ── Parse query params ── */
+  const q        = new URLSearchParams(location.search);
+  const headers  = q.has('headers') ? q.get('headers') !== 'false' : null;  // null = don't touch
+  const maxRetry = Math.max(1, parseInt(q.get('maxretry') || '3', 10));
+  const exit     = q.get('exit') !== 'false' && q.has('exit');
+  const imageUrl = q.get('image') || '';
+  const exclude  = q.has('exclude')
+    ? q.get('exclude').split(',').map(s => s.trim()).filter(Boolean)
+    : null; // null = don't touch
+
+  /* ── Image ── */
+  if (imageUrl) {
+    const wrap = document.getElementById('image-wrap');
+    document.getElementById('hero').src = imageUrl;
+    wrap.style.display = 'block';
+  }
+
+  const $s   = document.getElementById('status');
+  const $log = document.getElementById('log');
+
+  function setStatus(msg, cls = '') {
+    $s.textContent = msg;
+    $s.className   = cls;
+  }
+  function addLog(line) {
+    $log.textContent += (($log.textContent ? '\n' : '') + line);
+  }
+
+  /* ── Register SW ── */
+  if (!('serviceWorker' in navigator)) {
+    setStatus('service workers not supported', 'error');
+    return;
+  }
+
+  setStatus('registering service worker…');
+
+  let reg;
+  try {
+    reg = await navigator.serviceWorker.register('./JS/cors.js', { scope: './' });
+    addLog('sw registered');
+  } catch (err) {
+    setStatus('registration failed', 'error');
+    addLog(String(err));
+    return;
+  }
+
+  /* Wait for SW to be active */
+  await new Promise(resolve => {
+    if (reg.active) { resolve(); return; }
+    const w = reg.installing || reg.waiting;
+    if (!w) { resolve(); return; }
+    w.addEventListener('statechange', function h() {
+      if (this.state === 'activated') { w.removeEventListener('statechange', h); resolve(); }
+    });
+  });
+
+  addLog('sw active');
+
+  /* ── Read current config first ── */
+  const currentCfg = await new Promise(resolve => {
+    const channel = new MessageChannel();
+    channel.port1.onmessage = e => resolve(e.data);
+    navigator.serviceWorker.controller
+      ? navigator.serviceWorker.controller.postMessage({ type: 'GET_CONFIG' }, [channel.port2])
+      : resolve({ headers: false, exclude: [] });
+  });
+
+  /* Merge: only override fields that were actually specified in the URL */
+  const newCfg = {
+    headers: headers  !== null ? headers  : currentCfg.headers,
+    exclude: exclude  !== null ? exclude  : (currentCfg.exclude ?? []),
+  };
+
+  addLog(`headers: ${newCfg.headers}  |  exclude: [${newCfg.exclude.join(', ') || '—'}]`);
+
+  /* ── Retry loop ── */
+  let attempt = 0;
+  let success = false;
+
+  while (attempt < maxRetry && !success) {
+    attempt++;
+    setStatus(`applying config… (${attempt}/${maxRetry})`);
+
+    try {
+      const ok = await new Promise((resolve, reject) => {
+        const channel = new MessageChannel();
+        channel.port1.onmessage = e => e.data?.ok ? resolve(true) : reject(new Error('sw rejected'));
+        channel.port1.onmessageerror = () => reject(new Error('message error'));
+
+        const sw = navigator.serviceWorker.controller;
+        if (!sw) { reject(new Error('no active controller')); return; }
+        sw.postMessage({ type: 'CONFIGURE', payload: newCfg }, [channel.port2]);
+
+        setTimeout(() => reject(new Error('timeout')), 4000);
+      });
+
+      if (ok) { success = true; break; }
+    } catch (err) {
+      addLog(`attempt ${attempt} failed: ${err.message}`);
+      if (attempt < maxRetry) {
+        setStatus(`retrying in 3s… (${attempt}/${maxRetry})`, 'error');
+        await new Promise(r => setTimeout(r, 3000));
+        /* Re-claim controller if lost */
+        if (!navigator.serviceWorker.controller) {
+          await reg.update();
+          await navigator.serviceWorker.ready;
+        }
+      }
+    }
+  }
+
+  if (!success) {
+    setStatus('failed to apply config', 'error');
+    addLog('max retries reached');
+    return;
+  }
+
+  setStatus('config applied ✓', 'ok');
+  addLog('done');
+
+  /* ── Exit ── */
+  if (exit) {
+    addLog('closing…');
+    setTimeout(() => {
+      try { window.close(); } catch(_) {}
+      /* fallback: go back in history */
+      if (!window.closed) history.back();
+    }, 800);
+  }
+})();
+</script>
+</body>
+</html>
