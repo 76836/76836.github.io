@@ -126,7 +126,7 @@
 
   let reg;
   try {
-    reg = await navigator.serviceWorker.register('./JS/cors.js', { scope: './' });
+    reg = await navigator.serviceWorker.register('./cors.js', { scope: './' });
     addLog('sw registered');
   } catch (err) {
     setStatus('registration failed', 'error');
