@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games Home</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --accent-color: #0078d4;
+            --text-main: #ffffff;
+            --text-dim: #aaaaaa;
+            --panel-bg: rgba(15, 15, 15, 0.75);
+            --border-glow: rgba(0, 120, 212, 0.4);
+            --crop-size: 15px;
+            --card-width: 280px;
+            --card-height: 400px;
+            --card-gap: 30px;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            user-select: none;
+            outline: none;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+        #wallpaper-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background-size: cover;
+            background-position: center;
+            transition: background-image 0.8s ease;
+        }
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.5) 100%),
+                        linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.9) 100%);
+            z-index: 0;
+        }
+        .ui-wrapper {
+            position: relative;
+            z-index: 10;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 0px 0px;
+            transition: filter 0.3s ease, opacity 0.3s ease;
+        }
+        .ui-wrapper.blurred {
+            filter: blur(20px) scale(0.95);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px;
+        }
+        .brand-logo { display: flex; align-items: center; gap: 15px; font-weight: 900; letter-spacing: 4px; font-size: 1.2rem; }
+        
+        /* Action Bar */
+        .action-bar {
+            display: flex;
+            gap: 15px;
+        }
+        .action-item {
+            padding: 8px 16px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-dim);
+            background: rgba(255,255,255,0.05);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: 0.2s;
+            clip-path: polygon(8px 0%, 100% 0%, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0% 100%, 0% 8px);
+        }
+        .action-item:hover, .action-item.focused {
+            color: white;
+            background: rgba(255,255,255,0.1);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px var(--border-glow);
+        }
+
+        .content-area {
+            flex-grow: 1;
+            display: flex;
+            position: relative; /* Allows info-panel to anchor to this container */
+            align-items: stretch;
+            overflow: hidden;
+        }
+        .carousel-panel {
+            flex: 0 0 100%; /* Now takes full width */
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            z-index: 1; /* Sits behind the info panel */
+        }
+        .game-strip {
+            display: flex;
+            gap: var(--card-gap);
+            padding: 20px 0;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: transform;
+        }
+        .game-card {
+            width: var(--card-width);
+            min-width: var(--card-width);
+            height: var(--card-height);
+            background: #111;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            clip-path: polygon(var(--crop-size) 0%, 100% 0%, 100% calc(100% - var(--crop-size)), calc(100% - var(--crop-size)) 100%, 0% 100%, 0% var(--crop-size));
+            border: 3px solid rgba(255,255,255,0.05);
+        }
+        .game-card.focused {
+            transform: translateY(-15px) scale(1.08);
+            border-color: var(--accent-color);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.9), 0 0 25px var(--border-glow);
+            z-index: 50;
+            clip-path: none;
+        }
+        .game-art {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+        }
+        .game-info-overlay {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%;
+            padding: 25px;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 100%);
+            pointer-events: none;
+        }
+        .game-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .game-meta { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+        .edit-btn {
+            position: absolute;
+            top: 15px; right: 15px;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid var(--accent-color);
+            color: white;
+            padding: 6px 14px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            opacity: 0;
+            transition: 0.3s;
+            clip-path: polygon(5px 0%, 100% 0%, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0% 100%, 0% 5px);
+            z-index: 60;
+        }
+        .game-card.focused .edit-btn, .game-card:hover .edit-btn { opacity: 1; }
+
+        /* RIGHT INFO PANEL */
+        /* COMPACT OVERLAY INFO PANEL */
+        .info-panel {
+            position: absolute; /* The "Overlay" magic */
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 450px; /* Reduced width */
+            background: linear-gradient(to right, 
+                rgba(55, 55, 55, 0.95) 0%, 
+                rgba(55, 55, 55, 0.8) 70%, 
+                transparent 100%);
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            z-index: 100; /* Sits on top of cards */
+            backdrop-filter: blur(10px); /* Blurs cards behind it */
+            border-left: 3px solid rgba(255,255,255,1);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        /* Adjusting internal art for the smaller panel */
+        .info-art {
+    width: 100%;
+    height: auto; /* Allows the height to scale with the image aspect ratio */
+    max-height: 250px; /* Limits the height to your original design spec */
+    object-fit: contain; /* Ensures the entire image is visible without cropping */
+    background-color: transparent; /* Or a specific color to fill empty space */
+    border-radius: 0px;
+    margin-bottom: 25px;
+    box-shadow: 0;
+    image-rendering: pixelated; /* Enhances sharpness in some browsers */
+}
+        .info-title {
+            font-size: 2.1rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .info-meta {
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+        .info-desc {
+            flex-grow: 1;
+            color: #ddd;
+            line-height: 1.6;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+        .info-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        /* Immersive Settings */
+        #settings-immersive {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--panel-bg);
+            z-index: 1000;
+            display: none;
+            padding: 80px;
+            flex-direction: column;
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes slideUp { from { transform: translateY(50%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .settings-header {
+            font-size: 3rem; font-weight: 900; letter-spacing: 10px; margin-bottom: 50px;
+            border-bottom: 2px solid var(--accent-color); width: fit-content; padding-bottom: 10px;
+        }
+        .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 40px; }
+        .settings-group h3 { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; margin-bottom: 20px; letter-spacing: 2px; }
+        .settings-control {
+            background: #151515; padding: 20px; margin-bottom: 15px;
+            clip-path: polygon(10px 0%, 100% 0%, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0% 100%, 0% 10px);
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid #222; transition: 0.2s;
+        }
+        .settings-control:hover, .settings-control.focused { border-color: var(--accent-color); background: #1a1a1a; box-shadow: 0 0 10px var(--border-glow); }
+
+        /* Shared Modal & Toast */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: #111;
+            width: 500px;
+            padding: 40px;
+            border: 1px solid var(--accent-color);
+            clip-path: polygon(20px 0%, 100% 0%, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0% 100%, 0% 20px);
+            box-shadow: 0 30px 60px rgba(0,0,0,1);
+        }
+        input, select {
+            width: 100%; background: #1a1a1a; border: 1px solid #333; color: white;
+            padding: 14px; margin: 8px 0 20px 0; outline: none; transition: 0.2s;
+        }
+        input:focus { border-color: var(--accent-color); background: #222; }
+        .btn {
+            padding: 14px 28px; border: none; cursor: pointer; text-transform: uppercase;
+            font-weight: bold; letter-spacing: 1px; transition: 0.2s;
+            clip-path: polygon(5px 0%, 100% 0%, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0% 100%, 0% 5px);
+        }
+        .btn-primary { background: var(--accent-color); color: white; }
+        .btn-primary:hover { filter: brightness(1.2); transform: scale(1.02); }
+        .btn-secondary { background: #333; color: #ccc; }
+        .btn-danger { background: #a00; color: white; }
+        #toast {
+            position: fixed; bottom: 40px; right: 40px;
+            background: var(--accent-color); color: white;
+            padding: 18px 35px; z-index: 3000; font-weight: bold;
+            transform: translateX(250%); transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            clip-path: polygon(10px 0%, 100% 0%, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0% 100%, 0% 10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        #toast.active { transform: translateX(0); }
+
+        /* ON-SCREEN KEYBOARD */
+        #osk {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #111;
+            border: 2px solid var(--accent-color);
+            border-radius: 16px;
+            padding: 20px 25px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 4000;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+            max-width: 820px;
+        }
+        .osk-row {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+        }
+        .osk-key {
+            padding: 16px 18px;
+            background: #222;
+            color: white;
+            font-size: 1.1rem;
+            min-width: 42px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid #444;
+            transition: 0.1s;
+        }
+        .osk-key:active {
+            background: var(--accent-color);
+            transform: scale(0.92);
+        }
+        .osk-key.wide { min-width: 80px; }
+    </style>
+</head>
+<body>
+    <div id="wallpaper-container"></div>
+    <div class="overlay"></div>
+    <div class="ui-wrapper" id="main-ui">
+        <header>
+            <div class="brand-logo">
+                <svg width="30" height="30" viewBox="0 0 100 100">
+                    <path d="M10 20 L90 20 L90 80 L70 100 L10 100 Z" fill="var(--accent-color)" />
+                    <text x="50" y="70" text-anchor="middle" fill="white" font-size="40" font-weight="bold">⌂</text>
+                </svg>
+                Home Menu
+            </div>
+            <div class="action-bar" id="header-actions">
+                <div class="action-item" data-action="add">Add Game</div>
+                <div class="action-item" data-action="reload">Refresh</div>
+                <div class="action-item" data-action="settings">Settings</div>
+                <div class="action-item" data-action="exit">Exit</div>
+            </div>
+            <div style="font-variant-numeric: tabular-nums; letter-spacing: 2px; font-weight: bold;" id="clock">00:00:00</div>
+        </header>
+
+        <main class="content-area" id="scroll-container">
+            <!-- LEFT: CAROUSEL (focused card centered in left panel) -->
+            <div class="carousel-panel">
+                <div class="game-strip" id="game-strip"></div>
+            </div>
+
+            <!-- RIGHT: INFO PANEL -->
+            <div class="info-panel" id="info-panel">
+                <img id="info-art" class="info-art" src="" alt="/!\ No image available!">
+                <div id="info-title" class="info-title"></div>
+                <div id="info-meta" class="info-meta"></div>
+                <div id="info-desc" class="info-desc">Launch directly from your living room. Full controller &amp; BT remote support enabled.</div>
+                <div class="info-actions">
+                    <button class="btn btn-primary" onclick="App.launchSelected()">Start program...</button>
+                    <button class="btn btn-secondary" onclick="App.openEditFromInfo()">EDIT</button>
+                </div>
+            </div>
+        </main>
+
+        <footer style="display: flex; justify-content: space-between; align-items: flex-end; margin: 40px;">
+            <div class="controls-legend">
+                <div class="hint"><span class="key">←/→</span> Move</div>
+                <div class="hint"><span class="key">Enter / A</span> Launch</div>
+                <div class="hint"><span class="key">E</span> Edit</div>
+                <div class="hint"><span class="key">S</span> Settings</div>
+                <div class="hint"><span class="key">Esc / B</span> Back</div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Immersive Settings (now fully navigable) -->
+    <div id="settings-immersive">
+        <div class="settings-header">SETTINGS</div>
+        <div class="settings-grid">
+            <div class="settings-group">
+                <h3>Visual Customization</h3>
+                <div class="settings-control" data-focus="0">
+                    <span>Accent Theme</span>
+                    <input type="color" id="set-accent" style="width: 60px; padding: 0; margin: 0; height: 35px; cursor: pointer;">
+                </div>
+                <div class="settings-control" data-focus="1">
+                    <span>Background Image</span>
+                    <button class="btn btn-primary" onclick="document.getElementById('wp-upload').click()">Upload File</button>
+                    <input type="file" id="wp-upload" style="display:none" accept="image/*">
+                </div>
+                <div class="settings-control" data-focus="2">
+                    <span>Menu Corner Crop</span>
+                    <input type="range" id="set-crop" min="0" max="40" style="width: 120px; margin: 0;">
+                </div>
+            </div>
+            <div class="settings-group">
+                <h3>System Management</h3>
+                <div class="settings-control" data-focus="3">
+                    <span>Quick Add Utility</span>
+                    <button class="btn btn-primary" onclick="App.openEdit()">Add Launcher Item</button>
+                </div>
+                <div class="settings-control" data-focus="4">
+                    <span>Reset All Data</span>
+                    <button class="btn btn-danger" onclick="App.factoryReset()">Wipe Database</button>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary" style="margin-top: 60px; width: 220px;" onclick="App.toggleSettings(false)">Close Settings</button>
+    </div>
+
+    <!-- Edit/Add Modal -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <h2 id="modal-title" style="margin-bottom: 25px; letter-spacing: 2px;">ADD NEW GAME</h2>
+            <label>Display Name</label>
+            <input type="text" id="game-name" placeholder="e.g. Geometry Dash" onfocus="App.showOSK()">
+            <label>Category</label>
+            <select id="game-cat">
+                <option value="arcade">arcade</option>
+                <option value="io">.io game</option>
+                <option value="web">other website</option>
+                <option value="video streaming">video streaming service</option>
+                <option value="multiplayer">multiplayer online game</option>
+            </select>
+            <label>Target URL</label>
+            <input type="text" id="game-url" placeholder="https://">
+            <label>Cover Art URL</label>
+            <input type="text" id="game-img" placeholder="Paste URL or leave blank for auto-fetch" onfocus="App.showOSK()">
+            
+            <div style="display: flex; gap: 15px; margin-top: 10px;">
+                <button class="btn btn-secondary" style="flex: 1" onclick="Modals.close('edit-modal')">Cancel</button>
+                <button class="btn btn-danger" id="del-btn" style="display: none;" onclick="App.deleteGame()">Delete</button>
+                <button class="btn btn-primary" style="flex: 1" onclick="App.saveGame()">Save Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- On-Screen Keyboard -->
+    <div id="osk">
+        <div class="osk-row">
+            <div class="osk-key" onclick="App.oskInsert('Q')">Q</div><div class="osk-key" onclick="App.oskInsert('W')">W</div><div class="osk-key" onclick="App.oskInsert('E')">E</div><div class="osk-key" onclick="App.oskInsert('R')">R</div><div class="osk-key" onclick="App.oskInsert('T')">T</div><div class="osk-key" onclick="App.oskInsert('Y')">Y</div><div class="osk-key" onclick="App.oskInsert('U')">U</div><div class="osk-key" onclick="App.oskInsert('I')">I</div><div class="osk-key" onclick="App.oskInsert('O')">O</div><div class="osk-key" onclick="App.oskInsert('P')">P</div>
+        </div>
+        <div class="osk-row">
+            <div class="osk-key" onclick="App.oskInsert('A')">A</div><div class="osk-key" onclick="App.oskInsert('S')">S</div><div class="osk-key" onclick="App.oskInsert('D')">D</div><div class="osk-key" onclick="App.oskInsert('F')">F</div><div class="osk-key" onclick="App.oskInsert('G')">G</div><div class="osk-key" onclick="App.oskInsert('H')">H</div><div class="osk-key" onclick="App.oskInsert('J')">J</div><div class="osk-key" onclick="App.oskInsert('K')">K</div><div class="osk-key" onclick="App.oskInsert('L')">L</div>
+        </div>
+        <div class="osk-row">
+            <div class="osk-key wide" onclick="App.oskInsert(' ')" style="flex:1">SPACE</div>
+            <div class="osk-key" onclick="App.oskInsert('Z')">Z</div><div class="osk-key" onclick="App.oskInsert('X')">X</div><div class="osk-key" onclick="App.oskInsert('C')">C</div><div class="osk-key" onclick="App.oskInsert('V')">V</div><div class="osk-key" onclick="App.oskInsert('B')">B</div><div class="osk-key" onclick="App.oskInsert('N')">N</div><div class="osk-key" onclick="App.oskInsert('M')">M</div>
+            <div class="osk-key wide" onclick="App.oskBackspace()">⌫</div>
+        </div>
+        <div style="text-align:center; margin-top:10px; font-size:0.8rem; color:#777;">Tap keys or type on physical keyboard / BT remote — OSK hides automatically</div>
+    </div>
+
+    <div id="toast">Message</div>
+
+    <script>
+        // Persistence Engine (unchanged)
+        const DB = {
+            name: 'BSL_v1',
+            store: 'games',
+            prefs: 'prefs',
+            async init() {
+                return new Promise(res => {
+                    const req = indexedDB.open(this.name, 4);
+                    req.onupgradeneeded = e => {
+                        const db = e.target.result;
+                        if (!db.objectStoreNames.contains(this.store)) db.createObjectStore(this.store, { keyPath: 'id', autoIncrement: true });
+                        if (!db.objectStoreNames.contains(this.prefs)) db.createObjectStore(this.prefs);
+                    };
+                    req.onsuccess = e => res(e.target.result);
+                });
+            },
+            async getAll() {
+                const db = await this.init();
+                return new Promise(res => {
+                    const tx = db.transaction(this.store, 'readonly');
+                    const req = tx.objectStore(this.store).getAll();
+                    req.onsuccess = () => res(req.result);
+                });
+            },
+            async put(store, val, key) {
+                const db = await this.init();
+                const tx = db.transaction(store, 'readwrite');
+                tx.objectStore(store).put(val, key);
+            },
+            async get(store, key) {
+                const db = await this.init();
+                return new Promise(res => {
+                    const tx = db.transaction(store, 'readonly');
+                    const req = tx.objectStore(store).get(key);
+                    req.onsuccess = () => res(req.result);
+                });
+            },
+            async delete(id) {
+                const db = await this.init();
+                const tx = db.transaction(this.store, 'readwrite');
+                tx.objectStore(this.store).delete(id);
+            }
+        };
+
+        const App = {
+            games: [],
+            focusedIdx: 0,
+            editingId: null,
+            isSettingsOpen: false,
+            isHeaderFocused: false,
+            headerIdx: 0,
+            settingsFocusIdx: 0,           // for full keyboard/controller navigation in settings
+            inputMode: 'mouse',            // 'mouse' | 'keyboard' | 'controller'
+            ignoreMouseUntil: 0,           // timestamp to ignore mouse hover after controller/keyboard use
+            oskActiveInput: null,          // reference to currently focused text input for OSK
+
+            async init() {
+                this.games = await DB.getAll();
+                if (this.games.length === 0) await this.seed();
+                await this.loadPrefs();
+                this.render();
+                this.setupListeners();
+                this.startClock();
+                this.pollGamepad();            // enhanced for full controller / BT remote
+                this.focus(0);
+            },
+            async seed() {
+                const base = [
+                    { title: "Kirka.io", cat: "first person shooter", url: "https://kirka.io", img: "https://dashmetry.com/cache/data/image/game/kirkaio-m546x307.webp" },
+                    { title: "Minecraft Classic", cat: "open world", url: "https://classic.minecraft.net", img: "https://assets.xboxservices.com/assets/0e/f8/0ef8df5c-a7dd-4eb3-b11a-743058d93953.jpg?n=Minecraft_GLP-Page-Hero-1084_Titan-Update_1920x1080_01.jpg" },
+                    { title: "GeForce Now", cat: "cloud gaming", url: "https://play.geforcenow.com/mall", img: "https://blogs.nvidia.com/wp-content/uploads/2019/11/geforce-now.jpg" },
+                    { title: "Krunker.io", cat: "first person shooter", url: "https://krunker.io", img: "https://www.dexerto.com/cdn-image/igdb/image/upload/t_1080p/sc81zr.jpg?width=1200&quality=50&format=auto" },
+                    { title: "Paper io", cat: "arcade", url: "https://paperio.site", img: "https://www.metacritic.com/a/img/catalog/provider/6/12/6-1-620313-52.jpg" },
+                    { title: "Backrooms (esyverse)", cat: "liminal exploration / horror", url: "https://html-classic.itch.zone/html/9813294/Backrooms v1.7.1 - WebGL/index.html?v=1732313592", img: "https://i.ytimg.com/vi/Bt_tkDTWS6A/hqdefault.jpg" },
+                    { title: "Shell Shockers", cat: "first person shooter", url: "https://shellshock.io", img: "https://static-cdn.jtvnw.net/ttv-boxart/509506_IGDB-272x380.jpg" },
+                    { title: "PolyTrack", cat: "racing", url: "https://www.kodub.com/apps/polytrack", img: "https://cdn.now.gg/apps-content/com.nowgg.h5.pub501.app51738/game-tiles/polytrack.jpg" },
+                    { title: "Escape Road 2", cat: "roleplay / driving", url: "https://escaperoad.org/escape-road-2", img: "https://spacewavesgame.io/data/image/game/escape-road-2.png" },
+                    { title: "Rocket Goal", cat: "sports / driving", url: "https://rocketgoal.io/", img: "https://crossy-road.io/data/image/rocketgoal.jpg" },
+                    { title: "Slope", cat: "arcade", url: "https://goldenn.dev/Slope-Game/", img: "https://slopegame-online.com/slope.webp" },
+                    { title: "Line Rider", cat: "sandbox", url: "https://www.linerider.com/", img: "https://helios-i.mashable.com/imagery/videos/07KCP9YPQYOhKhjjk7DvElR/hero-image.fill.size_1200x900.v1614271343.png" },
+                    { title: "Discord", cat: "messaging", url: "https://discord.com/channels/@me", img: "https://cdn2.unrealengine.com/what-is-discord-1920x1080-c3d90ca45f57.jpg" },
+                    { title: "YouTube", cat: "video streaming", url: "https://youtube.com", img: "https://i.ytimg.com/vi/81cF0ZnDlQg/maxresdefault.jpg" }
+                ];
+                for(let g of base) await DB.put(DB.store, g);
+                this.games = await DB.getAll();
+            },
+            async loadPrefs() {
+                const accent = await DB.get(DB.prefs, 'accent') || '#0078d4';
+                const crop = await DB.get(DB.prefs, 'crop') || '15';
+                const wp = await DB.get(DB.prefs, 'wp');
+                document.documentElement.style.setProperty('--accent-color', accent);
+                document.documentElement.style.setProperty('--crop-size', crop + 'px');
+                document.getElementById('set-accent').value = accent;
+                document.getElementById('set-crop').value = crop;
+                const container = document.getElementById('wallpaper-container');
+                container.style.backgroundImage = wp ? `url(${wp})` : `url('https://76836.github.io/Akari/wallpapers/luna.png')`;
+            },
+            render() {
+                const strip = document.getElementById('game-strip');
+                const html = this.games.map((g, i) => `
+                    <div class="game-card" id="card-${i}" onclick="App.handleCardClick(${i});">
+                        <img src="${g.img}" class="game-art" onerror="App.handleImgError(this, '${g.title}')">
+                        <div class="game-info-overlay">
+                            <div class="game-title">${g.title}</div>
+                        </div>
+                    </div>
+                `).join('');
+                strip.innerHTML = html + `
+                    <div class="game-card" id="card-settings" onclick="App.toggleSettings(true)">
+                        <div style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#181818; gap:20px;">
+                            <svg width="60" height="60" fill="var(--accent-color)" viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.31.61.22l2.49-1c.52.39 1.06.73 1.69.98l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.25 1.17-.59 1.69-.98l2.49 1c.22.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z"/></svg>
+                            <div class="game-title">Settings</div>
+                        </div>
+                    </div>
+                `;
+                this.updateInfoPanel();
+            },
+            updateInfoPanel() {
+                const panel = document.getElementById('info-panel');
+                if (this.focusedIdx >= this.games.length) {
+                    // settings card selected
+                    panel.querySelector('#info-art').src = '';
+                    panel.querySelector('#info-title').innerText = 'System Settings';
+                    panel.querySelector('#info-meta').innerText = 'CONFIGURE YOUR LAUNCHER';
+                    panel.querySelector('#info-desc').innerText = 'Adjust visuals, add games, or reset everything.';
+                    return;
+                }
+                const game = this.games[this.focusedIdx];
+                if (!game) return;
+                document.getElementById('info-art').src = game.img;
+                document.getElementById('info-title').innerText = game.title;
+                document.getElementById('info-meta').innerText = game.cat.toUpperCase();
+                document.getElementById('info-desc').innerText = game.url;
+            },
+            handleCardClick(idx) {
+                if (this.isHeaderFocused) return;
+                this.focus(idx);
+                this.launch(idx);
+            },
+            handleEditClick(e, id) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.openEdit(id);
+            },
+            handleImgError(img, title) {
+                img.src = `https://via.placeholder.com/280x400/222/0078d4?text=${encodeURIComponent(title)}`;
+                img.onerror = null;
+            },
+            focus(idx) {
+                this.isHeaderFocused = false;
+                this.focusedIdx = Math.max(0, Math.min(idx, this.games.length));
+                this.inputMode = 'keyboard'; // any programmatic focus is keyboard priority
+                this.ignoreMouseUntil = Date.now() + 2500; // prevent mouse hover from stealing focus
+
+                // update visual cards
+                document.querySelectorAll('.game-card').forEach((c, i) => {
+                    c.classList.toggle('focused', i === this.focusedIdx);
+                });
+                this.updateScroll();
+                this.updateInfoPanel();
+            },
+            focusHeader(idx) {
+                this.isHeaderFocused = true;
+                this.headerIdx = idx;
+                this.inputMode = 'keyboard';
+                this.ignoreMouseUntil = Date.now() + 2500;
+                document.querySelectorAll('.game-card').forEach(c => c.classList.remove('focused'));
+                const items = document.querySelectorAll('.action-item');
+                items.forEach((item, i) => item.classList.toggle('focused', i === idx));
+            },
+            updateScroll() {
+                const carousel = document.querySelector('.carousel-panel');
+                if (!carousel) return;
+                const cardSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-width')) + parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-gap'));
+                const leftWidth = carousel.clientWidth;
+                const offset = (leftWidth * 0.42) - (280 / 2) - (this.focusedIdx * cardSize); // centered nicely in LEFT panel
+                const strip = document.getElementById('game-strip');
+                strip.style.transform = `translateX(${offset}px)`;
+            },
+            launch(idx) {
+                const game = this.games[idx];
+                if (!game) return;
+                this.showToast(`Starting ${game.title}...`);
+                if (game.url && game.url !== '#') {
+                    setTimeout(() => window.open(game.url, '_blank'), 1200);
+                }
+            },
+            launchSelected() {
+                if (this.focusedIdx < this.games.length) this.launch(this.focusedIdx);
+            },
+            showToast(msg) {
+                const t = document.getElementById('toast');
+                t.innerText = msg;
+                t.classList.add('active');
+                setTimeout(() => t.classList.remove('active'), 2800);
+            },
+            toggleSettings(show) {
+                this.isSettingsOpen = show;
+                const settingsEl = document.getElementById('settings-immersive');
+                settingsEl.style.display = show ? 'flex' : 'none';
+                document.getElementById('main-ui').classList.toggle('blurred', show);
+                if (show) {
+                    this.isHeaderFocused = false;
+                    this.settingsFocusIdx = 0;
+                    this.updateSettingsFocus();
+                }
+            },
+            // FULL KEYBOARD / CONTROLLER NAVIGATION IN SETTINGS
+            updateSettingsFocus() {
+                const controls = document.querySelectorAll('#settings-immersive .settings-control');
+                controls.forEach((c, i) => c.classList.toggle('focused', i === this.settingsFocusIdx));
+            },
+            openEdit(id = null) {
+                this.editingId = id;
+                const modal = document.getElementById('edit-modal');
+                const delBtn = document.getElementById('del-btn');
+                if (id) {
+                    const g = this.games.find(x => x.id === id);
+                    document.getElementById('modal-title').innerText = "EDIT GAME";
+                    document.getElementById('game-name').value = g.title;
+                    document.getElementById('game-cat').value = g.cat;
+                    document.getElementById('game-url').value = g.url;
+                    document.getElementById('game-img').value = g.img;
+                    delBtn.style.display = "block";
+                } else {
+                    document.getElementById('modal-title').innerText = "ADD GAME";
+                    document.getElementById('game-name').value = "";
+                    document.getElementById('game-url').value = "";
+                    document.getElementById('game-img').value = "";
+                    delBtn.style.display = "none";
+                }
+                Modals.open('edit-modal');
+            },
+            openEditFromInfo() {
+                if (this.focusedIdx < this.games.length) this.openEdit(this.games[this.focusedIdx].id);
+            },
+            async saveGame() {
+                const title = document.getElementById('game-name').value;
+                if(!title) return;
+                let img = document.getElementById('game-img').value;
+               
+
+
+
+
+
+// 1. Create and Inject Spinner Styles & HTML
+const styleId = 'icon-scraper-style';
+if (!document.getElementById(styleId)) {
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.innerHTML = `
+        @keyframes spin-loader { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #loader-overlay {
+            position: fixed; top: 45vh; left: calc(50vw - 5vh); width: 10vh; height: 10vh;
+            background: rgba(0, 0, 0, 0.7); display: flex; justify-content: center;
+            border-radius: 25px;
+            align-items: center; z-index: 10000;
+        }
+        .spinner-circle {
+            width: 50px; height: 50px; border: 5px solid #222222;
+            border-top: 5px solid #ffffff; border-radius: 50%;
+            animation: spin-loader 1s linear infinite;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+const loader = document.createElement('div');
+loader.id = 'loader-overlay';
+loader.innerHTML = '<div class="spinner-circle"></div>';
+document.body.appendChild(loader);
+
+// 2. Variables for Data
+let finalImg = null;
+const gameUrl = document.getElementById('game-url').value || '#';
+
+try {
+    finalImg = null;
+
+    if (gameUrl !== '#' && gameUrl.startsWith('http')) {
+        const domain = new URL(gameUrl).hostname;
+        finalImg = `https://www.google.com/s2/favicons?domain=${domain}&sz=256`;
+    }
+
+    // Final fallback to vertical Unsplash if no gameUrl or Google fails
+    if (!finalImg) {
+        const query = encodeURIComponent(title + ' game cover');
+        finalImg = `https://source.unsplash.com/featured/400x600?${query}`;
+    }
+
+} catch (err) {
+    console.warn("Google favicon failed, using Unsplash fallback.");
+    const query = encodeURIComponent(title + ' game cover');
+    finalImg = `https://source.unsplash.com/featured/400x600?${query}`;
+} finally {
+    // Remove loader
+    if (loader && loader.parentNode) {
+        loader.parentNode.removeChild(loader);
+    }
+}
+
+// 4. Construct the Final Data Object
+const data = {
+    title,
+    cat: document.getElementById('game-cat').value,
+    url: gameUrl,
+    img: finalImg
+};
+
+
+
+
+
+
+
+
+                if (this.editingId) data.id = this.editingId;
+                await DB.put(DB.store, data);
+                this.games = await DB.getAll();
+                this.render();
+                Modals.close('edit-modal');
+                this.showToast("Library Synced");
+            },
+            async deleteGame() {
+                if (!this.editingId) return;
+                await DB.delete(this.editingId);
+                this.games = await DB.getAll();
+                this.render();
+                Modals.close('edit-modal');
+                this.showToast("Game Removed");
+            },
+            async factoryReset() {
+                if(confirm("Wipe all library data and custom settings?")) {
+                    const db = await DB.init();
+                    db.transaction([DB.store, DB.prefs], 'readwrite').objectStore(DB.store).clear();
+                    db.transaction([DB.store, DB.prefs], 'readwrite').objectStore(DB.prefs).clear();
+                    window.location.reload();
+                }
+            },
+            setupListeners() {
+                // Mouse hover fix: only focus if not recently using controller/keyboard
+                const carousel = document.querySelector('.carousel-panel');
+                carousel.addEventListener('mousemove', e => {
+                    if (Date.now() < this.ignoreMouseUntil) return;
+                    this.inputMode = 'mouse';
+                    const card = e.target.closest('.game-card');
+                    if (card && card.id.startsWith('card-')) {
+                        const idx = parseInt(card.id.split('-')[1]);
+                        if (!isNaN(idx)) this.focus(idx);
+                    }
+                });
+
+                window.addEventListener('wheel', e => {
+                    if (this.isSettingsOpen || document.querySelector('.modal.active')) return;
+                    this.move(e.deltaY > 0 ? 1 : -1);
+                }, { passive: true });
+
+                window.addEventListener('keydown', e => {
+                    this.inputMode = 'keyboard';
+                    this.ignoreMouseUntil = Date.now() + 3000;
+
+                    if (document.querySelector('.modal.active')) {
+                        // OSK auto-hide on physical typing
+                        if (/^[a-zA-Z0-9 ]$/.test(e.key)) {
+                            this.hideOSK();
+                        }
+                        if (e.key === 'Escape') Modals.close('edit-modal');
+                        return;
+                    }
+
+                    if (this.isSettingsOpen) {
+                        this.handleSettingsKey(e);
+                        return;
+                    }
+
+                    // Global shortcuts
+                    if (e.key.toLowerCase() === 's') { this.toggleSettings(!this.isSettingsOpen); return; }
+                    if (e.key.toLowerCase() === 'e') {
+                        if (!this.isHeaderFocused && this.focusedIdx < this.games.length) this.openEdit(this.games[this.focusedIdx].id);
+                        return;
+                    }
+
+                    switch(e.key) {
+                        case 'ArrowRight': this.move(1); break;
+                        case 'ArrowLeft': this.move(-1); break;
+                        case 'ArrowUp':
+                            if (!this.isHeaderFocused) this.focusHeader(0);
+                            break;
+                        case 'ArrowDown':
+                            if (this.isHeaderFocused) this.focus(this.focusedIdx);
+                            break;
+                        case 'Enter':
+                            if (this.isHeaderFocused) {
+                                const action = document.querySelectorAll('.action-item')[this.headerIdx].dataset.action;
+                                this.handleAction(action);
+                            } else {
+                                if (this.focusedIdx === this.games.length) this.toggleSettings(true);
+                                else this.launch(this.focusedIdx);
+                            }
+                            break;
+                        case 'Escape':
+                            if (this.isHeaderFocused) this.focus(this.focusedIdx);
+                            break;
+                    }
+                });
+
+                // Header clicks
+                document.getElementById('header-actions').addEventListener('click', e => {
+                    const item = e.target.closest('.action-item');
+                    if (item) this.handleAction(item.dataset.action);
+                });
+
+                // Prefs listeners
+                document.getElementById('set-accent').addEventListener('input', e => {
+                    document.documentElement.style.setProperty('--accent-color', e.target.value);
+                    DB.put(DB.prefs, e.target.value, 'accent');
+                });
+                document.getElementById('set-crop').addEventListener('input', e => {
+                    document.documentElement.style.setProperty('--crop-size', e.target.value + 'px');
+                    DB.put(DB.prefs, e.target.value, 'crop');
+                });
+                document.getElementById('wp-upload').addEventListener('change', e => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = ev => {
+                        document.getElementById('wallpaper-container').style.backgroundImage = `url(${ev.target.result})`;
+                        DB.put(DB.prefs, ev.target.result, 'wp');
+                    };
+                    reader.readAsDataURL(file);
+                });
+            },
+            handleSettingsKey(e) {
+                const controls = Array.from(document.querySelectorAll('#settings-immersive .settings-control'));
+                if (!controls.length) return;
+                if (e.key === 'ArrowDown') {
+                    this.settingsFocusIdx = (this.settingsFocusIdx + 1) % controls.length;
+                    this.updateSettingsFocus();
+                } else if (e.key === 'ArrowUp') {
+                    this.settingsFocusIdx = (this.settingsFocusIdx - 1 + controls.length) % controls.length;
+                    this.updateSettingsFocus();
+                } else if (e.key === 'Enter') {
+                    controls[this.settingsFocusIdx].click();
+                } else if (e.key === 'Escape') {
+                    this.toggleSettings(false);
+                }
+            },
+            handleAction(action) {
+                switch(action) {
+                    case 'add': this.openEdit(); break;
+                    case 'reload': window.location.reload(); break;
+                    case 'settings': this.toggleSettings(true); break;
+                    case 'exit': this.showToast("Exiting..."); window.location='about:blank'; break;
+                }
+            },
+            move(dir) {
+                if (this.isHeaderFocused) {
+                    const items = document.querySelectorAll('.action-item');
+                    this.headerIdx = (this.headerIdx + dir + items.length) % items.length;
+                    this.focusHeader(this.headerIdx);
+                } else {
+                    const count = this.games.length + 1;
+                    this.focusedIdx = (this.focusedIdx + dir + count) % count;
+                    this.focus(this.focusedIdx);
+                }
+            },
+            startClock() {
+                const el = document.getElementById('clock');
+                const tick = () => el.innerText = new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+                tick();
+                setInterval(tick, 1000);
+            },
+            // ENHANCED FULL CONTROLLER + BT REMOTE SUPPORT (works on Windows, macOS, Linux, Android TV, Fire TV, etc.)
+            pollGamepad() {
+                let debt = false;
+                const loop = () => {
+                    const gp = navigator.getGamepads()[0];
+                    if (gp) {
+                        this.inputMode = 'controller';
+                        this.ignoreMouseUntil = Date.now() + 2000;
+
+                        const deadzone = 0.3;
+                        // Left stick / D-Pad horizontal
+                        if (gp.axes[0] > deadzone || gp.buttons[15].pressed) { if (!debt) { this.move(1); debt = true; } }
+                        if (gp.axes[0] < -deadzone || gp.buttons[14].pressed) { if (!debt) { this.move(-1); debt = true; } }
+                        // Vertical (header <-> carousel)
+                        if (gp.axes[1] < -deadzone || gp.buttons[12].pressed) { if (!debt && !this.isHeaderFocused) { this.focusHeader(0); debt = true; } }
+                        if (gp.axes[1] > deadzone || gp.buttons[13].pressed) { if (!debt && this.isHeaderFocused) { this.focus(this.focusedIdx); debt = true; } }
+
+                        // A / Cross button
+                        if (gp.buttons[0].pressed && !debt) {
+                            if (this.isHeaderFocused) {
+                                const action = document.querySelectorAll('.action-item')[this.headerIdx].dataset.action;
+                                this.handleAction(action);
+                            } else if (this.focusedIdx === this.games.length) this.toggleSettings(true);
+                            else this.launch(this.focusedIdx);
+                            debt = true;
+                        }
+                        // B / Circle button
+                        if (gp.buttons[1].pressed && !debt) {
+                            if (this.isHeaderFocused) this.focus(this.focusedIdx);
+                            else if (this.isSettingsOpen) this.toggleSettings(false);
+                            debt = true;
+                        }
+                        // Extra BT remote friendly buttons
+                        if (gp.buttons[8].pressed && !debt) { // usually "Select" or "Menu"
+                            this.toggleSettings(true);
+                            debt = true;
+                        }
+                        if (gp.buttons[9].pressed && !debt) { // usually "Start"
+                            if (!this.isHeaderFocused) this.focusHeader(0);
+                            debt = true;
+                        }
+
+                        // Reset debt when inputs released
+                        if (Math.abs(gp.axes[0]) < deadzone && Math.abs(gp.axes[1]) < deadzone &&
+                            !gp.buttons[0].pressed && !gp.buttons[1].pressed &&
+                            !gp.buttons[8].pressed && !gp.buttons[9].pressed &&
+                            !gp.buttons[12].pressed && !gp.buttons[13].pressed &&
+                            !gp.buttons[14].pressed && !gp.buttons[15].pressed) {
+                            debt = false;
+                        }
+                    } else {
+                        //nothing
+                    }
+                    requestAnimationFrame(loop);
+                };
+                loop();
+            },
+            // ON-SCREEN KEYBOARD (hides automatically on physical alphanumeric input)
+            showOSK() {
+                return;//disabling osk until future version
+                const osk = document.getElementById('osk');
+                osk.style.display = 'flex';
+                this.oskActiveInput = document.activeElement;
+            },
+            hideOSK() {
+                const osk = document.getElementById('osk');
+                osk.style.display = 'none';
+                this.oskActiveInput = null;
+            },
+            oskInsert(char) {
+                if (this.oskActiveInput) {
+                    this.oskActiveInput.value += char;
+                    this.oskActiveInput.focus();
+                }
+            },
+            oskBackspace() {
+                if (this.oskActiveInput) {
+                    this.oskActiveInput.value = this.oskActiveInput.value.slice(0, -1);
+                    this.oskActiveInput.focus();
+                }
+            }
+        };
+
+        const Modals = {
+            open(id) {
+                const modal = document.getElementById(id);
+                modal.classList.add('active');
+                // focus first text input
+                const firstInput = modal.querySelector('input[type="text"]');
+                if (firstInput) setTimeout(() => firstInput.focus(), 100);
+            },
+            close(id) {
+                const modal = document.getElementById(id);
+                modal.classList.remove('active');
+                App.hideOSK();
+                App.focus(App.focusedIdx);
+            }
+        };
+
+        window.onload = () => App.init();
+    </script>
+</body>
+</html>
