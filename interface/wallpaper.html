@@ -33,26 +33,26 @@
         // that would wipe or ignore the existing schema.
         const request = indexedDB.open("WallpaperDB");
 
-        request.onsuccess = e => {
-            const db = e.target.result;
-            if (!appid || !db.objectStoreNames.contains("settings")) {
-                tryDefault(); return;
-            }
-            const getReq = db.transaction("settings", "readonly")
-                             .objectStore("settings")
-                             .get(appid);
-            getReq.onsuccess = () => {
-                if (getReq.result) {
-                    const { type, content, muted } = getReq.result;
-                    render(type, content, muted);
-                } else {
-                    tryDefault();
-                }
-            };
-            getReq.onerror = tryDefault;
-        };
+       request.onsuccess = e => {
+    const db = e.target.result;
+    if (!appid || !db.objectStoreNames.contains("settings")) {
+        tryDefault(db); return;
+    }
+    const getReq = db.transaction("settings", "readonly")
+                     .objectStore("settings")
+                     .get(appid);
+    getReq.onsuccess = () => {
+        if (getReq.result) {
+            const { type, content, muted } = getReq.result;
+            render(type, content, muted);
+        } else {
+            tryDefault(db);
+        }
+    };
+    getReq.onerror = () => tryDefault(db);
+};
 
-        request.onerror = tryDefault;
+request.onerror = () => tryDefault(null);
 
         // If the loader somehow triggers an upgrade (first ever open on this origin),
         // create the schema so it matches what the settings app expects.
@@ -64,10 +64,41 @@
                 db.createObjectStore("settings", { keyPath: "appid" });
         };
 
-        function tryDefault() {
-            if (!defaultUrl) return;
-            render(detectType(defaultUrl), defaultUrl, true);
+        function tryDefault(db) {
+    if (defaultUrl) {
+        const type = detectType(defaultUrl);
+        // Register the appid with the default wallpaper so it shows in the customizer
+        if (db && appid && db.objectStoreNames.contains("settings")) {
+            const stub = {
+                appid,
+                name: appid,
+                type,
+                content: defaultUrl,
+                muted: true,
+                history: [],
+                added: Date.now()
+            };
+            db.transaction("settings", "readwrite")
+              .objectStore("settings")
+              .put(stub);
         }
+        render(type, defaultUrl, true);
+    } else if (db && appid && db.objectStoreNames.contains("settings")) {
+        // No default — register a blank stub so the appid still appears in the customizer
+        const stub = {
+            appid,
+            name: appid,
+            type: 'image',
+            content: '',
+            muted: true,
+            history: [],
+            added: Date.now()
+        };
+        db.transaction("settings", "readwrite")
+          .objectStore("settings")
+          .put(stub);
+    }
+}
 
         function detectType(url) {
             const clean = url.split('?')[0].toLowerCase();
