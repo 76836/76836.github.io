@@ -1,57 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Wallpaper Loader</title>
     <style>
-        body,
-        html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: #000;
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+        #container { width: 100vw; height: 100vh; position: relative; }
+        img, video, iframe {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            object-fit: cover; border: none;
         }
-
-        #container {
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-        }
-
-        img,
-        video,
-        iframe {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border: none;
+        #unmute-btn {
+            position: fixed; bottom: 16px; right: 16px; z-index: 999;
+            background: rgba(0,0,0,0.6); color: #fff;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 14px; cursor: pointer; font-size: 0.8rem;
+            display: none;
         }
     </style>
 </head>
-
 <body>
     <div id="container"></div>
+    <button id="unmute-btn" onclick="userUnmute()">🔊 TAP TO UNMUTE</button>
     <script>
         const params = new URLSearchParams(window.location.search);
         const appid = params.get('appid');
         const defaultUrl = params.get('default');
 
-        const request = indexedDB.open("WallpaperDB", 1);
+        // Open without specifying a version — this lets the browser use whatever
+        // version the settings app already created, avoiding a spurious upgrade
+        // that would wipe or ignore the existing schema.
+        const request = indexedDB.open("WallpaperDB");
 
         request.onsuccess = e => {
             const db = e.target.result;
-            // DB might not have a "settings" store if it was never written to
-            if (!db.objectStoreNames.contains("settings")) {
+            if (!appid || !db.objectStoreNames.contains("settings")) {
                 tryDefault(); return;
             }
             const getReq = db.transaction("settings", "readonly")
-                .objectStore("settings")
-                .get(appid);
+                             .objectStore("settings")
+                             .get(appid);
             getReq.onsuccess = () => {
                 if (getReq.result) {
                     const { type, content, muted } = getReq.result;
@@ -65,28 +54,36 @@
 
         request.onerror = tryDefault;
 
+        // If the loader somehow triggers an upgrade (first ever open on this origin),
+        // create the schema so it matches what the settings app expects.
+        request.onupgradeneeded = e => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains("library"))
+                db.createObjectStore("library", { keyPath: "id", autoIncrement: true });
+            if (!db.objectStoreNames.contains("settings"))
+                db.createObjectStore("settings", { keyPath: "appid" });
+        };
+
         function tryDefault() {
             if (!defaultUrl) return;
-            const type = detectType(defaultUrl);
-            render(type, defaultUrl, true);
+            render(detectType(defaultUrl), defaultUrl, true);
         }
 
         function detectType(url) {
             const clean = url.split('?')[0].toLowerCase();
             if (/\.(mp4|webm|mov|ogg)$/.test(clean)) return 'video';
             if (/\.(html?|php|aspx?)$/.test(clean)) return 'page';
-            // treat bare domains / paths with no image extension as pages
             if (!/\.(jpe?g|png|gif|webp|avif|svg|bmp)$/.test(clean)) return 'page';
             return 'image';
         }
+
+        let activeVideo = null;
 
         function render(type, content, muted) {
             const container = document.getElementById('container');
             container.innerHTML = '';
 
             if (type === 'page') {
-                // Live URLs take over the tab intentionally to prevent frame stacking.
-                // Only use iframe for locally stored HTML (data: or blob: URLs).
                 if (content.startsWith('data:') || content.startsWith('blob:')) {
                     const frame = document.createElement('iframe');
                     frame.src = content;
@@ -103,20 +100,42 @@
                 vid.src = content;
                 vid.autoplay = true;
                 vid.loop = true;
-                vid.muted = (muted !== false);
                 vid.playsInline = true;
-                // browsers may block autoplay without muted; fall back gracefully
-                vid.play().catch(() => { vid.muted = true; vid.play(); });
+                // Always start muted so autoplay is allowed by the browser,
+                // then unmute immediately if the setting says sound is on.
+                vid.muted = true;
+                vid.play().then(() => {
+                    if (muted === false) {
+                        // Try to unmute now that playback has started.
+                        // This works if the page was opened by a user gesture
+                        // (e.g. clicking a link). If it fails, show the button.
+                        vid.muted = false;
+                        if (vid.muted) showUnmuteBtn(vid);
+                    }
+                }).catch(() => {
+                    // Autoplay blocked entirely — nothing to do, video won't play.
+                });
+                activeVideo = vid;
                 container.appendChild(vid);
                 return;
             }
 
-            // image / gif
             const img = document.createElement('img');
             img.src = content;
             container.appendChild(img);
         }
+
+        function showUnmuteBtn(vid) {
+            const btn = document.getElementById('unmute-btn');
+            btn.style.display = 'block';
+            btn._vid = vid;
+        }
+
+        function userUnmute() {
+            const btn = document.getElementById('unmute-btn');
+            if (btn._vid) btn._vid.muted = false;
+            btn.style.display = 'none';
+        }
     </script>
 </body>
-
 </html>
