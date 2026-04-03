@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Wallpaper Loader</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+        }
+
+        #container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        img,
+        video,
+        iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const appid = params.get('appid');
+        const defaultUrl = params.get('default');
+
+        const request = indexedDB.open("WallpaperDB", 1);
+
+        request.onsuccess = e => {
+            const db = e.target.result;
+            // DB might not have a "settings" store if it was never written to
+            if (!db.objectStoreNames.contains("settings")) {
+                tryDefault(); return;
+            }
+            const getReq = db.transaction("settings", "readonly")
+                .objectStore("settings")
+                .get(appid);
+            getReq.onsuccess = () => {
+                if (getReq.result) {
+                    const { type, content, muted } = getReq.result;
+                    render(type, content, muted);
+                } else {
+                    tryDefault();
+                }
+            };
+            getReq.onerror = tryDefault;
+        };
+
+        request.onerror = tryDefault;
+
+        function tryDefault() {
+            if (!defaultUrl) return;
+            const type = detectType(defaultUrl);
+            render(type, defaultUrl, true);
+        }
+
+        function detectType(url) {
+            const clean = url.split('?')[0].toLowerCase();
+            if (/\.(mp4|webm|mov|ogg)$/.test(clean)) return 'video';
+            if (/\.(html?|php|aspx?)$/.test(clean)) return 'page';
+            // treat bare domains / paths with no image extension as pages
+            if (!/\.(jpe?g|png|gif|webp|avif|svg|bmp)$/.test(clean)) return 'page';
+            return 'image';
+        }
+
+        function render(type, content, muted) {
+            const container = document.getElementById('container');
+            container.innerHTML = '';
+
+            if (type === 'page') {
+                // Live URLs take over the tab intentionally to prevent frame stacking.
+                // Only use iframe for locally stored HTML (data: or blob: URLs).
+                if (content.startsWith('data:') || content.startsWith('blob:')) {
+                    const frame = document.createElement('iframe');
+                    frame.src = content;
+                    frame.sandbox = 'allow-scripts allow-same-origin allow-forms';
+                    container.appendChild(frame);
+                } else {
+                    window.location.replace(content);
+                }
+                return;
+            }
+
+            if (type === 'video') {
+                const vid = document.createElement('video');
+                vid.src = content;
+                vid.autoplay = true;
+                vid.loop = true;
+                vid.muted = (muted !== false);
+                vid.playsInline = true;
+                // browsers may block autoplay without muted; fall back gracefully
+                vid.play().catch(() => { vid.muted = true; vid.play(); });
+                container.appendChild(vid);
+                return;
+            }
+
+            // image / gif
+            const img = document.createElement('img');
+            img.src = content;
+            container.appendChild(img);
+        }
+    </script>
+</body>
+
+</html>
