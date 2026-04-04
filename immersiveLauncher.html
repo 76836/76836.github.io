@@ -14,7 +14,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #1f1f1f;
+            background: transparent;
             font-family: 'Inter', sans-serif;
             color: white;
         }
@@ -25,6 +25,7 @@
             left: 0;
             width: 100vw;
             height: 130vh;
+            overflow: hidden;
             display: flex;
             justify-content: space-around;
             perspective: 1000px;
@@ -37,6 +38,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            overflow: hidden;
             transition: all 0.5s ease;
         }
 
@@ -44,7 +46,7 @@
             position: absolute;
             width: 16vw;
             height: 22vh;
-            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            background: rgba(20, 20, 20, 0.473);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
             display: flex;
@@ -127,6 +129,7 @@
             pointer-events: none;
             width: 90%;
             max-width: 600px;
+            overflow: hidden;
         }
 
         #search-input {
@@ -143,6 +146,7 @@
             width: 100%;
             pointer-events: all;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
         }
 
         #search-input:focus {
@@ -315,56 +319,45 @@
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
+        #background-iframe {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            z-index: 0;
+            opacity: 1;
+            pointer-events: none;
+            background: transparent;
+            transform: scale(1);
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .search-overlay {
+            z-index: 1100;
+            overflow: hidden;
+        }
+
+        .settings-btn,
+        .settings-panel {
+            z-index: 1200;
+        }
+
         .settings-panel.open {
             transform: translateY(0) scale(1);
             opacity: 1;
             pointer-events: all;
         }
-
-        :root {
-            --glow-speed: 6s;
-            --glow-thickness: 100px;
-            --glow-softness: 80px;
-            --glow-opacity: 0.25;
-        }
-
-        .vignette {
-            position: fixed;
-            top: calc(var(--glow-thickness) * -1);
-            left: calc(var(--glow-thickness) * -1);
-            right: calc(var(--glow-thickness) * -1);
-            bottom: calc(var(--glow-thickness) * -1);
-            pointer-events: none;
-            z-index: 500;
-            border: var(--glow-thickness) solid;
-            border-image-source: conic-gradient(from var(--angle),
-                    red, orange, yellow, green, cyan, blue, magenta, white, grey, darkgray, black);
-            border-image-slice: 1;
-            opacity: var(--glow-opacity);
-            filter: blur(var(--glow-softness));
-            animation: rotate-glow var(--glow-speed) linear infinite;
-        }
-
-        @property --angle {
-            syntax: '<angle>';
-            initial-value: 0deg;
-            inherits: false;
-        }
-
-        @keyframes rotate-glow {
-            from {
-                --angle: 0deg;
-            }
-
-            to {
-                --angle: 360deg;
-            }
-        }
     </style>
 </head>
 
 <body>
-    <div class="vignette"></div>
+    <iframe id="background-iframe" src="https://76836.github.io/interface/wallpaper?appid=Immersive Launcher" aria-hidden="true"></iframe>
 
     <div class="search-overlay">
         <div class="search-input-wrap">
@@ -438,8 +431,15 @@
             </select>
         </div>
 
+        <div class="mb-4">
+            <label class="block text-xs text-white/50 mb-2 font-medium">Wallpaper</label>
+            <button onclick="window.location = 'https://76836.github.io/interface/customize';" class="w-full bg-black/40 border border-white/10 p-2 rounded-lg text-white text-sm outline-none focus:border-white/30 transition">
+                Open Wallpapers ↗
+            </button>
+        </div>
+
         <div class="text-[10px] text-white/30 text-center mt-4">
-            76836 Launcher v2.0
+            76836 Launcher v3.0
         </div>
     </div>
 
@@ -766,6 +766,10 @@
             } else if (cmd === '@ua') {
                 result = navigator.userAgent.substring(0, 30) + "...";
                 label = "User Agent";
+            } else if (cmd === '@games') {
+                result = "loading application...";
+                window.location = 'https://76836.github.io/games';
+                label = "Games Launcher";
             }
 
             if (result !== null) {
