@@ -103,16 +103,34 @@ request.onerror = () => tryDefault(null);
         function detectType(url) {
             const clean = url.split('?')[0].toLowerCase();
             if (/\.(mp4|webm|mov|ogg)$/.test(clean)) return 'video';
+            if (/\.gif$/.test(clean)) return 'gif';
             if (/\.(html?|php|aspx?)$/.test(clean)) return 'page';
             if (!/\.(jpe?g|png|gif|webp|avif|svg|bmp)$/.test(clean)) return 'page';
             return 'image';
         }
 
         let activeVideo = null;
+        let activeObjectUrl = null;
+
+        function revokeActiveObjectUrl() {
+            if (activeObjectUrl) {
+                URL.revokeObjectURL(activeObjectUrl);
+                activeObjectUrl = null;
+            }
+        }
+
+        async function cacheAssetInMemory(url) {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Failed to cache asset: ${response.status}`);
+            const blob = await response.blob();
+            return URL.createObjectURL(blob);
+        }
 
         function render(type, content, muted) {
             const container = document.getElementById('container');
             container.innerHTML = '';
+            revokeActiveObjectUrl();
+            activeVideo = null;
 
             if (type === 'page') {
                 if (content.startsWith('data:') || content.startsWith('blob:')) {
@@ -130,11 +148,34 @@ request.onerror = () => tryDefault(null);
                 const vid = document.createElement('video');
                 vid.src = content;
                 vid.autoplay = true;
-                vid.loop = true;
+                // Keep metadata-only preload to get a visible first frame as fast as possible.
+                // We stream from disk/network first, then swap to an in-memory Blob for smooth loops.
+                vid.preload = 'metadata';
+                vid.loop = false;
                 vid.playsInline = true;
                 // Always start muted so autoplay is allowed by the browser,
                 // then unmute immediately if the setting says sound is on.
                 vid.muted = true;
+                let cachedLoopSource = null;
+
+                cacheAssetInMemory(content).then(objectUrl => {
+                    cachedLoopSource = objectUrl;
+                }).catch(() => {
+                    // Best effort only — playback still works from the original source.
+                });
+
+                vid.addEventListener('ended', () => {
+                    if (cachedLoopSource) {
+                        if (vid.src !== cachedLoopSource) {
+                            activeObjectUrl = cachedLoopSource;
+                            vid.src = cachedLoopSource;
+                            vid.loop = true;
+                        }
+                    }
+                    vid.currentTime = 0;
+                    vid.play().catch(() => {});
+                });
+
                 vid.play().then(() => {
                     if (muted === false) {
                         // Try to unmute now that playback has started.
@@ -148,6 +189,26 @@ request.onerror = () => tryDefault(null);
                 });
                 activeVideo = vid;
                 container.appendChild(vid);
+                return;
+            }
+
+            if (type === 'gif') {
+                const img = document.createElement('img');
+                // Show first frame quickly from the original streamable source.
+                img.src = content;
+                container.appendChild(img);
+
+                // Then copy the full GIF to an in-memory Blob URL for future loops.
+                cacheAssetInMemory(content).then(objectUrl => {
+                    if (!container.contains(img)) {
+                        URL.revokeObjectURL(objectUrl);
+                        return;
+                    }
+                    activeObjectUrl = objectUrl;
+                    img.src = objectUrl;
+                }).catch(() => {
+                    // Keep original source when caching fails.
+                });
                 return;
             }
 
