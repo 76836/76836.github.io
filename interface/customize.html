@@ -696,6 +696,9 @@ input[type="range"] {
 
 <script>
 let db, allItems = [], currentFilter = 'all', activeItemId = null;
+let appRegistry = [];
+const THUMB_W = 180, THUMB_H = 120;
+const thumbCache = new Map();
 let editImg = null, editOriginalData = null, flipH = false, flipV = false, rotateDeg = 0;
 
 const req = indexedDB.open("WallpaperDB", 1);
@@ -705,8 +708,12 @@ req.onupgradeneeded = e => {
     d.createObjectStore("library", { keyPath: "id", autoIncrement: true });
   if (!d.objectStoreNames.contains("settings"))
     d.createObjectStore("settings", { keyPath: "appid" });
+  if (!d.objectStoreNames.contains("thumbnails"))
+    d.createObjectStore("thumbnails", { keyPath: "key" });
+  if (!d.objectStoreNames.contains("apps"))
+    d.createObjectStore("apps", { keyPath: "appid" });
 };
-req.onsuccess = e => { db = e.target.result; loadLib(); };
+req.onsuccess = e => { db = e.target.result; loadLib(); refreshAppRegistry(); };
 req.onerror = () => notify("DB ERROR", true);
 
 /* ── TAB SWITCHING ── */
@@ -790,6 +797,59 @@ function updateCounts() {
   };
 }
 
+
+function escapeHtml(str = '') {
+  return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function thumbKeyForItem(item) {
+  const stamp = item.added || 0;
+  return `lib:${item.id}:${item.type}:${stamp}:${(item.content||'').slice(0,64)}`;
+}
+
+function getThumbRecord(key) {
+  if (thumbCache.has(key)) return Promise.resolve(thumbCache.get(key));
+  return new Promise(resolve => {
+    const req = db.transaction('thumbnails').objectStore('thumbnails').get(key);
+    req.onsuccess = () => {
+      const value = req.result?.data || null;
+      thumbCache.set(key, value);
+      resolve(value);
+    };
+    req.onerror = () => resolve(null);
+  });
+}
+
+function saveThumbRecord(key, data) {
+  thumbCache.set(key, data);
+  db.transaction('thumbnails','readwrite').objectStore('thumbnails').put({ key, data, updated: Date.now() });
+}
+
+function createImageThumb(src) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = THUMB_W; c.height = THUMB_H;
+      const ctx = c.getContext('2d');
+      const ratio = Math.max(THUMB_W / img.width, THUMB_H / img.height);
+      const w = img.width * ratio, h = img.height * ratio;
+      ctx.drawImage(img, (THUMB_W-w)/2, (THUMB_H-h)/2, w, h);
+      resolve(c.toDataURL('image/webp', 0.82));
+    };
+    img.onerror = () => resolve('');
+    img.src = src;
+  });
+}
+
+
+function refreshAppRegistry() {
+  if (!db.objectStoreNames.contains('apps')) { appRegistry = []; return; }
+  db.transaction('apps').objectStore('apps').getAll().onsuccess = e => {
+    appRegistry = (e.target.result || []).sort((a,b) => (b.seenAt||0) - (a.seenAt||0));
+  };
+}
+
 function setFilter(btn, f) {
   currentFilter = f;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -824,9 +884,10 @@ function renderLib() {
     const sizeStr = item.size ? formatSize(item.size) : 'URL';
     const typeLabel = item.type.toUpperCase();
 
+    const thumb = makeThumbnail(item);
     card.innerHTML = `
       <div class="card-thumb-wrap" onclick="openPreview(${item.id})">
-        ${makeThumbnail(item)}
+        ${thumb}
         <div class="play-icon">${item.type === 'video' ? '▶' : '⛶'}</div>
         <span class="thumb-type-badge">${typeLabel}</span>
       </div>
@@ -842,17 +903,30 @@ function renderLib() {
       </div>`;
     grid.appendChild(card);
 
-    // Lazy canvas thumbnail for images to avoid browser memory issues
-    if (item.type === 'image') {
-      const canvas = card.querySelector('canvas');
-      if (canvas) generateThumb(canvas, item.content);
+    if (item.type === 'image' && !thumb.includes('img')) {
+      const key = thumbKeyForItem(item);
+      createImageThumb(item.content).then(data => {
+        if (!data) return;
+        saveThumbRecord(key, data);
+        const node = grid.querySelector(`.card[data-id="${item.id}"] .thumb-img`);
+        if (node) node.src = data;
+      });
     }
   });
 }
 
 function makeThumbnail(item) {
   if (item.type === 'image') {
-    return `<canvas width="180" height="120" style="width:100%;height:100%;object-fit:cover"></canvas>`;
+    const key = thumbKeyForItem(item);
+    const cached = thumbCache.get(key);
+    if (!cached) {
+      getThumbRecord(key).then(data => {
+        if (!data) return;
+        const node = document.querySelector(`.card[data-id="${item.id}"] .thumb-img`);
+        if (node) node.src = data;
+      });
+    }
+    return `<img class="thumb-img" src="${cached || ''}" loading="lazy" decoding="async" style="background:var(--bg3)">`;
   } else if (item.type === 'video') {
     return `<video src="${item.content}" muted preload="metadata" style="width:100%;height:100%;object-fit:cover" onloadedmetadata="this.currentTime=1"></video>`;
   } else {
@@ -861,18 +935,6 @@ function makeThumbnail(item) {
       <span style="font-family:var(--font-mono);font-size:0.6rem;color:#555566">${item.name.substring(0,20)}</span>
     </div>`;
   }
-}
-
-function generateThumb(canvas, src) {
-  const ctx = canvas.getContext('2d');
-  const img = new Image();
-  img.onload = () => {
-    canvas.width = 180; canvas.height = 120;
-    const ratio = Math.max(180/img.width, 120/img.height);
-    const w = img.width * ratio, h = img.height * ratio;
-    ctx.drawImage(img, (180-w)/2, (120-h)/2, w, h);
-  };
-  img.src = src;
 }
 
 function formatSize(bytes) {
@@ -1033,6 +1095,18 @@ function saveEdit() {
   };
 }
 
+
+function toAppWallpaperRecord(item) {
+  const rec = {
+    wallpaperId: item.id,
+    name: item.name,
+    type: item.type,
+    muted: item.muted ?? true
+  };
+  if (typeof item.content === 'string' && !item.content.startsWith('data:')) rec.content = item.content;
+  return rec;
+}
+
 /* ── APPLY MODAL ── */
 let applyItemId = null;
 function openApplyModal(id) {
@@ -1040,20 +1114,27 @@ function openApplyModal(id) {
   document.getElementById('apply-app-id').value = '';
   const tagList = document.getElementById('existing-app-tags');
   tagList.innerHTML = '';
-  db.transaction("settings").objectStore("settings").getAll().onsuccess = e => {
-    e.target.result.forEach(app => {
-      const tag = document.createElement('div');
-      tag.className = 'app-tag';
-      tag.textContent = app.appid;
-      tag.onclick = () => {
-        document.querySelectorAll('.app-tag').forEach(t=>t.classList.remove('selected'));
-        tag.classList.add('selected');
-        document.getElementById('apply-app-id').value = app.appid;
-      };
-      tagList.appendChild(tag);
-    });
-    if (!e.target.result.length) tagList.innerHTML = '<span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--dim)">NO EXISTING APPS</span>';
+  const addTag = appid => {
+    const tag = document.createElement('div');
+    tag.className = 'app-tag';
+    tag.textContent = appid;
+    tag.onclick = () => {
+      document.querySelectorAll('.app-tag').forEach(t=>t.classList.remove('selected'));
+      tag.classList.add('selected');
+      document.getElementById('apply-app-id').value = appid;
+    };
+    tagList.appendChild(tag);
   };
+  const fastList = appRegistry.map(a => a.appid).filter(Boolean);
+  if (fastList.length) {
+    fastList.forEach(addTag);
+  } else {
+    db.transaction("settings").objectStore("settings").getAll().onsuccess = e => {
+      const ids = e.target.result.map(x => x.appid).filter(Boolean);
+      ids.forEach(addTag);
+      if (!ids.length) tagList.innerHTML = '<span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--dim)">NO EXISTING APPS</span>';
+    };
+  }
   openModal('apply-modal');
 }
 
@@ -1065,9 +1146,12 @@ function confirmApply() {
   const tx = db.transaction("settings","readwrite");
   tx.objectStore("settings").get(appid).onsuccess = e => {
     const existing = e.target.result || { appid, history: [], muted: true };
-    const history = [item, ...(existing.history||[]).filter(h=>h.content!==item.content)].slice(0,5);
-    tx.objectStore("settings").put({ ...item, appid, history, muted: existing.muted ?? true }).onsuccess = () => {
+    const appRecord = toAppWallpaperRecord(item);
+    const history = [appRecord, ...(existing.history||[]).filter(h => h.wallpaperId !== appRecord.wallpaperId)].slice(0,5);
+    tx.objectStore("settings").put({ ...appRecord, appid, history, muted: existing.muted ?? true }).onsuccess = () => {
+      if (db.objectStoreNames.contains('apps')) db.transaction('apps','readwrite').objectStore('apps').put({ appid, seenAt: Date.now() });
       closeModal('apply-modal'); notify('APPLIED TO ' + appid.toUpperCase());
+      refreshAppRegistry();
       updateCounts();
     };
   };
@@ -1085,7 +1169,8 @@ function renderApps() {
     apps.forEach(app => {
       const card = document.createElement('div');
       card.className = 'app-card';
-      const thumbSrc = app.type === 'image' ? app.content : '';
+      const thumbSrc = app.type === 'image' ? (app.content || '') : '';
+      const activeThumb = app.wallpaperId ? (thumbCache.get(`lib:${app.wallpaperId}:${app.type}:${app.added||0}:${(app.content||'').slice(0,64)}`) || '') : thumbSrc;
       card.innerHTML = `
         <div class="app-header">
           <span class="app-id">${app.appid}</span>
@@ -1095,7 +1180,7 @@ function renderApps() {
           </div>
         </div>
         <div class="app-preview-row">
-          ${thumbSrc ? `<img class="app-current-thumb" src="${thumbSrc}">` : `<div class="app-current-thumb" style="display:flex;align-items:center;justify-content:center;font-size:1.2rem;opacity:0.3">◱</div>`}
+          ${(activeThumb || thumbSrc) ? `<img class="app-current-thumb" src="${activeThumb || thumbSrc}">` : `<div class="app-current-thumb" style="display:flex;align-items:center;justify-content:center;font-size:1.2rem;opacity:0.3">◱</div>`}
           <div class="app-current-info">
             <div class="app-current-name">${app.name}</div>
             <div class="app-current-type">${app.type.toUpperCase()} · ACTIVE</div>
@@ -1120,7 +1205,7 @@ function quickChangeApp(appid, wp) {
   const tx = db.transaction("settings","readwrite");
   tx.objectStore("settings").get(appid).onsuccess = e => {
     const data = e.target.result;
-    const history = [wp, ...(data.history||[]).filter(h=>h.content!==wp.content)].slice(0,5);
+    const history = [wp, ...(data.history||[]).filter(h => h.wallpaperId !== wp.wallpaperId)].slice(0,5);
     tx.objectStore("settings").put({ ...data, ...wp, appid, history }).onsuccess = () => { renderApps(); notify('WALLPAPER SWAPPED'); };
   };
 }
