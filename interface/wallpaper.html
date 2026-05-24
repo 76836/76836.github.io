@@ -34,9 +34,13 @@ request.onupgradeneeded = e => {
   if (!db.objectStoreNames.contains("library")) db.createObjectStore("library", { keyPath: "id", autoIncrement: true });
   if (!db.objectStoreNames.contains("settings")) db.createObjectStore("settings", { keyPath: "appid" });
   if (!db.objectStoreNames.contains("thumbnails")) db.createObjectStore("thumbnails", { keyPath: "key" });
+  if (!db.objectStoreNames.contains("apps")) db.createObjectStore("apps", { keyPath: "appid" });
 };
 request.onsuccess = e => {
   const db = e.target.result;
+  if (appid && db.objectStoreNames.contains("apps")) {
+    db.transaction("apps", "readwrite").objectStore("apps").put({ appid, seenAt: Date.now() });
+  }
   if (!appid || !db.objectStoreNames.contains("settings")) return tryDefault(db);
   db.transaction("settings").objectStore("settings").get(appid).onsuccess = async ev => {
     const cfg = ev.target.result;
@@ -55,7 +59,17 @@ async function resolveWallpaper(db, cfg) {
   const thumbRec = await reqP(db.transaction('thumbnails').objectStore('thumbnails').get(key));
   return { type: item.type, content: item.content, thumb: (thumbRec && thumbRec.data) || '' };
 }
-function tryDefault(db) { if (!defaultUrl) return; const type = detectType(defaultUrl); render(type, defaultUrl, true, ''); }
+function tryDefault(db) {
+  if (db && appid && db.objectStoreNames.contains("settings")) {
+    const tx = db.transaction("settings", "readwrite").objectStore("settings");
+    tx.get(appid).onsuccess = e => {
+      if (!e.target.result) tx.put({ appid, name: appid, type: "image", content: "", muted: true, history: [], added: Date.now() });
+    };
+  }
+  if (!defaultUrl) return;
+  const type = detectType(defaultUrl);
+  render(type, defaultUrl, true, '');
+}
 function detectType(url){ const clean=(url||'').split('?')[0].toLowerCase(); if(/\.(mp4|webm|mov|ogg)$/.test(clean)) return 'video'; if(/\.(html?|php|aspx?)$/.test(clean)) return 'page'; if(!/\.(jpe?g|png|gif|webp|avif|svg|bmp)$/.test(clean)) return 'page'; return 'image'; }
 function render(type, content, muted, thumb) {
   const container = document.getElementById('container'); container.innerHTML='';

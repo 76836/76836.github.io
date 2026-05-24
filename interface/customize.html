@@ -696,6 +696,7 @@ input[type="range"] {
 
 <script>
 let db, allItems = [], currentFilter = 'all', activeItemId = null;
+let appRegistry = [];
 const THUMB_W = 180, THUMB_H = 120;
 const thumbCache = new Map();
 let editImg = null, editOriginalData = null, flipH = false, flipV = false, rotateDeg = 0;
@@ -709,8 +710,10 @@ req.onupgradeneeded = e => {
     d.createObjectStore("settings", { keyPath: "appid" });
   if (!d.objectStoreNames.contains("thumbnails"))
     d.createObjectStore("thumbnails", { keyPath: "key" });
+  if (!d.objectStoreNames.contains("apps"))
+    d.createObjectStore("apps", { keyPath: "appid" });
 };
-req.onsuccess = e => { db = e.target.result; loadLib(); };
+req.onsuccess = e => { db = e.target.result; loadLib(); refreshAppRegistry(); };
 req.onerror = () => notify("DB ERROR", true);
 
 /* ── TAB SWITCHING ── */
@@ -837,6 +840,14 @@ function createImageThumb(src) {
     img.onerror = () => resolve('');
     img.src = src;
   });
+}
+
+
+function refreshAppRegistry() {
+  if (!db.objectStoreNames.contains('apps')) { appRegistry = []; return; }
+  db.transaction('apps').objectStore('apps').getAll().onsuccess = e => {
+    appRegistry = (e.target.result || []).sort((a,b) => (b.seenAt||0) - (a.seenAt||0));
+  };
 }
 
 function setFilter(btn, f) {
@@ -1103,20 +1114,27 @@ function openApplyModal(id) {
   document.getElementById('apply-app-id').value = '';
   const tagList = document.getElementById('existing-app-tags');
   tagList.innerHTML = '';
-  db.transaction("settings").objectStore("settings").getAll().onsuccess = e => {
-    e.target.result.forEach(app => {
-      const tag = document.createElement('div');
-      tag.className = 'app-tag';
-      tag.textContent = app.appid;
-      tag.onclick = () => {
-        document.querySelectorAll('.app-tag').forEach(t=>t.classList.remove('selected'));
-        tag.classList.add('selected');
-        document.getElementById('apply-app-id').value = app.appid;
-      };
-      tagList.appendChild(tag);
-    });
-    if (!e.target.result.length) tagList.innerHTML = '<span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--dim)">NO EXISTING APPS</span>';
+  const addTag = appid => {
+    const tag = document.createElement('div');
+    tag.className = 'app-tag';
+    tag.textContent = appid;
+    tag.onclick = () => {
+      document.querySelectorAll('.app-tag').forEach(t=>t.classList.remove('selected'));
+      tag.classList.add('selected');
+      document.getElementById('apply-app-id').value = appid;
+    };
+    tagList.appendChild(tag);
   };
+  const fastList = appRegistry.map(a => a.appid).filter(Boolean);
+  if (fastList.length) {
+    fastList.forEach(addTag);
+  } else {
+    db.transaction("settings").objectStore("settings").getAll().onsuccess = e => {
+      const ids = e.target.result.map(x => x.appid).filter(Boolean);
+      ids.forEach(addTag);
+      if (!ids.length) tagList.innerHTML = '<span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--dim)">NO EXISTING APPS</span>';
+    };
+  }
   openModal('apply-modal');
 }
 
@@ -1131,7 +1149,9 @@ function confirmApply() {
     const appRecord = toAppWallpaperRecord(item);
     const history = [appRecord, ...(existing.history||[]).filter(h => h.wallpaperId !== appRecord.wallpaperId)].slice(0,5);
     tx.objectStore("settings").put({ ...appRecord, appid, history, muted: existing.muted ?? true }).onsuccess = () => {
+      if (db.objectStoreNames.contains('apps')) db.transaction('apps','readwrite').objectStore('apps').put({ appid, seenAt: Date.now() });
       closeModal('apply-modal'); notify('APPLIED TO ' + appid.toUpperCase());
+      refreshAppRegistry();
       updateCounts();
     };
   };
