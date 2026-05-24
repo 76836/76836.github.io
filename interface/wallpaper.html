@@ -24,149 +24,49 @@
     <div id="container"></div>
     <button id="unmute-btn" onclick="userUnmute()">🔊 TAP TO UNMUTE</button>
     <script>
-        const params = new URLSearchParams(window.location.search);
-        const appid = params.get('appid');
-        const defaultUrl = params.get('default');
-
-        // Open without specifying a version — this lets the browser use whatever
-        // version the settings app already created, avoiding a spurious upgrade
-        // that would wipe or ignore the existing schema.
-        const request = indexedDB.open("WallpaperDB");
-
-       request.onsuccess = e => {
-    const db = e.target.result;
-    if (!appid || !db.objectStoreNames.contains("settings")) {
-        tryDefault(db); return;
-    }
-    const getReq = db.transaction("settings", "readonly")
-                     .objectStore("settings")
-                     .get(appid);
-    getReq.onsuccess = () => {
-        if (getReq.result) {
-            const { type, content, muted } = getReq.result;
-            render(type, content, muted);
-        } else {
-            tryDefault(db);
-        }
-    };
-    getReq.onerror = () => tryDefault(db);
+const params = new URLSearchParams(window.location.search);
+const appid = params.get('appid');
+const defaultUrl = params.get('default');
+const request = indexedDB.open("WallpaperDB");
+let activeAnimated = null;
+request.onupgradeneeded = e => {
+  const db = e.target.result;
+  if (!db.objectStoreNames.contains("library")) db.createObjectStore("library", { keyPath: "id", autoIncrement: true });
+  if (!db.objectStoreNames.contains("settings")) db.createObjectStore("settings", { keyPath: "appid" });
+  if (!db.objectStoreNames.contains("thumbnails")) db.createObjectStore("thumbnails", { keyPath: "key" });
 };
-
+request.onsuccess = e => {
+  const db = e.target.result;
+  if (!appid || !db.objectStoreNames.contains("settings")) return tryDefault(db);
+  db.transaction("settings").objectStore("settings").get(appid).onsuccess = async ev => {
+    const cfg = ev.target.result;
+    if (!cfg) return tryDefault(db);
+    const resolved = await resolveWallpaper(db, cfg);
+    render(resolved.type, resolved.content, cfg.muted, resolved.thumb);
+  };
+};
 request.onerror = () => tryDefault(null);
-
-        // If the loader somehow triggers an upgrade (first ever open on this origin),
-        // create the schema so it matches what the settings app expects.
-        request.onupgradeneeded = e => {
-            const db = e.target.result;
-            if (!db.objectStoreNames.contains("library"))
-                db.createObjectStore("library", { keyPath: "id", autoIncrement: true });
-            if (!db.objectStoreNames.contains("settings"))
-                db.createObjectStore("settings", { keyPath: "appid" });
-        };
-
-        function tryDefault(db) {
-    if (defaultUrl) {
-        const type = detectType(defaultUrl);
-        // Register the appid with the default wallpaper so it shows in the customizer
-        if (db && appid && db.objectStoreNames.contains("settings")) {
-            const stub = {
-                appid,
-                name: appid,
-                type,
-                content: defaultUrl,
-                muted: true,
-                history: [],
-                added: Date.now()
-            };
-            db.transaction("settings", "readwrite")
-              .objectStore("settings")
-              .put(stub);
-        }
-        render(type, defaultUrl, true);
-    } else if (db && appid && db.objectStoreNames.contains("settings")) {
-        // No default — register a blank stub so the appid still appears in the customizer
-        const stub = {
-            appid,
-            name: appid,
-            type: 'image',
-            content: '',
-            muted: true,
-            history: [],
-            added: Date.now()
-        };
-        db.transaction("settings", "readwrite")
-          .objectStore("settings")
-          .put(stub);
-    }
+function reqP(req){ return new Promise((r,j)=>{req.onsuccess=()=>r(req.result); req.onerror=()=>j(req.error);}); }
+async function resolveWallpaper(db, cfg) {
+  if (!cfg.wallpaperId) return { type: cfg.type, content: cfg.content || '', thumb: '' };
+  const item = await reqP(db.transaction('library').objectStore('library').get(cfg.wallpaperId));
+  if (!item) return { type: cfg.type, content: cfg.content || '', thumb: '' };
+  const key = 'lib:' + item.id + ':' + item.type + ':' + (item.added||0) + ':' + (item.content||'').slice(0,64);
+  const thumbRec = await reqP(db.transaction('thumbnails').objectStore('thumbnails').get(key));
+  return { type: item.type, content: item.content, thumb: (thumbRec && thumbRec.data) || '' };
 }
-
-        function detectType(url) {
-            const clean = url.split('?')[0].toLowerCase();
-            if (/\.(mp4|webm|mov|ogg)$/.test(clean)) return 'video';
-            if (/\.(html?|php|aspx?)$/.test(clean)) return 'page';
-            if (!/\.(jpe?g|png|gif|webp|avif|svg|bmp)$/.test(clean)) return 'page';
-            return 'image';
-        }
-
-        let activeVideo = null;
-
-        function render(type, content, muted) {
-            const container = document.getElementById('container');
-            container.innerHTML = '';
-
-            if (type === 'page') {
-                if (content.startsWith('data:') || content.startsWith('blob:')) {
-                    const frame = document.createElement('iframe');
-                    frame.src = content;
-                    frame.sandbox = 'allow-scripts allow-same-origin allow-forms';
-                    container.appendChild(frame);
-                } else {
-                    window.location.replace(content);
-                }
-                return;
-            }
-
-            if (type === 'video') {
-                const vid = document.createElement('video');
-                vid.src = content;
-                vid.autoplay = true;
-                vid.loop = true;
-                vid.playsInline = true;
-                // Always start muted so autoplay is allowed by the browser,
-                // then unmute immediately if the setting says sound is on.
-                vid.muted = true;
-                vid.play().then(() => {
-                    if (muted === false) {
-                        // Try to unmute now that playback has started.
-                        // This works if the page was opened by a user gesture
-                        // (e.g. clicking a link). If it fails, show the button.
-                        vid.muted = false;
-                        if (vid.muted) showUnmuteBtn(vid);
-                    }
-                }).catch(() => {
-                    // Autoplay blocked entirely — nothing to do, video won't play.
-                });
-                activeVideo = vid;
-                container.appendChild(vid);
-                return;
-            }
-
-            const img = document.createElement('img');
-            img.src = content;
-            container.appendChild(img);
-        }
-
-        function showUnmuteBtn(vid) {
-            const btn = document.getElementById('unmute-btn');
-            btn.style.display = 'block';
-            btn._vid = vid;
-        }
-
-        function userUnmute() {
-            const btn = document.getElementById('unmute-btn');
-            if (btn._vid) btn._vid.muted = false;
-            btn.style.display = 'none';
-        }
-    </script>
+function tryDefault(db) { if (!defaultUrl) return; const type = detectType(defaultUrl); render(type, defaultUrl, true, ''); }
+function detectType(url){ const clean=(url||'').split('?')[0].toLowerCase(); if(/\.(mp4|webm|mov|ogg)$/.test(clean)) return 'video'; if(/\.(html?|php|aspx?)$/.test(clean)) return 'page'; if(!/\.(jpe?g|png|gif|webp|avif|svg|bmp)$/.test(clean)) return 'page'; return 'image'; }
+function render(type, content, muted, thumb) {
+  const container = document.getElementById('container'); container.innerHTML='';
+  if (thumb) { const t = new Image(); t.src = thumb; t.style.filter='blur(1px)'; container.appendChild(t); }
+  if (type === 'page') { if (content.startsWith('data:') || content.startsWith('blob:')) { const f = document.createElement('iframe'); f.src = content; f.sandbox='allow-scripts allow-same-origin allow-forms'; requestAnimationFrame(()=>container.appendChild(f)); } else window.location.replace(content); return; }
+  if (type === 'video') { const v=document.createElement('video'); v.src=content; v.autoplay=true; v.loop=true; v.playsInline=true; v.preload='metadata'; v.muted=true; v.addEventListener('canplay',()=>requestAnimationFrame(()=>container.appendChild(v)),{once:true}); v.play().then(()=>{if(muted===false){v.muted=false;if(v.muted) showUnmuteBtn(v);}}).catch(()=>{}); activeAnimated=v; return; }
+  const img = new Image(); img.decoding='async'; img.onload=()=>requestAnimationFrame(()=>container.appendChild(img)); img.src=content;
+}
+document.addEventListener('visibilitychange', () => { if (!activeAnimated) return; if (document.visibilityState === 'hidden') activeAnimated.pause?.(); else activeAnimated.play?.().catch(()=>{}); });
+function showUnmuteBtn(vid){ const btn=document.getElementById('unmute-btn'); btn.style.display='block'; btn._vid=vid; }
+function userUnmute(){ const btn=document.getElementById('unmute-btn'); if(btn._vid) btn._vid.muted=false; btn.style.display='none'; }
+</script>
 </body>
 </html>
