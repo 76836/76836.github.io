@@ -1,0 +1,1858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>llamafile builder</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@300;500;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #000000;
+    --surface: #0a0a0a;
+    --surface2: #111111;
+    --border: #2a2a2a;
+    --border-hover: #444;
+    --accent: #ffffff;
+    --accent2: #e8e8e8;
+    --text: #ffffff;
+    --muted: #888888;
+    --success: #ffffff;
+    --warn: #cccccc;
+    --error: #ff5555;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --sans: 'Space Grotesk', system-ui, sans-serif;
+    --radius: 14px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  header { margin-bottom: 48px; }
+
+  .logo {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: #fff;
+    -webkit-text-fill-color: #fff;
+  }
+
+  .subtitle {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+
+  .step:hover { border-color: #3a3a55; }
+  .step.done { border-color: var(--success); }
+
+  .step-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .step-num {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: all 0.2s;
+    margin-top: 2px;
+  }
+
+  .step.done .step-num {
+    background: var(--success);
+    border-color: var(--success);
+    color: #0a0a0f;
+  }
+
+  .step-title { font-size: 15px; font-weight: 500; letter-spacing: -0.01em; }
+  .step-desc { font-size: 13px; color: var(--muted); margin-top: 4px; line-height: 1.6; }
+
+  .dropzone {
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    background: var(--surface2);
+  }
+
+  .dropzone:hover, .dropzone.drag-over {
+    border-color: var(--accent);
+    background: rgba(91,106,240,0.05);
+  }
+
+  .dropzone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .dropzone-icon { font-size: 28px; margin-bottom: 10px; display: block; }
+  .dropzone-label { font-size: 14px; font-weight: 500; }
+  .dropzone-sub { font-size: 12px; color: var(--muted); margin-top: 4px; font-family: var(--mono); }
+
+  .file-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(34,211,160,0.1);
+    border: 1px solid var(--success);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--success);
+    margin-top: 12px;
+  }
+
+  .file-size { color: var(--muted); }
+
+  textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 16px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.6;
+    min-height: 160px;
+  }
+
+  textarea:focus { border-color: var(--accent); }
+
+  .textarea-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .label-text {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-family: var(--mono);
+  }
+
+  .hint-link { font-size: 11px; color: var(--accent2); text-decoration: none; font-family: var(--mono); }
+  .hint-link:hover { text-decoration: underline; }
+
+  .extra-files-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+
+  .extra-file-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+  }
+
+  .extra-file-name { flex: 1; }
+
+  .extra-file-name input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    width: 100%;
+    border-bottom: 1px solid var(--border);
+    padding: 2px 4px;
+  }
+
+  .extra-file-name input:focus { border-color: var(--accent); }
+
+  .remove-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: color 0.15s;
+  }
+  .remove-btn:hover { color: var(--error); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+
+  .btn-success {
+    background: #fff;
+    color: #000;
+    font-weight: 700;
+    padding: 14px 28px;
+    font-size: 15px;
+    border-radius: 12px;
+    border: 1px solid #fff;
+  }
+  .btn-success:hover { background: #e8e8e8; transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,255,255,0.12); }
+  .btn-success:active { transform: translateY(0); }
+  .btn-success:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .btn-ghost:hover { border-color: #fff; background: rgba(255,255,255,0.06); }
+
+  .btn-outline {
+    background: transparent;
+    color: #fff;
+    border: 1px solid #fff;
+    border-radius: 10px;
+    padding: 10px 16px;
+  }
+  .btn-outline:hover { background: #fff; color: #000; }
+
+  .cache-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .cache-pill.hit { border-color: #fff; color: #fff; }
+  .cache-stats { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+  .folder-hint {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+
+  .akari-panel {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    background: var(--surface2);
+    margin-top: 8px;
+  }
+
+
+  .status-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-top: 24px;
+    display: none;
+  }
+  .status-bar.visible { display: block; }
+
+  .status-row { display: flex; align-items: center; gap: 12px; font-size: 14px; }
+
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .progress-bar-wrap {
+    background: var(--surface2);
+    border-radius: 4px;
+    height: 6px;
+    margin-top: 14px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 4px;
+    transition: width 0.3s;
+    width: 0%;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .info-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+
+  .info-card-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+
+  .info-card-value { font-family: var(--mono); font-size: 13px; color: var(--text); font-weight: 500; }
+
+  .build-section {
+    margin-top: 32px;
+    padding: 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .build-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.02em; }
+  .build-sub { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+
+  .output-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 400px;
+    margin: 0 auto 24px;
+  }
+
+  .output-name-row input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .output-name-row input:focus { border-color: var(--accent); }
+  .output-ext { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+
+  .error-msg { color: var(--error); font-size: 13px; margin-top: 12px; font-family: var(--mono); }
+
+  .collapsible-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    gap: 14px;
+  }
+
+  .collapsible-header .arrow { font-size: 12px; color: var(--muted); transition: transform 0.2s; margin-top: 8px; flex-shrink: 0; }
+  .collapsible-body { overflow: hidden; }
+  .collapsed .collapsible-body { display: none; }
+  .collapsed .arrow { transform: rotate(-90deg); }
+
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .tag-optional { border-color: var(--muted); color: var(--muted); }
+  .tag-required { border-color: var(--accent); color: var(--accent); }
+
+  code {
+    font-family: var(--mono);
+    background: var(--surface2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  .help-text { font-size: 12px; color: var(--muted); line-height: 1.7; margin-top: 10px; }
+  .help-text strong { color: var(--text); }
+
+  a { color: var(--accent2); }
+
+  /* Web UI editor */
+  .ui-mode-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px;
+  }
+
+  .ui-tab {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .ui-tab:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  .ui-tab.active { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+
+  .editor-shell {
+    display: flex;
+    height: 480px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--surface2);
+  }
+
+  .editor-sidebar {
+    width: 160px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    background: var(--bg);
+  }
+
+  .editor-sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    transition: all 0.1s;
+    position: relative;
+  }
+
+  .editor-sidebar-item:hover { background: var(--surface); color: var(--text); }
+  .editor-sidebar-item.active { background: var(--surface2); color: var(--accent2); border-left: 2px solid var(--accent); padding-left: 8px; }
+
+  .editor-sidebar-item .del-file {
+    margin-left: auto;
+    opacity: 0;
+    background: none;
+    border: none;
+    color: var(--error);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 0 2px;
+    line-height: 1;
+  }
+
+  .editor-sidebar-item:hover .del-file { opacity: 1; }
+
+  .editor-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .editor-toolbar {
+    display: flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .editor-textarea {
+    flex: 1;
+    width: 100%;
+    background: #0d0d14;
+    border: none;
+    border-radius: 0;
+    color: #c9d1d9;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    padding: 14px;
+    resize: none;
+    outline: none;
+    line-height: 1.65;
+    min-height: unset;
+    tab-size: 2;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo">76836 · llamafile builder</div>
+    <h1>llamafile builder</h1>
+    <p class="subtitle">Pack a GGUF + llamafile runtime into one portable executable — fully offline. ZIP64 · 64KB align · <strong>stream-to-disk</strong> (low RAM) · optional <strong>Akari-AIO</strong> UI with asset cache.</p>
+  </header>
+
+  <!-- STEP 1 -->
+  <div class="step" id="step1">
+    <div class="step-header">
+      <div class="step-num" id="num1">1</div>
+      <div>
+        <div class="step-title">llamafile binary <span class="tag tag-required">required</span></div>
+        <div class="step-desc">
+          Download from <a href="https://github.com/mozilla-ai/llamafile/releases" target="_blank">github.com/mozilla-ai/llamafile/releases</a> — the file named <code>llamafile-X.X.X</code> (no extension, ~100 MB).
+          On Windows, rename it to <code>.exe</code> first to verify it works, then use the original here.
+        </div>
+      </div>
+    </div>
+    <div class="dropzone" id="dz1">
+      <input type="file" id="llamafileBin">
+      <span class="dropzone-icon">⚙️</span>
+      <div class="dropzone-label">Drop llamafile binary here</div>
+      <div class="dropzone-sub">llamafile-X.X.X or llamafile-X.X.X.exe</div>
+    </div>
+    <div id="llamafileBinInfo"></div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step" id="step2">
+    <div class="step-header">
+      <div class="step-num" id="num2">2</div>
+      <div>
+        <div class="step-title">GGUF model file <span class="tag tag-required">required</span></div>
+        <div class="step-desc">Any <code>.gguf</code> file. Quantized models (Q4_K_M, Q8_0) recommended. File will be 64KB-aligned in the output for GPU mmap compatibility.</div>
+      </div>
+    </div>
+    <div class="dropzone" id="dz2">
+      <input type="file" id="ggufFile" accept=".gguf,*/*">
+      <span class="dropzone-icon">🧠</span>
+      <div class="dropzone-label">Drop your .gguf model here</div>
+      <div class="dropzone-sub">model.gguf</div>
+    </div>
+    <div id="ggufInfo"></div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step" id="step3">
+    <div class="step-header">
+      <div class="step-num" id="num3">3</div>
+      <div>
+        <div class="step-title">.args configuration <span class="tag tag-required">required</span></div>
+        <div class="step-desc">One flag per line. The <code>-m</code> value auto-updates when you load a GGUF. Use <code>...</code> on its own line to allow the user to pass extra args.</div>
+      </div>
+    </div>
+    <div class="textarea-label">
+      <span class="label-text">.args</span>
+      <a href="https://github.com/mozilla-ai/llamafile#creating-llamafiles" target="_blank" class="hint-link">flag reference ↗</a>
+    </div>
+    <textarea id="argsContent" spellcheck="false">-m
+MODEL_FILENAME
+--host
+0.0.0.0
+-c
+8192
+...</textarea>
+    <p class="help-text">
+      <strong>Common flags (one per line):</strong> <code>--host 0.0.0.0</code> expose on LAN ·
+      <code>-c 8192</code> context window · <code>--nobrowser</code> suppress browser (older versions only) ·
+      <code>--system-prompt "you are helpful"</code> default system prompt ·
+      <code>-ngl 999</code> GPU offload layers · <code>--port 8080</code>
+    </p>
+  </div>
+
+  <!-- STEP 4: Web UI -->
+  <div class="step" id="step4">
+    <div class="step-header">
+      <div class="step-num" id="num4">4</div>
+      <div>
+        <div class="step-title">Web UI <span class="tag tag-optional">optional</span></div>
+        <div class="step-desc">Customize what opens in the browser. Uses <code>--path /zip/ui</code> to serve your files from inside the executable.</div>
+      </div>
+    </div>
+
+    <!-- Mode toggle -->
+    <div class="ui-mode-tabs">
+      <button class="ui-tab active" id="tab-builtin" onclick="setUiMode('builtin')">Built-in UI</button>
+      <button class="ui-tab" id="tab-akariaio" onclick="setUiMode('akariaio')">Akari-AIO</button>
+      <button class="ui-tab" id="tab-starter" onclick="setUiMode('starter')">Starter template</button>
+      <button class="ui-tab" id="tab-custom" onclick="setUiMode('custom')">Custom / folder</button>
+    </div>
+
+    <div id="ui-mode-builtin" class="ui-mode-panel">
+      <p class="help-text" style="padding:16px 0">Use llamafile's default built-in chat UI (llama.cpp server). No extra files are bundled — just works out of the box.</p>
+    </div>
+
+    
+    <div id="ui-mode-akariaio" class="ui-mode-panel" style="display:none">
+      <div class="akari-panel">
+        <p class="help-text" style="margin:0 0 12px">
+          Packages the full <strong>Akari-AIO</strong> offline UI from
+          <a href="https://github.com/76836/Akari-AIO" target="_blank">github.com/76836/Akari-AIO</a>
+          into <code>/zip/ui/</code>. Assets are cached by Git SHA in the browser — rebuilds reuse cache when nothing changed.
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+          <button class="btn btn-outline" type="button" onclick="prefetchAkariAIO()">Fetch / refresh Akari-AIO</button>
+          <button class="btn btn-ghost" type="button" onclick="clearAkariCache()">Clear UI cache</button>
+          <span class="cache-pill" id="akariCachePill">cache idle</span>
+        </div>
+        <div class="cache-stats" id="akariCacheStats">Not loaded yet.</div>
+        <p class="help-text" style="margin-top:12px">
+          Large files (Vosk ~40MB, Piper ~60MB, VRM) download once and stay in Cache Storage.
+          Requires network only on first fetch or when the repo tip changes.
+        </p>
+      </div>
+    </div>
+
+    <div id="ui-mode-starter" class="ui-mode-panel" style="display:none">
+      <p class="help-text" style="margin-bottom:12px">A minimal single-file chat UI is pre-loaded below. Edit it freely — it talks to the OpenAI-compatible API at <code>/v1/chat/completions</code>. Add more files with the + button.</p>
+      <div class="editor-shell">
+        <div class="editor-sidebar" id="editorSidebar"></div>
+        <div class="editor-main">
+          <div class="editor-toolbar">
+            <span id="activeFilename" style="font-family:var(--mono);font-size:12px;color:var(--text)"></span>
+            <div style="display:flex;gap:8px;margin-left:auto">
+              <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="addUiFile()">+ New file</button>
+              <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="uploadUiFiles()">↑ Upload</button>
+              <input type="file" id="uiFileUpload" multiple style="display:none" onchange="handleUiUpload(event)">
+            </div>
+          </div>
+          <textarea id="editorTextarea" class="editor-textarea" spellcheck="false" oninput="onEditorInput()" onkeydown="onEditorKeydown(event)"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div id="ui-mode-custom" class="ui-mode-panel" style="display:none">
+      <p class="help-text" style="margin-bottom:12px">Upload individual files or an entire folder. Served from <code>/zip/ui/</code> — include <code>index.html</code> at the folder root. Ideal for prerelease Akari-AIO builds.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+        <button class="btn btn-outline" type="button" onclick="pickFolder()">Upload folder</button>
+        <input type="file" id="folderPicker" webkitdirectory directory multiple style="display:none" onchange="handleFolderUpload(event)">
+      </div>
+      <div class="editor-shell">
+        <div class="editor-sidebar" id="editorSidebarCustom"></div>
+        <div class="editor-main">
+          <div class="editor-toolbar">
+            <span id="activeFilenameCustom" style="font-family:var(--mono);font-size:12px;color:var(--text)"></span>
+            <div style="display:flex;gap:8px;margin-left:auto">
+              <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="addUiFile('custom')">+ New file</button>
+              <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="uploadUiFiles('custom')">↑ Upload</button>
+              <input type="file" id="uiFileUploadCustom" multiple style="display:none" onchange="handleUiUpload(event,'custom')">
+            </div>
+          </div>
+          <textarea id="editorTextareaCustom" class="editor-textarea" spellcheck="false" oninput="onEditorInput('custom')" onkeydown="onEditorKeydown(event,'custom')"></textarea>
+        </div>
+      </div>
+      <div class="dropzone" id="dzCustom" style="padding:16px;margin-top:12px;border-style:dashed">
+        <input type="file" id="uiDropFiles" multiple onchange="handleUiUpload(event,'custom')">
+        <div class="dropzone-label" style="font-size:12px">Drop files here to add them</div>
+        <div class="dropzone-sub">Images, JS, CSS, HTML — anything</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUILD -->
+  <div class="build-section">
+    <div class="build-title">Build your llamafile</div>
+    <div class="build-sub">All processing is local — no uploads. Uses ZIP64 + 64KB alignment, matching the real <code>zipalign -j0</code>.</div>
+
+    <div class="output-name-row">
+      <input type="text" id="outputName" placeholder="my-model" value="my-model">
+      <span class="output-ext">.llamafile</span>
+    </div>
+
+    <label style="display:flex;align-items:center;justify-content:center;gap:10px;margin:0 auto 20px;max-width:420px;font-size:13px;color:var(--muted);cursor:pointer;user-select:none">
+      <input type="checkbox" id="optStreamDisk" checked style="width:16px;height:16px;accent-color:#fff">
+      <span>Stream to disk <span style="color:var(--text)">(recommended)</span> — File System Access API, ~4&nbsp;MB RAM chunks, no OOM on large GGUFs. Falls back to memory download if unsupported.</span>
+    </label>
+
+    <button class="btn btn-success" id="buildBtn" onclick="buildLlamafile()" disabled>
+      ⚡ Build &amp; Save
+    </button>
+    <div id="errorMsg" class="error-msg"></div>
+  </div>
+
+  <div class="status-bar" id="statusBar">
+    <div class="status-row">
+      <div class="spinner" id="statusSpinner"></div>
+      <span id="statusText">Building…</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+    <div class="info-grid" id="infoGrid" style="display:none"></div>
+  </div>
+
+</div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────
+const state = { llamafileBin: null, ggufFile: null };
+
+// uiMode: 'builtin' | 'starter' | 'custom'
+let uiMode = 'builtin';
+
+// UI file editors: { name: string, content: string (text) | Uint8Array (binary), binary: bool }[]
+const uiFiles = { starter: [], custom: [] };
+let activeFile = { starter: 0, custom: 0 };
+
+// ── Drag/drop ─────────────────────────────────────────────────────────────
+['dz1','dz2'].forEach(id => {
+  const dz = document.getElementById(id);
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); });
+});
+
+// ── UI mode ─────────────────────────────────────────────────────────────
+function setUiMode(mode) {
+  uiMode = mode;
+  ['builtin','akariaio','starter','custom'].forEach(m => {
+    const tab = document.getElementById('tab-'+m);
+    const panel = document.getElementById('ui-mode-'+m);
+    if (tab) tab.classList.toggle('active', m === mode);
+    if (panel) panel.style.display = m === mode ? '' : 'none';
+  });
+  if (mode === 'starter' && uiFiles.starter.length === 0) initStarterFiles();
+  if (mode === 'custom' && uiFiles.custom.length === 0) {
+    uiFiles.custom.push({ name: 'index.html', content: '<!-- Add your HTML here -->\n', binary: false });
+    renderEditorSidebar('custom');
+    selectFile('custom', 0);
+  }
+  if (mode === 'akariaio') {
+    refreshAkariCacheStats();
+  }
+}
+
+function initStarterFiles() {
+  uiFiles.starter = [{ name: 'index.html', content: STARTER_TEMPLATE, binary: false }];
+  renderEditorSidebar('starter');
+  selectFile('starter', 0);
+}
+
+function renderEditorSidebar(scope) {
+  const id = scope === 'starter' ? 'editorSidebar' : 'editorSidebarCustom';
+  const sb = document.getElementById(id);
+  sb.innerHTML = '';
+  uiFiles[scope].forEach((f, i) => {
+    const item = document.createElement('div');
+    item.className = 'editor-sidebar-item' + (i === activeFile[scope] ? ' active' : '');
+    item.innerHTML = `<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(f.name)}">${esc(f.name)}</span>` +
+      (uiFiles[scope].length > 1 ? `<button class="del-file" onclick="event.stopPropagation();deleteFile('${scope}',${i})">✕</button>` : '');
+    item.addEventListener('click', () => selectFile(scope, i));
+    sb.appendChild(item);
+  });
+}
+
+function selectFile(scope, i) {
+  // Save current textarea back to state
+  saveCurrentFile(scope);
+  activeFile[scope] = i;
+  const f = uiFiles[scope][i];
+  const ta = document.getElementById(scope === 'starter' ? 'editorTextarea' : 'editorTextareaCustom');
+  const fn = document.getElementById(scope === 'starter' ? 'activeFilename' : 'activeFilenameCustom');
+  fn.textContent = f.name;
+  if (f.binary) {
+    ta.value = '[binary file — not editable as text]';
+    ta.disabled = true;
+  } else {
+    ta.value = f.content;
+    ta.disabled = false;
+  }
+  renderEditorSidebar(scope);
+}
+
+function saveCurrentFile(scope) {
+  const i = activeFile[scope];
+  if (i >= uiFiles[scope].length) return;
+  const f = uiFiles[scope][i];
+  if (!f.binary) {
+    const ta = document.getElementById(scope === 'starter' ? 'editorTextarea' : 'editorTextareaCustom');
+    f.content = ta.value;
+  }
+}
+
+function onEditorInput(scope = 'starter') { /* live save handled on selectFile */ }
+
+function onEditorKeydown(e, scope = 'starter') {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const ta = e.target;
+    const s = ta.selectionStart, end = ta.selectionEnd;
+    ta.value = ta.value.substring(0, s) + '  ' + ta.value.substring(end);
+    ta.selectionStart = ta.selectionEnd = s + 2;
+  }
+}
+
+function deleteFile(scope, i) {
+  uiFiles[scope].splice(i, 1);
+  if (activeFile[scope] >= uiFiles[scope].length) activeFile[scope] = uiFiles[scope].length - 1;
+  if (uiFiles[scope].length === 0) {
+    document.getElementById(scope === 'starter' ? 'editorTextarea' : 'editorTextareaCustom').value = '';
+    document.getElementById(scope === 'starter' ? 'activeFilename' : 'activeFilenameCustom').textContent = '';
+  }
+  renderEditorSidebar(scope);
+  if (uiFiles[scope].length > 0) selectFile(scope, activeFile[scope]);
+}
+
+function addUiFile(scope = 'starter') {
+  saveCurrentFile(scope);
+  const name = prompt('Filename:', 'newfile.html');
+  if (!name) return;
+  uiFiles[scope].push({ name, content: '', binary: false });
+  activeFile[scope] = uiFiles[scope].length - 1;
+  renderEditorSidebar(scope);
+  selectFile(scope, activeFile[scope]);
+}
+
+function uploadUiFiles(scope = 'starter') {
+  document.getElementById(scope === 'starter' ? 'uiFileUpload' : 'uiFileUploadCustom').click();
+}
+
+async function handleUiUpload(event, scope = 'starter') {
+  saveCurrentFile(scope);
+  const files = event.target.files;
+  for (const f of files) {
+    const isText = /\.(html?|css|js|json|txt|md|svg|xml)$/i.test(f.name);
+    if (isText) {
+      const text = await f.text();
+      const existing = uiFiles[scope].findIndex(u => u.name === f.name);
+      if (existing >= 0) uiFiles[scope][existing] = { name: f.name, content: text, binary: false };
+      else uiFiles[scope].push({ name: f.name, content: text, binary: false });
+    } else {
+      const buf = await readFile(f);
+      const existing = uiFiles[scope].findIndex(u => u.name === f.name);
+      const entry = { name: f.name, content: new Uint8Array(buf), binary: true };
+      if (existing >= 0) uiFiles[scope][existing] = entry;
+      else uiFiles[scope].push(entry);
+    }
+  }
+  event.target.value = '';
+  renderEditorSidebar(scope);
+  selectFile(scope, activeFile[scope] < uiFiles[scope].length ? activeFile[scope] : 0);
+}
+
+document.getElementById('llamafileBin').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  state.llamafileBin = f;
+  document.getElementById('llamafileBinInfo').innerHTML = fileBadge(f);
+  setStepDone('step1','num1');
+  updateBuildBtn();
+});
+
+document.getElementById('ggufFile').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  state.ggufFile = f;
+  document.getElementById('ggufInfo').innerHTML = fileBadge(f);
+  setStepDone('step2','num2');
+  updateArgsModelName(f.name);
+  updateBuildBtn();
+});
+
+function updateArgsModelName(filename) {
+  const ta = document.getElementById('argsContent');
+  const lines = ta.value.split('\n');
+  const mi = lines.findIndex(l => l.trim() === '-m');
+  if (mi !== -1 && mi + 1 < lines.length) lines[mi+1] = filename;
+  ta.value = lines.join('\n');
+}
+
+function fileBadge(f) { return `<div class="file-badge">✓ ${esc(f.name)} <span class="file-size">${fmtSize(f.size)}</span></div>`; }
+function setStepDone(sid, nid) { document.getElementById(sid).classList.add('done'); document.getElementById(nid).textContent = '✓'; }
+function updateBuildBtn() { document.getElementById('buildBtn').disabled = !(state.llamafileBin && state.ggufFile); }
+function fmtSize(b) { if (b<1024) return b+' B'; if (b<1048576) return (b/1024).toFixed(1)+' KB'; return (b/1048576).toFixed(1)+' MB'; }
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function setProgress(pct, text) { document.getElementById('progressFill').style.width=pct+'%'; document.getElementById('statusText').textContent=text; }
+
+// ── ZIP64 + zipalign implementation ───────────────────────────────────────
+// Matches exactly what jart's zipalign.c does with -j0 (STORE, 65536 alignment)
+
+const ALIGNMENT = 65536;
+
+// Helper: write little-endian integers into a DataView
+function w16(dv, off, v) { dv.setUint16(off, v, true); }
+function w32(dv, off, v) { dv.setUint32(off, v, true); }
+function w64(dv, off, v) {
+  // v is a regular JS number; safe for sizes up to 2^53
+  const lo = v >>> 0;
+  const hi = Math.floor(v / 0x100000000) >>> 0;
+  dv.setUint32(off, lo, true);
+  dv.setUint32(off + 4, hi, true);
+}
+
+// CRC-32 table
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let i = 0; i < 256; i++) {
+    let c = i;
+    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    t[i] = c;
+  }
+  return t;
+})();
+
+function crc32(buf, offset, length) {
+  let c = 0xFFFFFFFF;
+  for (let i = offset; i < offset + length; i++) c = CRC_TABLE[(c ^ buf[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+// DOS timestamp (deterministic, matching zipalign default ts=1700000000)
+// 1700000000 unix = 2023-11-14 22:13:20 UTC
+const DOS_DATE = (2023 - 1980) << 9 | 11 << 5 | 14;  // 2023-11-14
+const DOS_TIME = 22 << 11 | 13 << 5 | (20 >> 1);       // 22:13:20
+
+// Magic numbers
+const LFH_SIG  = 0x04034b50; // local file header
+const CFH_SIG  = 0x02014b50; // central file header
+const EOCD64_SIG   = 0x06064b50; // zip64 end of central directory
+const EOCD64L_SIG  = 0x07064b50; // zip64 eocd locator
+const EOCD_SIG     = 0x06054b50; // end of central directory
+
+// kZipEra2001 = 0x002d = version 4.5 (ZIP64)
+const ERA2001 = 0x002d;
+const OS_UNIX = 3;
+const GFLAG_UTF8 = 0x0800;
+const COMPRESSION_STORE = 0;
+const IATTR_BINARY = 0;
+const EXTRA_ZIP64 = 0x0001;
+
+// Local file header size (fixed part) = 30 bytes
+const LFH_FIXED = 30;
+// Central file header size (fixed part) = 46 bytes
+const CFH_FIXED = 46;
+
+// ── Streaming CRC32 (reads File in 4MB slices, no full load) ─────────────
+const CHUNK = 4 * 1024 * 1024; // 4MB
+
+async function crc32File(file, onProgress) {
+  let c = 0xFFFFFFFF;
+  let offset = 0;
+  while (offset < file.size) {
+    const slice = file.slice(offset, offset + CHUNK);
+    const buf = new Uint8Array(await slice.arrayBuffer());
+    for (let i = 0; i < buf.length; i++) c = CRC_TABLE[(c ^ buf[i]) & 0xFF] ^ (c >>> 8);
+    offset += buf.length;
+    if (onProgress) onProgress(offset / file.size);
+  }
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+async function crc32Bytes(bytes) {
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+// ── Streaming ZipStream (writes via FSAS WritableStream) ─────────────────
+// Never holds more than one 4MB chunk + headers in RAM.
+class ZipStream {
+  constructor(writer) {
+    this.writer = writer; // FileSystemWritableFileStream or MemWriter
+    this.pos = 0;
+    this.entries = []; // central dir entries (small, metadata only)
+  }
+
+  async write(bytes) {
+    await this.writer.write(bytes);
+    this.pos += bytes.byteLength;
+  }
+
+  async addFileFromFile(name, file, onProgress) {
+    // file: File object — streamed in 4MB chunks
+    const nameBytes = new TextEncoder().encode(name);
+    const namLen = nameBytes.length;
+    const lhExtLen = 4 + 8 + 8; // zip64 extra
+    const lhHdrLen = LFH_FIXED + namLen + lhExtLen;
+
+    // Align: pad so (pos + lhHdrLen) % ALIGNMENT === 0
+    const mask = ALIGNMENT - 1;
+    const needed = (ALIGNMENT - ((this.pos + lhHdrLen) & mask)) & mask;
+    if (needed > 0) await this.write(new Uint8Array(needed));
+
+    const lfileOffset = this.pos;
+    const dataSize = file.size;
+
+    // CRC pass
+    if (onProgress) onProgress(0, 'crc');
+    const crc = await crc32File(file, p => onProgress && onProgress(p * 0.5, 'crc'));
+
+    // Write local file header
+    const lhBuf = new ArrayBuffer(lhHdrLen);
+    const lhDV = new DataView(lhBuf);
+    let off = 0;
+    w32(lhDV, off, LFH_SIG);          off+=4;
+    w16(lhDV, off, ERA2001);           off+=2;
+    w16(lhDV, off, GFLAG_UTF8);        off+=2;
+    w16(lhDV, off, COMPRESSION_STORE); off+=2;
+    w16(lhDV, off, DOS_TIME);          off+=2;
+    w16(lhDV, off, DOS_DATE);          off+=2;
+    w32(lhDV, off, crc);               off+=4;
+    w32(lhDV, off, 0xFFFFFFFF);        off+=4;
+    w32(lhDV, off, 0xFFFFFFFF);        off+=4;
+    w16(lhDV, off, namLen);            off+=2;
+    w16(lhDV, off, lhExtLen);          off+=2;
+    new Uint8Array(lhBuf, off, namLen).set(nameBytes); off += namLen;
+    w16(lhDV, off, EXTRA_ZIP64);       off+=2;
+    w16(lhDV, off, 8+8);              off+=2;
+    w64(lhDV, off, dataSize);          off+=8;
+    w64(lhDV, off, dataSize);          off+=8;
+    await this.write(new Uint8Array(lhBuf));
+
+    // Stream file data
+    let written = 0;
+    let readOffset = 0;
+    while (readOffset < file.size) {
+      const slice = file.slice(readOffset, readOffset + CHUNK);
+      const buf = new Uint8Array(await slice.arrayBuffer());
+      await this.write(buf);
+      written += buf.length;
+      readOffset += buf.length;
+      if (onProgress) onProgress(0.5 + (written / dataSize) * 0.5, 'write');
+    }
+
+    this._pushCentral(nameBytes, crc, dataSize, lfileOffset);
+  }
+
+  async addFileFromBytes(name, bytes) {
+    // bytes: Uint8Array — small files only (args, ui files)
+    const nameBytes = new TextEncoder().encode(name);
+    const namLen = nameBytes.length;
+    const lhExtLen = 4 + 8 + 8;
+    const lhHdrLen = LFH_FIXED + namLen + lhExtLen;
+
+    const mask = ALIGNMENT - 1;
+    const needed = (ALIGNMENT - ((this.pos + lhHdrLen) & mask)) & mask;
+    if (needed > 0) await this.write(new Uint8Array(needed));
+
+    const lfileOffset = this.pos;
+    const dataSize = bytes.byteLength;
+    const crc = await crc32Bytes(bytes);
+
+    const lhBuf = new ArrayBuffer(lhHdrLen);
+    const lhDV = new DataView(lhBuf);
+    let off = 0;
+    w32(lhDV, off, LFH_SIG);          off+=4;
+    w16(lhDV, off, ERA2001);           off+=2;
+    w16(lhDV, off, GFLAG_UTF8);        off+=2;
+    w16(lhDV, off, COMPRESSION_STORE); off+=2;
+    w16(lhDV, off, DOS_TIME);          off+=2;
+    w16(lhDV, off, DOS_DATE);          off+=2;
+    w32(lhDV, off, crc);               off+=4;
+    w32(lhDV, off, 0xFFFFFFFF);        off+=4;
+    w32(lhDV, off, 0xFFFFFFFF);        off+=4;
+    w16(lhDV, off, namLen);            off+=2;
+    w16(lhDV, off, lhExtLen);          off+=2;
+    new Uint8Array(lhBuf, off, namLen).set(nameBytes); off += namLen;
+    w16(lhDV, off, EXTRA_ZIP64);       off+=2;
+    w16(lhDV, off, 8+8);              off+=2;
+    w64(lhDV, off, dataSize);          off+=8;
+    w64(lhDV, off, dataSize);          off+=8;
+    await this.write(new Uint8Array(lhBuf));
+    await this.write(bytes);
+
+    this._pushCentral(nameBytes, crc, dataSize, lfileOffset);
+  }
+
+  _pushCentral(nameBytes, crc, dataSize, lfileOffset) {
+    const namLen = nameBytes.length;
+    const chExtLen = 4 + 8 + 8 + 8;
+    const chHdrLen = CFH_FIXED + namLen + chExtLen;
+    const chBuf = new ArrayBuffer(chHdrLen);
+    const chDV = new DataView(chBuf);
+    let off = 0;
+    w32(chDV, off, CFH_SIG);                    off+=4;
+    w16(chDV, off, (OS_UNIX<<8)|ERA2001);        off+=2;
+    w16(chDV, off, ERA2001);                     off+=2;
+    w16(chDV, off, GFLAG_UTF8);                  off+=2;
+    w16(chDV, off, COMPRESSION_STORE);           off+=2;
+    w16(chDV, off, DOS_TIME);                    off+=2;
+    w16(chDV, off, DOS_DATE);                    off+=2;
+    w32(chDV, off, crc);                         off+=4;
+    w32(chDV, off, 0xFFFFFFFF);                  off+=4;
+    w32(chDV, off, 0xFFFFFFFF);                  off+=4;
+    w16(chDV, off, namLen);                      off+=2;
+    w16(chDV, off, chExtLen);                    off+=2;
+    w16(chDV, off, 0);                           off+=2;
+    w16(chDV, off, 0);                           off+=2;
+    w16(chDV, off, IATTR_BINARY);                off+=2;
+    w32(chDV, off, 0o100644 << 16);              off+=4;
+    w32(chDV, off, 0xFFFFFFFF);                  off+=4;
+    new Uint8Array(chBuf, off, namLen).set(nameBytes); off += namLen;
+    w16(chDV, off, EXTRA_ZIP64);                 off+=2;
+    w16(chDV, off, 8+8+8);                       off+=2;
+    w64(chDV, off, dataSize);                    off+=8;
+    w64(chDV, off, dataSize);                    off+=8;
+    w64(chDV, off, lfileOffset);                 off+=8;
+    this.entries.push(new Uint8Array(chBuf));
+  }
+
+  async finalize() {
+    const cdirOffset = this.pos;
+    for (const entry of this.entries) await this.write(entry);
+    const cdirSize = this.entries.reduce((s, e) => s + e.byteLength, 0);
+    const cnt = this.entries.length;
+    const eocdOffset = cdirOffset + cdirSize;
+
+    const eocd64Size = 56, eocd64LocSize = 20, eocdSize = 22;
+    const eocdBuf = new ArrayBuffer(eocd64Size + eocd64LocSize + eocdSize);
+    const dv = new DataView(eocdBuf);
+    let off = 0;
+
+    w32(dv, off, EOCD64_SIG);           off+=4;
+    w64(dv, off, eocd64Size - 12);      off+=8;
+    w16(dv, off, (OS_UNIX<<8)|ERA2001); off+=2;
+    w16(dv, off, ERA2001);              off+=2;
+    w32(dv, off, 0);                    off+=4;
+    w32(dv, off, 0);                    off+=4;
+    w64(dv, off, cnt);                  off+=8;
+    w64(dv, off, cnt);                  off+=8;
+    w64(dv, off, cdirSize);             off+=8;
+    w64(dv, off, cdirOffset);           off+=8;
+
+    w32(dv, off, EOCD64L_SIG);         off+=4;
+    w32(dv, off, 0);                    off+=4;
+    w64(dv, off, eocdOffset);           off+=8;
+    w32(dv, off, 1);                    off+=4;
+
+    w32(dv, off, EOCD_SIG);            off+=4;
+    w16(dv, off, 0);                    off+=2;
+    w16(dv, off, 0);                    off+=2;
+    w16(dv, off, cnt & 0xFFFF);         off+=2;
+    w16(dv, off, cnt & 0xFFFF);         off+=2;
+    w32(dv, off, cdirSize > 0xFFFFFFFF ? 0xFFFFFFFF : cdirSize); off+=4;
+    w32(dv, off, 0xFFFFFFFF);           off+=4;
+    w16(dv, off, 0);                    off+=2;
+
+    await this.write(new Uint8Array(eocdBuf));
+    await this.writer.close();
+    return this.pos;
+  }
+}
+
+// Fallback in-memory writer for browsers without FSAS
+class MemWriter {
+  constructor() { this.chunks = []; }
+  async write(bytes) { this.chunks.push(bytes); }
+  async close() {}
+  blob() {
+    return new Blob(this.chunks, { type: 'application/octet-stream' });
+  }
+}
+
+// Old ZipBuilder shim — not used, kept for reference
+class ZipBuilder {
+  constructor(prefixBytes) {
+    this.prefix = prefixBytes;
+    this.entries = [];
+    this.chunks = [prefixBytes];
+    this.pos = prefixBytes.byteLength;
+  }
+
+  addFile(name, data, onProgress) {
+    // name: string, data: Uint8Array
+    const nameBytes = new TextEncoder().encode(name);
+    const namLen = nameBytes.length;
+
+    // Local file header extra: zip64 tag (4B header) + uncompressed size (8B) + compressed size (8B) = 20B
+    const lhExtLen = 4 + 8 + 8; // 20
+    const lhHdrLen = LFH_FIXED + namLen + lhExtLen;
+
+    // Pad pos so that (pos + lhHdrLen) is aligned to ALIGNMENT
+    // This matches: while ((zsize + hdrlen) & (flag_alignment - 1)) ++zsize;
+    const mask = ALIGNMENT - 1;
+    while ((this.pos + lhHdrLen) & mask) {
+      this.pos++;
+    }
+    // The gap to fill with zeros
+    const gapSize = this.pos - this._totalWritten();
+    if (gapSize > 0) {
+      this.chunks.push(new Uint8Array(gapSize));
+    }
+
+    const lfileOffset = this.pos; // where the local file header starts
+    const dataSize = data.byteLength;
+
+    // Compute CRC
+    const crc = crc32(data, 0, dataSize);
+
+    // Build local file header
+    const lhBuf = new ArrayBuffer(lhHdrLen);
+    const lhDV = new DataView(lhBuf);
+    let off = 0;
+    w32(lhDV, off, LFH_SIG);           off+=4;
+    w16(lhDV, off, ERA2001);            off+=2; // version needed
+    w16(lhDV, off, GFLAG_UTF8);         off+=2; // general purpose flags
+    w16(lhDV, off, COMPRESSION_STORE);  off+=2;
+    w16(lhDV, off, DOS_TIME);           off+=2;
+    w16(lhDV, off, DOS_DATE);           off+=2;
+    w32(lhDV, off, crc);                off+=4;
+    w32(lhDV, off, 0xFFFFFFFF);         off+=4; // compressed size (zip64)
+    w32(lhDV, off, 0xFFFFFFFF);         off+=4; // uncompressed size (zip64)
+    w16(lhDV, off, namLen);             off+=2;
+    w16(lhDV, off, lhExtLen);           off+=2;
+    new Uint8Array(lhBuf, off, namLen).set(nameBytes); off += namLen;
+    // extra: zip64
+    w16(lhDV, off, EXTRA_ZIP64);        off+=2;
+    w16(lhDV, off, 8+8);               off+=2; // size of extra data
+    w64(lhDV, off, dataSize);           off+=8; // uncompressed size
+    w64(lhDV, off, dataSize);           off+=8; // compressed size (same, STORE)
+
+    this.chunks.push(new Uint8Array(lhBuf));
+    this.chunks.push(data);
+    this.pos += lhHdrLen + dataSize;
+
+    // Central directory entry extra: zip64 with offset too = 4B + 8+8+8 = 28B
+    const chExtLen = 4 + 8 + 8 + 8; // 28
+    const chHdrLen = CFH_FIXED + namLen + chExtLen;
+    const chBuf = new ArrayBuffer(chHdrLen);
+    const chDV = new DataView(chBuf);
+    off = 0;
+    w32(chDV, off, CFH_SIG);                    off+=4;
+    w16(chDV, off, (OS_UNIX << 8) | ERA2001);   off+=2; // version made by
+    w16(chDV, off, ERA2001);                     off+=2; // version needed
+    w16(chDV, off, GFLAG_UTF8);                  off+=2;
+    w16(chDV, off, COMPRESSION_STORE);           off+=2;
+    w16(chDV, off, DOS_TIME);                    off+=2;
+    w16(chDV, off, DOS_DATE);                    off+=2;
+    w32(chDV, off, crc);                         off+=4;
+    w32(chDV, off, 0xFFFFFFFF);                  off+=4; // compressed size
+    w32(chDV, off, 0xFFFFFFFF);                  off+=4; // uncompressed size
+    w16(chDV, off, namLen);                      off+=2;
+    w16(chDV, off, chExtLen);                    off+=2;
+    w16(chDV, off, 0);                           off+=2; // comment length
+    w16(chDV, off, 0);                           off+=2; // disk number start
+    w16(chDV, off, IATTR_BINARY);               off+=2; // internal attrs
+    w32(chDV, off, 0o100644 << 16);             off+=4; // external attrs (unix mode)
+    w32(chDV, off, 0xFFFFFFFF);                  off+=4; // local header offset (zip64)
+    new Uint8Array(chBuf, off, namLen).set(nameBytes); off += namLen;
+    // extra zip64
+    w16(chDV, off, EXTRA_ZIP64);                 off+=2;
+    w16(chDV, off, 8+8+8);                       off+=2;
+    w64(chDV, off, dataSize);                    off+=8; // uncompressed size
+    w64(chDV, off, dataSize);                    off+=8; // compressed size
+    w64(chDV, off, lfileOffset);                 off+=8; // local header offset
+
+    this.entries.push(new Uint8Array(chBuf));
+  }
+
+  _totalWritten() {
+    return this.chunks.reduce((s, c) => s + c.byteLength, 0);
+  }
+
+  finalize() {
+    // Write all central directory entries
+    const cdirOffset = this.pos;
+    for (const entry of this.entries) {
+      this.chunks.push(entry);
+    }
+    const cdirSize = this.entries.reduce((s, e) => s + e.byteLength, 0);
+    const cnt = this.entries.length;
+    const eocdOffset = cdirOffset + cdirSize;
+
+    // ZIP64 EOCD record: 56 bytes (signature + 8 + rest)
+    // kZipCdir64HdrMinSize = 56
+    const eocd64Size = 56;
+    const eocd64LocSize = 20;
+    const eocdSize = 22;
+    const eocdBuf = new ArrayBuffer(eocd64Size + eocd64LocSize + eocdSize);
+    const dv = new DataView(eocdBuf);
+    let off = 0;
+
+    // ZIP64 EOCD
+    w32(dv, off, EOCD64_SIG);          off+=4;
+    w64(dv, off, eocd64Size - 12);     off+=8; // size of this record minus 12
+    w16(dv, off, (OS_UNIX<<8)|ERA2001);off+=2; // version made by
+    w16(dv, off, ERA2001);             off+=2; // version needed
+    w32(dv, off, 0);                   off+=4; // this disk
+    w32(dv, off, 0);                   off+=4; // disk with start of cd
+    w64(dv, off, cnt);                 off+=8; // records on this disk
+    w64(dv, off, cnt);                 off+=8; // total records
+    w64(dv, off, cdirSize);            off+=8; // size of cd
+    w64(dv, off, cdirOffset);          off+=8; // offset of cd
+
+    // ZIP64 EOCD locator
+    w32(dv, off, EOCD64L_SIG);        off+=4;
+    w32(dv, off, 0);                   off+=4; // disk with eocd64
+    w64(dv, off, eocdOffset);          off+=8; // offset of eocd64
+    w32(dv, off, 1);                   off+=4; // total disks
+
+    // Standard EOCD
+    w32(dv, off, EOCD_SIG);           off+=4;
+    w16(dv, off, 0);                   off+=2; // this disk
+    w16(dv, off, 0);                   off+=2; // disk with cd
+    w16(dv, off, cnt & 0xFFFF);        off+=2; // records on disk
+    w16(dv, off, cnt & 0xFFFF);        off+=2; // total records
+    w32(dv, off, cdirSize > 0xFFFFFFFF ? 0xFFFFFFFF : cdirSize); off+=4;
+    w32(dv, off, 0xFFFFFFFF);          off+=4; // cd offset (zip64 -> 0xFFFFFFFF)
+    w16(dv, off, 0);                   off+=2; // comment length
+
+    this.chunks.push(new Uint8Array(eocdBuf));
+
+    // Concat all chunks
+    const totalSize = this.chunks.reduce((s, c) => s + c.byteLength, 0);
+    const out = new Uint8Array(totalSize);
+    let cursor = 0;
+    for (const chunk of this.chunks) {
+      out.set(chunk, cursor);
+      cursor += chunk.byteLength;
+    }
+    return out;
+  }
+}
+
+
+// ── Akari-AIO fetch + Cache Storage ───────────────────────────────────────
+const AKARI_REPO = '76836/Akari-AIO';
+const AKARI_CACHE = 'akari-aio-ui-v1';
+let akariManifest = null; // { sha, files: [{path, sha, size, url}] }
+let akariFiles = []; // prepared for packaging: { name, content: Uint8Array, binary: true }
+
+function setAkariPill(text, hit) {
+  const el = document.getElementById('akariCachePill');
+  if (!el) return;
+  el.textContent = text;
+  el.classList.toggle('hit', !!hit);
+}
+
+async function refreshAkariCacheStats() {
+  const stats = document.getElementById('akariCacheStats');
+  try {
+    const cache = await caches.open(AKARI_CACHE);
+    const keys = await cache.keys();
+    const tip = localStorage.getItem('akari_aio_tip_sha') || '(unknown)';
+    stats.textContent = `Cached objects: ${keys.length} · tip SHA: ${tip.slice(0, 12)} · packaged files: ${akariFiles.length}`;
+    setAkariPill(keys.length ? 'cache warm' : 'cache empty', keys.length > 0);
+  } catch (e) {
+    stats.textContent = 'Cache unavailable: ' + e.message;
+  }
+}
+
+async function clearAkariCache() {
+  await caches.delete(AKARI_CACHE);
+  localStorage.removeItem('akari_aio_tip_sha');
+  akariManifest = null;
+  akariFiles = [];
+  await refreshAkariCacheStats();
+  setAkariPill('cache cleared', false);
+}
+
+async function githubJson(url) {
+  const res = await fetch(url, { headers: { 'Accept': 'application/vnd.github+json' } });
+  if (!res.ok) throw new Error('GitHub API ' + res.status + ' for ' + url);
+  return res.json();
+}
+
+async function fetchAkariTree() {
+  const commit = await githubJson(`https://api.github.com/repos/${AKARI_REPO}/commits/main`);
+  const sha = commit.sha;
+  const tree = await githubJson(`https://api.github.com/repos/${AKARI_REPO}/git/trees/${sha}?recursive=1`);
+  const files = (tree.tree || []).filter(n => n.type === 'blob' && n.path && !n.path.startsWith('.git'));
+  // Skip the builder itself and huge optional noise if any
+  const skip = new Set(['llamafile-builder.html']);
+  return {
+    sha,
+    files: files.filter(f => !skip.has(f.path)).map(f => ({
+      path: f.path,
+      sha: f.sha,
+      size: f.size || 0,
+      url: `https://raw.githubusercontent.com/${AKARI_REPO}/${sha}/${f.path}`
+    }))
+  };
+}
+
+async function cacheMatch(cache, path, sha) {
+  // Key includes sha so content updates invalidate
+  const key = new Request(`https://akari-aio.local/cache/${sha}/${path}`);
+  return cache.match(key);
+}
+
+async function cachePut(cache, path, sha, response) {
+  const key = new Request(`https://akari-aio.local/cache/${sha}/${path}`);
+  await cache.put(key, response);
+}
+
+async function loadBlobForFile(entry, cache) {
+  const hit = await cacheMatch(cache, entry.path, entry.sha);
+  if (hit) {
+    return { bytes: new Uint8Array(await hit.arrayBuffer()), fromCache: true };
+  }
+  const res = await fetch(entry.url);
+  if (!res.ok) throw new Error(`Failed ${entry.path}: HTTP ${res.status}`);
+  const buf = await res.arrayBuffer();
+  // Store a clone
+  await cachePut(cache, entry.path, entry.sha, new Response(buf.slice(0), {
+    headers: { 'Content-Type': 'application/octet-stream', 'X-Akari-Path': entry.path }
+  }));
+  return { bytes: new Uint8Array(buf), fromCache: false };
+}
+
+async function prefetchAkariAIO() {
+  const stats = document.getElementById('akariCacheStats');
+  setAkariPill('fetching…', false);
+  stats.textContent = 'Resolving GitHub tree…';
+  try {
+    const manifest = await fetchAkariTree();
+    akariManifest = manifest;
+    localStorage.setItem('akari_aio_tip_sha', manifest.sha);
+    const cache = await caches.open(AKARI_CACHE);
+    let hits = 0, misses = 0, bytes = 0;
+    akariFiles = [];
+    const total = manifest.files.length;
+    for (let i = 0; i < total; i++) {
+      const f = manifest.files[i];
+      stats.textContent = `Loading ${i + 1}/${total}: ${f.path}`;
+      setProgress && setProgress(Math.min(95, Math.round((i / total) * 100)), `Akari-AIO ${f.path}`);
+      const { bytes: data, fromCache } = await loadBlobForFile(f, cache);
+      if (fromCache) hits++; else misses++;
+      bytes += data.byteLength;
+      akariFiles.push({ name: f.path, content: data, binary: true });
+    }
+    stats.textContent = `Ready · ${total} files · ${(bytes/1048576).toFixed(1)} MB · cache hits ${hits} · downloads ${misses} · tip ${manifest.sha.slice(0, 10)}`;
+    setAkariPill(`${hits} hit / ${misses} new`, true);
+  } catch (e) {
+    stats.textContent = 'Error: ' + e.message;
+    setAkariPill('error', false);
+    console.error(e);
+  }
+}
+
+// Folder upload (webkitdirectory)
+async function pickFolder() {
+  document.getElementById('folderPicker').click();
+}
+
+async function handleFolderUpload(event) {
+  const files = event.target.files;
+  if (!files || !files.length) return;
+  saveCurrentFile('custom');
+  // Preserve relative paths from webkitRelativePath
+  for (const f of files) {
+    const rel = (f.webkitRelativePath || f.name).replace(/^[^/]+\//, ''); // strip top folder name
+    const name = rel || f.name;
+    const isText = /\.(html?|css|js|json|txt|md|svg|xml|webmanifest|map)$/i.test(name);
+    if (isText) {
+      const text = await f.text();
+      const existing = uiFiles.custom.findIndex(u => u.name === name);
+      const entry = { name, content: text, binary: false };
+      if (existing >= 0) uiFiles.custom[existing] = entry;
+      else uiFiles.custom.push(entry);
+    } else {
+      const buf = await f.arrayBuffer();
+      const existing = uiFiles.custom.findIndex(u => u.name === name);
+      const entry = { name, content: new Uint8Array(buf), binary: true };
+      if (existing >= 0) uiFiles.custom[existing] = entry;
+      else uiFiles.custom.push(entry);
+    }
+  }
+  event.target.value = '';
+  // Prefer index.html if present
+  const idx = uiFiles.custom.findIndex(u => u.name === 'index.html' || u.name.endsWith('/index.html'));
+  activeFile.custom = idx >= 0 ? idx : 0;
+  renderEditorSidebar('custom');
+  selectFile('custom', activeFile.custom);
+  const statsHint = document.querySelector('#ui-mode-custom .folder-hint') || (() => {
+    const d = document.createElement('div');
+    d.className = 'folder-hint';
+    document.getElementById('ui-mode-custom').appendChild(d);
+    return d;
+  })();
+  statsHint.textContent = `Folder loaded: ${uiFiles.custom.length} files`;
+}
+
+
+// ── Build ─────────────────────────────────────────────────────────────────
+async function buildLlamafile() {
+  const errEl = document.getElementById('errorMsg');
+  errEl.textContent = '';
+
+  const statusBar = document.getElementById('statusBar');
+  statusBar.classList.add('visible');
+  document.getElementById('infoGrid').style.display = 'none';
+  document.getElementById('statusSpinner').style.display = 'block';
+
+  const outputName = document.getElementById('outputName').value.trim() || 'my-model';
+  const outputFilename = outputName + '.llamafile';
+
+  const useStreaming = document.getElementById('optStreamDisk')?.checked !== false;
+  const canFSAS = typeof window.showSaveFilePicker === 'function';
+
+  try {
+    // ── Prepare .args ──────────────────────────────────────────────────
+    const ggufName = state.ggufFile.name;
+    let argsRaw = document.getElementById('argsContent').value;
+    const argsLines = argsRaw.split('\n');
+    const mi = argsLines.findIndex(l => l.trim() === '-m');
+    if (mi !== -1 && mi + 1 < argsLines.length) argsLines[mi + 1] = ggufName;
+    argsRaw = argsLines.join('\n').replace(/\r/g, '');
+    if (uiMode !== 'builtin' && !argsRaw.includes('--path')) {
+      argsRaw = argsRaw.replace(/\n$/, '') + '\n--path\n/zip/ui\n';
+    }
+    if (!argsRaw.endsWith('\n')) argsRaw += '\n';
+    const argsBytes = new TextEncoder().encode(argsRaw);
+
+    // Collect small UI files first (may fetch Akari-AIO)
+    let uiPack = [];
+    if (uiMode === 'akariaio') {
+      if (!akariFiles.length) {
+        setProgress(8, 'Fetching Akari-AIO (cache when possible)…');
+        await prefetchAkariAIO();
+      }
+      if (!akariFiles.length) throw new Error('Akari-AIO UI not loaded.');
+      uiPack = akariFiles;
+    } else if (uiMode !== 'builtin') {
+      saveCurrentFile(uiMode);
+      uiPack = uiFiles[uiMode].map(f => ({
+        name: f.name,
+        content: f.binary ? f.content : new TextEncoder().encode(f.content),
+        binary: true
+      }));
+    }
+
+    // ── Streaming path: File System Access API ─────────────────────────
+    if (useStreaming && canFSAS) {
+      setProgress(10, 'Choose where to save the .llamafile…');
+      let handle;
+      try {
+        handle = await window.showSaveFilePicker({
+          suggestedName: outputFilename,
+          types: [{ description: 'llamafile', accept: { 'application/octet-stream': ['.llamafile', '.exe'] } }]
+        });
+      } catch (e) {
+        if (e && e.name === 'AbortError') {
+          setProgress(0, 'Cancelled');
+          document.getElementById('statusSpinner').style.display = 'none';
+          return;
+        }
+        throw e;
+      }
+
+      const writable = await handle.createWritable();
+      // Stream runtime binary in 4MB chunks (never hold full file)
+      setProgress(12, 'Writing llamafile runtime…');
+      const binFile = state.llamafileBin;
+      let off = 0;
+      while (off < binFile.size) {
+        const slice = binFile.slice(off, off + CHUNK);
+        await writable.write(new Uint8Array(await slice.arrayBuffer()));
+        off += slice.size;
+        setProgress(12 + Math.floor(8 * (off / binFile.size)), `Runtime ${fmtSize(off)} / ${fmtSize(binFile.size)}`);
+      }
+
+      const zip = new ZipStream(writable);
+      zip.pos = binFile.size; // continue after prepended binary
+
+      setProgress(22, `Streaming GGUF (${fmtSize(state.ggufFile.size)}) — low memory…`);
+      await zip.addFileFromFile(ggufName, state.ggufFile, (p, phase) => {
+        const pct = 22 + Math.floor(p * 50);
+        setProgress(pct, phase === 'crc' ? `CRC ${Math.round(p * 100)}%` : `Writing GGUF ${Math.round(p * 100)}%`);
+      });
+
+      setProgress(74, 'Packing .args…');
+      await zip.addFileFromBytes('.args', argsBytes);
+
+      for (let i = 0; i < uiPack.length; i++) {
+        const f = uiPack[i];
+        setProgress(76 + Math.floor((i / Math.max(uiPack.length, 1)) * 16), `Packing ui/${f.name}`);
+        const bytes = f.content instanceof Uint8Array ? f.content : new Uint8Array(f.content);
+        await zip.addFileFromBytes('ui/' + f.name, bytes);
+      }
+
+      setProgress(94, 'Writing central directory…');
+      const totalSize = await zip.finalize();
+
+      setProgress(100, `✓ Saved ${outputFilename} (${fmtSize(totalSize)}) — streamed to disk`);
+      document.getElementById('statusSpinner').style.display = 'none';
+      const infoGrid = document.getElementById('infoGrid');
+      infoGrid.style.display = 'grid';
+      infoGrid.innerHTML = `
+        <div class="info-card"><div class="info-card-label">Output</div><div class="info-card-value">${esc(outputFilename)}</div></div>
+        <div class="info-card"><div class="info-card-label">Mode</div><div class="info-card-value">disk stream (FS Access)</div></div>
+        <div class="info-card"><div class="info-card-label">Total size</div><div class="info-card-value">${fmtSize(totalSize)}</div></div>
+        <div class="info-card"><div class="info-card-label">Peak RAM</div><div class="info-card-value">~4 MB chunks + headers</div></div>
+        <div class="info-card" style="grid-column:1/-1">
+          <div class="info-card-label">Run it</div>
+          <div class="info-card-value" style="font-size:12px;line-height:1.8">
+            Linux/macOS: <code>chmod +x ${esc(outputFilename)} && ./${esc(outputFilename)}</code><br>
+            Windows: rename to <code>${esc(outputName)}.exe</code> and double-click
+          </div>
+        </div>`;
+      return;
+    }
+
+    // ── Fallback: in-memory (small models / no FS Access) ──────────────
+    setProgress(10, 'Reading llamafile binary into memory…');
+    const binBytes = new Uint8Array(await readFile(state.llamafileBin));
+    setProgress(25, `Reading GGUF (${fmtSize(state.ggufFile.size)}) — may use a lot of RAM…`);
+    if (state.ggufFile.size > 512 * 1048576) {
+      console.warn('Large GGUF in memory mode — prefer Chromium + Stream to disk');
+    }
+    const ggufBytes = new Uint8Array(await readFile(state.ggufFile));
+
+    setProgress(45, 'Building ZIP64 in memory…');
+    const builder = new ZipBuilder(binBytes);
+    builder.addFile(ggufName, ggufBytes);
+    builder.addFile('.args', argsBytes);
+    for (let i = 0; i < uiPack.length; i++) {
+      const f = uiPack[i];
+      setProgress(70 + Math.floor((i / Math.max(uiPack.length, 1)) * 15), `Packing ui/${f.name}`);
+      const bytes = f.content instanceof Uint8Array ? f.content : new Uint8Array(f.content);
+      builder.addFile('ui/' + f.name, bytes);
+    }
+    setProgress(90, 'Writing EOCD…');
+    const result = builder.finalize();
+
+    setProgress(95, 'Triggering download…');
+    const blob = new Blob([result], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = outputFilename;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 2000);
+
+    setProgress(100, `✓ ${outputFilename} downloaded (${fmtSize(result.byteLength)})`);
+    document.getElementById('statusSpinner').style.display = 'none';
+    const infoGrid = document.getElementById('infoGrid');
+    infoGrid.style.display = 'grid';
+    infoGrid.innerHTML = `
+      <div class="info-card"><div class="info-card-label">Output</div><div class="info-card-value">${esc(outputFilename)}</div></div>
+      <div class="info-card"><div class="info-card-label">Mode</div><div class="info-card-value">in-memory (fallback)</div></div>
+      <div class="info-card"><div class="info-card-label">Total size</div><div class="info-card-value">${fmtSize(result.byteLength)}</div></div>
+      <div class="info-card" style="grid-column:1/-1">
+        <div class="info-card-label">Tip</div>
+        <div class="info-card-value" style="font-size:12px">Use Chrome/Edge and enable “Stream to disk” to avoid OOM on large GGUFs.</div>
+      </div>`;
+  } catch (err) {
+    setProgress(0, 'Error');
+    document.getElementById('statusSpinner').style.display = 'none';
+    errEl.textContent = '⚠ ' + err.message;
+    console.error(err);
+  }
+}
+
+function readFile(f) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.onerror = () => rej(new Error('Failed to read: ' + f.name));
+    r.readAsArrayBuffer(f);
+  });
+}
+
+// ── Starter UI template ───────────────────────────────────────────────────
+const STARTER_TEMPLATE = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #0f0f0f; color: #e8e8e8; height: 100vh; display: flex; flex-direction: column; }
+  #messages { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+  .msg { max-width: 720px; line-height: 1.6; }
+  .msg.user { align-self: flex-end; background: #1e40af; padding: 10px 16px; border-radius: 18px 18px 4px 18px; }
+  .msg.assistant { align-self: flex-start; background: #1e1e2e; padding: 10px 16px; border-radius: 18px 18px 18px 4px; white-space: pre-wrap; }
+  .msg.system-msg { align-self: center; color: #666; font-size: 12px; font-style: italic; }
+  #inputbar { padding: 16px 24px; background: #141414; border-top: 1px solid #222; display: flex; gap: 10px; }
+  #inputbar textarea { flex: 1; background: #1e1e2e; border: 1px solid #333; border-radius: 10px; color: #e8e8e8; font-family: inherit; font-size: 15px; padding: 10px 14px; resize: none; outline: none; min-height: 44px; max-height: 200px; overflow-y: auto; }
+  #inputbar textarea:focus { border-color: #4f46e5; }
+  #inputbar button { background: #4f46e5; border: none; border-radius: 10px; color: white; cursor: pointer; font-size: 15px; font-weight: 600; padding: 0 20px; transition: background 0.15s; }
+  #inputbar button:hover { background: #6366f1; }
+  #inputbar button:disabled { background: #333; color: #555; cursor: not-allowed; }
+  #status { text-align: center; font-size: 12px; color: #555; padding: 4px; }
+  .typing { align-self: flex-start; color: #666; font-size: 13px; padding: 8px 16px; }
+  pre { background: #0d0d0d; border-radius: 6px; padding: 12px; overflow-x: auto; font-family: monospace; font-size: 13px; }
+</style>
+</head>
+<body>
+<div id="messages">
+  <div class="msg system-msg">Connected to local model. Start chatting!</div>
+</div>
+<div id="status"></div>
+<div id="inputbar">
+  <textarea id="input" placeholder="Type a message…" rows="1" onkeydown="onKey(event)"></textarea>
+  <button id="sendBtn" onclick="send()">Send</button>
+</div>
+<script>
+const history = [];
+let streaming = false;
+
+async function send() {
+  const input = document.getElementById('input');
+  const text = input.value.trim();
+  if (!text || streaming) return;
+  input.value = '';
+  input.style.height = '';
+
+  addMsg('user', text);
+  history.push({ role: 'user', content: text });
+
+  const typingEl = document.createElement('div');
+  typingEl.className = 'typing';
+  typingEl.textContent = '…';
+  document.getElementById('messages').appendChild(typingEl);
+  scrollBottom();
+
+  streaming = true;
+  document.getElementById('sendBtn').disabled = true;
+
+  let assistantText = '';
+  const msgEl = document.createElement('div');
+  msgEl.className = 'msg assistant';
+
+  try {
+    const resp = await fetch('/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'local', messages: history, stream: true })
+    });
+
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    typingEl.replaceWith(msgEl);
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split('\\n');
+      buf = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6).trim();
+        if (data === '[DONE]') break;
+        try {
+          const delta = JSON.parse(data).choices?.[0]?.delta?.content;
+          if (delta) { assistantText += delta; msgEl.textContent = assistantText; scrollBottom(); }
+        } catch {}
+      }
+    }
+  } catch (e) {
+    typingEl.remove();
+    addMsg('system-msg', 'Error: ' + e.message);
+  }
+
+  if (assistantText) history.push({ role: 'assistant', content: assistantText });
+  streaming = false;
+  document.getElementById('sendBtn').disabled = false;
+  document.getElementById('input').focus();
+}
+
+function addMsg(role, text) {
+  const el = document.createElement('div');
+  el.className = 'msg ' + role;
+  el.textContent = text;
+  document.getElementById('messages').appendChild(el);
+  scrollBottom();
+}
+
+function scrollBottom() {
+  const m = document.getElementById('messages');
+  m.scrollTop = m.scrollHeight;
+}
+
+function onKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  const ta = e.target;
+  ta.style.height = 'auto';
+  ta.style.height = Math.min(ta.scrollHeight, 200) + 'px';
+}
+<\/script>
+</body>
+</html>
+`;
+</script>
+</body>
+</html>
