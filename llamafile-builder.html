@@ -841,8 +841,11 @@ function selectFile(scope, i) {
   const ta = document.getElementById(scope === 'starter' ? 'editorTextarea' : 'editorTextareaCustom');
   const fn = document.getElementById(scope === 'starter' ? 'activeFilename' : 'activeFilenameCustom');
   fn.textContent = f.name;
-  if (f.binary) {
-    ta.value = '[binary file — not editable as text]';
+  if (f.binary || f.streamOnly || f.content == null) {
+    const sz = f.size != null ? fmtSize(f.size) : (f.file ? fmtSize(f.file.size) : '');
+    ta.value = f.binary || f.streamOnly
+      ? `[binary/streamed file — packed from disk at build time] ${sz}`
+      : '';
     ta.disabled = true;
   } else {
     ta.value = f.content;
@@ -1511,42 +1514,117 @@ async function pickFolder() {
   document.getElementById('folderPicker').click();
 }
 
+const UI_TEXT_RE = /\.(html?|css|mjs|cjs|js|json|txt|md|svg|xml|webmanifest|map|csv|tsv)$/i;
+const UI_SKIP_RE = /(^|\/)(\.git|node_modules|\.svn|__MACOSX)(\/|$)/i;
+
+function normalizeUiPath(path) {
+  let name = String(path || '').replace(/\\/g, '/');
+  // strip a single top-level folder prefix (browser folder picker)
+  const parts = name.split('/').filter(Boolean);
+  if (parts.length > 1) name = parts.slice(1).join('/');
+  else name = parts[0] || name;
+  return name.replace(/^\/+/, '');
+}
+
+function isSkippableUiPath(name) {
+  if (!name) return true;
+  if (UI_SKIP_RE.test(name)) return true;
+  const base = name.split('/').pop();
+  if (base === '.DS_Store' || base === 'Thumbs.db' || base === 'desktop.ini') return true;
+  return false;
+}
+
+/** Build zip entries for UI: prefers streaming File handles for large/binary assets. */
+async function packUiIntoZip(zipOrBuilder, files, onProgress, streaming) {
+  const n = files.length || 1;
+  for (let i = 0; i < files.length; i++) {
+    const f = files[i];
+    const zipName = 'ui/' + String(f.name || '').replace(/^\/+/, '');
+    if (onProgress) onProgress(i, files.length, zipName);
+    if (streaming && f.file && typeof zipOrBuilder.addFileFromFile === 'function') {
+      await zipOrBuilder.addFileFromFile(zipName, f.file);
+      continue;
+    }
+    let bytes;
+    if (f.file && (f.content == null || f.streamOnly)) {
+      bytes = new Uint8Array(await f.file.arrayBuffer());
+    } else if (f.content instanceof Uint8Array) {
+      bytes = f.content;
+    } else if (typeof f.content === 'string') {
+      bytes = new TextEncoder().encode(f.content);
+    } else {
+      throw new Error('UI file has no data: ' + zipName);
+    }
+    if (typeof zipOrBuilder.addFileFromBytes === 'function') {
+      await zipOrBuilder.addFileFromBytes(zipName, bytes);
+    } else {
+      zipOrBuilder.addFile(zipName, bytes);
+    }
+  }
+}
+
 async function handleFolderUpload(event) {
   const files = event.target.files;
   if (!files || !files.length) return;
-  saveCurrentFile('custom');
-  // Preserve relative paths from webkitRelativePath
+
+  // Replace any previous custom tree (drops empty placeholder index.html)
+  uiFiles.custom = [];
+  activeFile.custom = 0;
+
+  let totalBytes = 0;
+  let skipped = 0;
+  const seen = new Set();
+
   for (const f of files) {
-    const rel = (f.webkitRelativePath || f.name).replace(/^[^/]+\//, ''); // strip top folder name
-    const name = rel || f.name;
-    const isText = /\.(html?|css|js|json|txt|md|svg|xml|webmanifest|map)$/i.test(name);
-    if (isText) {
-      const text = await f.text();
-      const existing = uiFiles.custom.findIndex(u => u.name === name);
-      const entry = { name, content: text, binary: false };
-      if (existing >= 0) uiFiles.custom[existing] = entry;
-      else uiFiles.custom.push(entry);
-    } else {
-      const buf = await f.arrayBuffer();
-      const existing = uiFiles.custom.findIndex(u => u.name === name);
-      const entry = { name, content: new Uint8Array(buf), binary: true };
-      if (existing >= 0) uiFiles.custom[existing] = entry;
-      else uiFiles.custom.push(entry);
+    const name = normalizeUiPath(f.webkitRelativePath || f.name);
+    if (isSkippableUiPath(name)) { skipped++; continue; }
+    if (seen.has(name)) continue;
+    seen.add(name);
+
+    const isText = UI_TEXT_RE.test(name);
+    // Keep File handle for everything so build can stream large nested assets.
+    // Only eagerly read small text into the editor buffer.
+    const entry = { name, file: f, size: f.size, binary: !isText, streamOnly: true };
+    if (isText && f.size <= 2 * 1024 * 1024) {
+      try {
+        entry.content = await f.text();
+        entry.binary = false;
+        entry.streamOnly = false;
+      } catch (e) {
+        console.warn('text read failed, will stream as binary', name, e);
+        entry.binary = true;
+        entry.streamOnly = true;
+      }
     }
+    uiFiles.custom.push(entry);
+    totalBytes += f.size;
   }
+
   event.target.value = '';
-  // Prefer index.html if present
-  const idx = uiFiles.custom.findIndex(u => u.name === 'index.html' || u.name.endsWith('/index.html'));
-  activeFile.custom = idx >= 0 ? idx : 0;
+
+  const idx = uiFiles.custom.findIndex(u => u.name === 'index.html');
+  if (idx < 0) {
+    const nested = uiFiles.custom.findIndex(u => /(^|\/)index\.html$/i.test(u.name));
+    activeFile.custom = nested >= 0 ? nested : 0;
+  } else {
+    activeFile.custom = idx;
+  }
+
   renderEditorSidebar('custom');
-  selectFile('custom', activeFile.custom);
+  if (uiFiles.custom.length) selectFile('custom', activeFile.custom);
+
   const statsHint = document.querySelector('#ui-mode-custom .folder-hint') || (() => {
     const d = document.createElement('div');
     d.className = 'folder-hint';
     document.getElementById('ui-mode-custom').appendChild(d);
     return d;
   })();
-  statsHint.textContent = `Folder loaded: ${uiFiles.custom.length} files`;
+  const hasRootIndex = uiFiles.custom.some(u => u.name === 'index.html');
+  statsHint.innerHTML = `Folder loaded: <strong>${uiFiles.custom.length}</strong> files (${fmtSize(totalBytes)})`
+    + (skipped ? `, skipped ${skipped}` : '')
+    + (hasRootIndex
+      ? ''
+      : ' · <span style="color:var(--error)">No index.html at folder root — page may be empty</span>');
 }
 
 
@@ -1580,7 +1658,7 @@ async function buildLlamafile() {
     if (!argsRaw.endsWith('\n')) argsRaw += '\n';
     const argsBytes = new TextEncoder().encode(argsRaw);
 
-    // Collect small UI files first (may fetch Akari-AIO)
+    // Collect UI files (keep File handles for streaming nested/large assets)
     let uiPack = [];
     if (uiMode === 'akariaio') {
       if (!akariFiles.length) {
@@ -1591,11 +1669,11 @@ async function buildLlamafile() {
       uiPack = akariFiles;
     } else if (uiMode !== 'builtin') {
       saveCurrentFile(uiMode);
-      uiPack = uiFiles[uiMode].map(f => ({
-        name: f.name,
-        content: f.binary ? f.content : new TextEncoder().encode(f.content),
-        binary: true
-      }));
+      uiPack = uiFiles[uiMode].slice();
+      if (!uiPack.length) throw new Error('No UI files loaded. Upload a folder or files first.');
+      if (!uiPack.some(f => f.name === 'index.html')) {
+        console.warn('No index.html at UI root — llamafile may show an empty page');
+      }
     }
 
     // ── Streaming path: File System Access API ─────────────────────────
@@ -1640,12 +1718,9 @@ async function buildLlamafile() {
       setProgress(74, 'Packing .args…');
       await zip.addFileFromBytes('.args', argsBytes);
 
-      for (let i = 0; i < uiPack.length; i++) {
-        const f = uiPack[i];
-        setProgress(76 + Math.floor((i / Math.max(uiPack.length, 1)) * 16), `Packing ui/${f.name}`);
-        const bytes = f.content instanceof Uint8Array ? f.content : new Uint8Array(f.content);
-        await zip.addFileFromBytes('ui/' + f.name, bytes);
-      }
+      await packUiIntoZip(zip, uiPack, (i, n, name) => {
+        setProgress(76 + Math.floor((i / Math.max(n, 1)) * 16), `Packing ${name}`);
+      }, true);
 
       setProgress(94, 'Writing central directory…');
       const totalSize = await zip.finalize();
@@ -1682,12 +1757,9 @@ async function buildLlamafile() {
     const builder = new ZipBuilder(binBytes);
     builder.addFile(ggufName, ggufBytes);
     builder.addFile('.args', argsBytes);
-    for (let i = 0; i < uiPack.length; i++) {
-      const f = uiPack[i];
-      setProgress(70 + Math.floor((i / Math.max(uiPack.length, 1)) * 15), `Packing ui/${f.name}`);
-      const bytes = f.content instanceof Uint8Array ? f.content : new Uint8Array(f.content);
-      builder.addFile('ui/' + f.name, bytes);
-    }
+    await packUiIntoZip(builder, uiPack, (i, n, name) => {
+      setProgress(70 + Math.floor((i / Math.max(n, 1)) * 15), `Packing ${name}`);
+    }, false);
     setProgress(90, 'Writing EOCD…');
     const result = builder.finalize();
 
