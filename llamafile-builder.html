@@ -573,6 +573,86 @@
     min-height: unset;
     tab-size: 2;
   }
+
+  .flag-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .flag-field {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .flag-field label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+  .flag-field input[type="text"],
+  .flag-field input[type="number"],
+  .flag-field select,
+  .flag-field textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 8px 10px;
+    outline: none;
+  }
+  .flag-field input:focus,
+  .flag-field select:focus,
+  .flag-field textarea:focus { border-color: #fff; }
+  .flag-field textarea { min-height: 72px; resize: vertical; }
+  .flag-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+  }
+  .flag-check input { width: 16px; height: 16px; accent-color: #fff; }
+  .flag-section-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 18px 0 8px;
+  }
+  .logo-preview {
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.25;
+    white-space: pre;
+    overflow: auto;
+    color: #22c55e;
+    min-height: 120px;
+  }
+  .raw-toggle {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: var(--mono);
+  }
+  .raw-toggle:hover { color: #fff; }
+
 </style>
 </head>
 <body>
@@ -628,26 +708,158 @@
     <div class="step-header">
       <div class="step-num" id="num3">3</div>
       <div>
-        <div class="step-title">.args configuration <span class="tag tag-required">required</span></div>
-        <div class="step-desc">One flag per line. The <code>-m</code> value auto-updates when you load a GGUF. Use <code>...</code> on its own line to allow the user to pass extra args.</div>
+        <div class="step-title">Runtime flags <span class="tag tag-required">required</span></div>
+        <div class="step-desc">Configure llamafile without memorizing CLI flags. Values sync into the <code>.args</code> file embedded in your build. <code>-m</code> updates when you load a GGUF.</div>
       </div>
     </div>
-    <div class="textarea-label">
-      <span class="label-text">.args</span>
-      <a href="https://github.com/mozilla-ai/llamafile#creating-llamafiles" target="_blank" class="hint-link">flag reference ↗</a>
+
+    <div class="flag-section-title">Mode</div>
+    <div class="flag-grid">
+      <div class="flag-field">
+        <label for="flgMode">Startup mode</label>
+        <select id="flgMode" onchange="syncFlagsToArgs()">
+          <option value="">Default — TUI chat + HTTP server</option>
+          <option value="--server">Server only (API + browser UI)</option>
+          <option value="--chat">Chat TUI only (no server)</option>
+          <option value="--cli">CLI single-shot (needs prompt)</option>
+        </select>
+      </div>
+      <div class="flag-field">
+        <label for="flgCliPrompt">CLI prompt (-p) when mode is --cli</label>
+        <input type="text" id="flgCliPrompt" placeholder="Explain quantum computing" oninput="syncFlagsToArgs()">
+      </div>
     </div>
-    <textarea id="argsContent" spellcheck="false">-m
+
+    <div class="flag-section-title">Network &amp; server</div>
+    <div class="flag-grid">
+      <div class="flag-field">
+        <label for="flgHost">Host (--host)</label>
+        <input type="text" id="flgHost" value="0.0.0.0" oninput="syncFlagsToArgs()">
+      </div>
+      <div class="flag-field">
+        <label for="flgPort">Port (--port)</label>
+        <input type="number" id="flgPort" value="8080" min="1" max="65535" oninput="syncFlagsToArgs()">
+      </div>
+      <div class="flag-field">
+        <label class="flag-check"><input type="checkbox" id="flgNobrowser" onchange="syncFlagsToArgs()"> Don't open browser (--nobrowser)</label>
+      </div>
+    </div>
+
+    <div class="flag-section-title">Model / context / GPU</div>
+    <div class="flag-grid">
+      <div class="flag-field">
+        <label for="flgCtx">Context size (-c)</label>
+        <input type="number" id="flgCtx" value="8192" min="512" step="256" oninput="syncFlagsToArgs()">
+      </div>
+      <div class="flag-field">
+        <label for="flgPredict">Max predict tokens (-n), -1 = infinite</label>
+        <input type="number" id="flgPredict" value="-1" min="-1" oninput="syncFlagsToArgs()">
+      </div>
+      <div class="flag-field">
+        <label for="flgNgl">GPU layers (-ngl), 999 = all</label>
+        <input type="number" id="flgNgl" value="999" min="0" oninput="syncFlagsToArgs()">
+      </div>
+      <div class="flag-field">
+        <label for="flgThreads">CPU threads (-t), 0 = auto</label>
+        <input type="number" id="flgThreads" value="0" min="0" oninput="syncFlagsToArgs()">
+      </div>
+    </div>
+
+    <div class="flag-section-title">Sampling</div>
+    <div class="flag-grid">
+      <div class="flag-field">
+        <label for="flgTemp">Temperature (--temp)</label>
+        <input type="number" id="flgTemp" value="0.7" min="0" max="2" step="0.05" oninput="syncFlagsToArgs()">
+      </div>
+      <div class="flag-field">
+        <label for="flgTopK">Top-k (--top-k)</label>
+        <input type="number" id="flgTopK" value="40" min="0" oninput="syncFlagsToArgs()">
+      </div>
+      <div class="flag-field">
+        <label for="flgTopP">Top-p (--top-p)</label>
+        <input type="number" id="flgTopP" value="0.95" min="0" max="1" step="0.01" oninput="syncFlagsToArgs()">
+      </div>
+      <div class="flag-field">
+        <label for="flgMinP">Min-p (--min-p)</label>
+        <input type="number" id="flgMinP" value="0.05" min="0" max="1" step="0.01" oninput="syncFlagsToArgs()">
+      </div>
+      <div class="flag-field">
+        <label for="flgRepeat">Repeat penalty (--repeat-penalty)</label>
+        <input type="number" id="flgRepeat" value="1.1" min="0" step="0.05" oninput="syncFlagsToArgs()">
+      </div>
+    </div>
+
+    <div class="flag-section-title">Personality &amp; CLI chrome</div>
+    <div class="flag-grid">
+      <div class="flag-field" style="grid-column:1/-1">
+        <label for="flgSystem">System prompt (--system-prompt)</label>
+        <textarea id="flgSystem" placeholder="You are Akari, a helpful assistant." oninput="syncFlagsToArgs()"></textarea>
+      </div>
+      <div class="flag-field">
+        <label class="flag-check"><input type="checkbox" id="flgNologo" onchange="syncFlagsToArgs()"> Hide startup logo (--nologo)</label>
+      </div>
+      <div class="flag-field">
+        <label class="flag-check"><input type="checkbox" id="flgAscii" onchange="syncFlagsToArgs()"> ASCII logo instead of Unicode (--ascii)</label>
+      </div>
+      <div class="flag-field">
+        <label class="flag-check"><input type="checkbox" id="flgAllowExtra" checked onchange="syncFlagsToArgs()"> Allow extra user args (<code>...</code>)</label>
+      </div>
+    </div>
+
+    <div class="flag-section-title">Extra raw lines (advanced)</div>
+    <div class="flag-field">
+      <label for="flgExtra">One flag per line (appended after GUI flags)</label>
+      <textarea id="flgExtra" placeholder="--no-mmap&#10;--mlock" oninput="syncFlagsToArgs()"></textarea>
+    </div>
+
+    <div class="raw-toggle" onclick="toggleRawArgs()">▸ Show generated .args (read-only preview)</div>
+    <div id="rawArgsWrap" style="display:none;margin-top:8px">
+      <div class="textarea-label">
+        <span class="label-text">.args</span>
+        <a href="https://github.com/mozilla-ai/llamafile/blob/main/docs/cli_arguments.md" target="_blank" class="hint-link">flag reference ↗</a>
+      </div>
+      <textarea id="argsContent" spellcheck="false" readonly style="min-height:120px;opacity:0.85">-m
 MODEL_FILENAME
 --host
 0.0.0.0
+--port
+8080
 -c
 8192
 ...</textarea>
-    <p class="help-text">
-      <strong>Common flags (one per line):</strong> <code>--host 0.0.0.0</code> expose on LAN ·
-      <code>-c 8192</code> context window · <code>--nobrowser</code> suppress browser (older versions only) ·
-      <code>--system-prompt "you are helpful"</code> default system prompt ·
-      <code>-ngl 999</code> GPU offload layers · <code>--port 8080</code>
+      <p class="help-text">This file is what gets zipped into the llamafile. Edit via the controls above (or Extra raw lines).</p>
+    </div>
+  </div>
+
+  <!-- STEP 3b: Logo (compile-time) -->
+  <div class="step" id="step3b">
+    <div class="step-header">
+      <div class="step-num">★</div>
+      <div>
+        <div class="step-title">CLI logo / ASCII art <span class="tag tag-optional">optional</span></div>
+        <div class="step-desc">
+          The startup banner lives in <code>llamafile/chatbot_logo.cpp</code> and is <strong>compiled into the binary</strong>.
+          You cannot change it by only editing this builder’s zip — but you can design art here, download a drop-in source file, and rebuild llamafile from source. Runtime toggles <code>--nologo</code> / <code>--ascii</code> are in the flags section above.
+        </div>
+      </div>
+    </div>
+    <div class="ui-mode-tabs" style="margin-bottom:12px">
+      <button type="button" class="ui-tab active" id="logoTabUni" onclick="setLogoTab('unicode')">Unicode (default)</button>
+      <button type="button" class="ui-tab" id="logoTabAsc" onclick="setLogoTab('ascii')">ASCII (--ascii)</button>
+    </div>
+    <div class="flag-field">
+      <label for="logoEditor">Art (use █ and box-drawing for Unicode; plain ASCII for the other tab)</label>
+      <textarea id="logoEditor" style="min-height:160px;font-family:var(--mono);font-size:11px;line-height:1.25" oninput="onLogoEdit()"></textarea>
+    </div>
+    <div class="flag-section-title">Preview</div>
+    <div class="logo-preview" id="logoPreview"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:14px">
+      <button type="button" class="btn btn-outline" onclick="loadDefaultLogo()">Reset to llamafile default</button>
+      <button type="button" class="btn btn-outline" onclick="downloadLogoCpp()">Download chatbot_logo.cpp</button>
+    </div>
+    <p class="help-text" style="margin-top:12px">
+      After download: replace <code>llamafile/chatbot_logo.cpp</code> in a
+      <a href="https://github.com/mozilla-ai/llamafile" target="_blank">mozilla-ai/llamafile</a> checkout, rebuild, then use that binary as Step 1.
     </p>
   </div>
 
@@ -941,13 +1153,202 @@ document.getElementById('ggufFile').addEventListener('change', e => {
   updateBuildBtn();
 });
 
-function updateArgsModelName(filename) {
-  const ta = document.getElementById('argsContent');
-  const lines = ta.value.split('\n');
-  const mi = lines.findIndex(l => l.trim() === '-m');
-  if (mi !== -1 && mi + 1 < lines.length) lines[mi+1] = filename;
-  ta.value = lines.join('\n');
+function val(id) {
+  const el = document.getElementById(id);
+  return el ? el.value : '';
 }
+function checked(id) {
+  const el = document.getElementById(id);
+  return !!(el && el.checked);
+}
+
+function syncFlagsToArgs() {
+  const model = (state.ggufFile && state.ggufFile.name) || 'MODEL_FILENAME';
+  const lines = ['-m', model];
+
+  const mode = val('flgMode');
+  if (mode) lines.push(mode);
+  if (mode === '--cli') {
+    const p = val('flgCliPrompt').trim();
+    if (p) { lines.push('-p'); lines.push(p); }
+  }
+
+  const host = val('flgHost').trim();
+  if (host) { lines.push('--host'); lines.push(host); }
+  const port = val('flgPort').trim();
+  if (port) { lines.push('--port'); lines.push(port); }
+  if (checked('flgNobrowser')) lines.push('--nobrowser');
+
+  const ctx = val('flgCtx').trim();
+  if (ctx) { lines.push('-c'); lines.push(ctx); }
+  const pred = val('flgPredict').trim();
+  if (pred !== '') { lines.push('-n'); lines.push(pred); }
+  const ngl = val('flgNgl').trim();
+  if (ngl !== '') { lines.push('-ngl'); lines.push(ngl); }
+  const threads = val('flgThreads').trim();
+  if (threads && threads !== '0') { lines.push('-t'); lines.push(threads); }
+
+  const temp = val('flgTemp').trim();
+  if (temp !== '') { lines.push('--temp'); lines.push(temp); }
+  const topk = val('flgTopK').trim();
+  if (topk !== '') { lines.push('--top-k'); lines.push(topk); }
+  const topp = val('flgTopP').trim();
+  if (topp !== '') { lines.push('--top-p'); lines.push(topp); }
+  const minp = val('flgMinP').trim();
+  if (minp !== '') { lines.push('--min-p'); lines.push(minp); }
+  const rep = val('flgRepeat').trim();
+  if (rep !== '') { lines.push('--repeat-penalty'); lines.push(rep); }
+
+  const sys = val('flgSystem').trim();
+  if (sys) { lines.push('--system-prompt'); lines.push(sys); }
+
+  if (checked('flgNologo')) lines.push('--nologo');
+  if (checked('flgAscii')) lines.push('--ascii');
+
+  const extra = val('flgExtra').replace(/\r/g, '').trim();
+  if (extra) {
+    extra.split('\n').map(l => l.trim()).filter(Boolean).forEach(l => lines.push(l));
+  }
+
+  // --path injected at build when UI mode needs it
+  if (checked('flgAllowExtra')) lines.push('...');
+
+  const ta = document.getElementById('argsContent');
+  if (ta) ta.value = lines.join('\n') + '\n';
+}
+
+function updateArgsModelName(filename) {
+  // Keep GUI + .args in sync when GGUF chosen
+  syncFlagsToArgs();
+}
+
+function toggleRawArgs() {
+  const w = document.getElementById('rawArgsWrap');
+  if (!w) return;
+  const open = w.style.display !== 'none';
+  w.style.display = open ? 'none' : 'block';
+}
+
+// ── Logo editor (compile-time source export) ─────────────────────────────
+const DEFAULT_LOGO_UNICODE = `██╗     ██╗      █████╗ ███╗   ███╗ █████╗ ███████╗██╗██╗     ███████╗
+██║     ██║     ██╔══██╗████╗ ████║██╔══██╗██╔════╝██║██║     ██╔════╝
+██║     ██║     ███████║██╔████╔██║███████║█████╗  ██║██║     █████╗
+██║     ██║     ██╔══██║██║╚██╔╝██║██╔══██║██╔══╝  ██║██║     ██╔══╝
+███████╗███████╗██║  ██║██║ ╚═╝ ██║██║  ██║██║     ██║███████╗███████╗
+╚══════╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚══════╝`;
+
+const DEFAULT_LOGO_ASCII = ` _ _                        __ _ _
+| | | __ _ _ __ ___   __ _ / _(_) | ___
+| | |/ _\` | '_ \` _ \\ / _\` | |_| | |/ _ \\
+| | | (_| | | | | | | (_| |  _| | |  __/
+|_|_|\\__,_|_| |_| |_|\\__,_|_| |_|_|\\___|`;
+
+let logoTab = 'unicode';
+const logoState = { unicode: DEFAULT_LOGO_UNICODE, ascii: DEFAULT_LOGO_ASCII };
+
+function setLogoTab(which) {
+  logoTab = which === 'ascii' ? 'ascii' : 'unicode';
+  document.getElementById('logoTabUni').classList.toggle('active', logoTab === 'unicode');
+  document.getElementById('logoTabAsc').classList.toggle('active', logoTab === 'ascii');
+  const ed = document.getElementById('logoEditor');
+  if (ed) ed.value = logoState[logoTab];
+  onLogoEdit();
+}
+
+function onLogoEdit() {
+  const ed = document.getElementById('logoEditor');
+  if (!ed) return;
+  logoState[logoTab] = ed.value;
+  const prev = document.getElementById('logoPreview');
+  if (prev) prev.textContent = ed.value || '(empty)';
+}
+
+function loadDefaultLogo() {
+  logoState.unicode = DEFAULT_LOGO_UNICODE;
+  logoState.ascii = DEFAULT_LOGO_ASCII;
+  setLogoTab(logoTab);
+}
+
+function escapeCppString(s) {
+  return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r/g, '');
+}
+
+function downloadLogoCpp() {
+  const uni = logoState.unicode.replace(/\r/g, '').replace(/\n$/, '');
+  const asc = logoState.ascii.replace(/\r/g, '').replace(/\n$/, '');
+  function escLine(l) {
+    return l.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  }
+  function contBlock(text) {
+    return text.split('\n').map(escLine).join('\\n\\\n');
+  }
+  const parts = [];
+  parts.push('// -*- mode:c++;indent-tabs-mode:nil;c-basic-offset:4;coding:utf-8 -*-');
+  parts.push('// Generated by 76836 llamafile builder — replace llamafile/chatbot_logo.cpp then rebuild.');
+  parts.push('#include "chatbot.h"');
+  parts.push('#include <cstdio>');
+  parts.push('#include "color.h"');
+  parts.push('#include "llamafile.h"');
+  parts.push('');
+  parts.push('namespace lf {');
+  parts.push('namespace chatbot {');
+  parts.push('');
+  parts.push('static void print_logo(const char16_t *s) {');
+  parts.push('    for (int i = 0; s[i]; ++i) {');
+  parts.push('        switch (s[i]) {');
+  parts.push("        case u'█':");
+  parts.push('            printf(GREEN "█" UNFOREGROUND);');
+  parts.push('            break;');
+  parts.push("        case u'╚':");
+  parts.push("        case u'═':");
+  parts.push("        case u'╝':");
+  parts.push("        case u'╗':");
+  parts.push("        case u'║':");
+  parts.push("        case u'╔':");
+  parts.push('            printf(FAINT "%C" UNBOLD, s[i]);');
+  parts.push('            break;');
+  parts.push('        default:');
+  parts.push('            printf("%C", s[i]);');
+  parts.push('            break;');
+  parts.push('        }');
+  parts.push('    }');
+  parts.push('}');
+  parts.push('');
+  parts.push('void logo(char **) {');
+  parts.push('    if (FLAG_nologo) {');
+  parts.push('        return;');
+  parts.push('    }');
+  parts.push('    if (FLAG_ascii) {');
+  parts.push('        printf("\\');
+  parts.push(contBlock(asc));
+  parts.push('\\n");');
+  parts.push('    } else {');
+  parts.push('        print_logo(u"\\n\\');
+  parts.push(contBlock(uni));
+  parts.push('\\n");');
+  parts.push('    }');
+  parts.push('}');
+  parts.push('');
+  parts.push('} // namespace chatbot');
+  parts.push('} // namespace lf');
+  parts.push('');
+  const src = parts.join('\n');
+  const blob = new Blob([src], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'chatbot_logo.cpp';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1500);
+}
+
+// init logo editor defaults after DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  loadDefaultLogo();
+  syncFlagsToArgs();
+});
+
 
 function fileBadge(f) { return `<div class="file-badge">✓ ${esc(f.name)} <span class="file-size">${fmtSize(f.size)}</span></div>`; }
 function setStepDone(sid, nid) { document.getElementById(sid).classList.add('done'); document.getElementById(nid).textContent = '✓'; }
@@ -1647,6 +2048,7 @@ async function buildLlamafile() {
   try {
     // ── Prepare .args ──────────────────────────────────────────────────
     const ggufName = state.ggufFile.name;
+    if (typeof syncFlagsToArgs === 'function') syncFlagsToArgs();
     let argsRaw = document.getElementById('argsContent').value;
     const argsLines = argsRaw.split('\n');
     const mi = argsLines.findIndex(l => l.trim() === '-m');
@@ -1824,6 +2226,86 @@ const STARTER_TEMPLATE = `<!DOCTYPE html>
   #status { text-align: center; font-size: 12px; color: #555; padding: 4px; }
   .typing { align-self: flex-start; color: #666; font-size: 13px; padding: 8px 16px; }
   pre { background: #0d0d0d; border-radius: 6px; padding: 12px; overflow-x: auto; font-family: monospace; font-size: 13px; }
+
+  .flag-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .flag-field {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .flag-field label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+  .flag-field input[type="text"],
+  .flag-field input[type="number"],
+  .flag-field select,
+  .flag-field textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 8px 10px;
+    outline: none;
+  }
+  .flag-field input:focus,
+  .flag-field select:focus,
+  .flag-field textarea:focus { border-color: #fff; }
+  .flag-field textarea { min-height: 72px; resize: vertical; }
+  .flag-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+  }
+  .flag-check input { width: 16px; height: 16px; accent-color: #fff; }
+  .flag-section-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 18px 0 8px;
+  }
+  .logo-preview {
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.25;
+    white-space: pre;
+    overflow: auto;
+    color: #22c55e;
+    min-height: 120px;
+  }
+  .raw-toggle {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: var(--mono);
+  }
+  .raw-toggle:hover { color: #fff; }
+
 </style>
 </head>
 <body>
