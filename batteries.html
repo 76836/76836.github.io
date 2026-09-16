@@ -2,107 +2,211 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>Batteries</title>
 <style>
   :root {
     --bg: #0a0a0a;
     --card: #141414;
+    --card2: #1a1a1a;
     --border: #2a2a2a;
     --text: #f2f2f2;
-    --muted: #888;
+    --muted: #8a8a8a;
     --accent: #7dd3fc;
     --warn: #fbbf24;
     --danger: #f87171;
     --ok: #4ade80;
+    --safe-b: env(safe-area-inset-bottom, 0px);
+    --safe-t: env(safe-area-inset-top, 0px);
+    --tap: 44px;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
   body {
-    font-family: system-ui, -apple-system, sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100dvh;
-    padding: 16px;
-    padding-bottom: 96px;
+    padding: calc(12px + var(--safe-t)) 14px calc(88px + var(--safe-b));
+    overscroll-behavior-y: contain;
   }
   header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 20px; gap: 12px;
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 12px; margin-bottom: 14px; position: sticky; top: 0; z-index: 5;
+    background: linear-gradient(var(--bg) 70%, transparent); padding-bottom: 8px;
   }
-  h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.02em; }
-  .sub { color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
+  h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.03em; }
+  .sub { color: var(--muted); font-size: 0.78rem; margin-top: 3px; line-height: 1.35; max-width: 16rem; }
+  .icon-btn {
+    min-width: var(--tap); min-height: var(--tap); border-radius: 12px;
+    border: 1px solid var(--border); background: var(--card); color: var(--text);
+    display: grid; place-items: center; cursor: pointer; flex-shrink: 0;
+  }
+  .icon-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; }
   .btn {
     border: 1px solid var(--border); background: var(--card); color: var(--text);
-    border-radius: 10px; padding: 10px 14px; font-size: 0.9rem; cursor: pointer;
+    border-radius: 12px; padding: 12px 16px; font-size: 0.95rem; cursor: pointer;
+    min-height: var(--tap); display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   }
   .btn:active { transform: scale(0.98); }
-  .btn-primary { background: var(--text); color: #000; border-color: var(--text); font-weight: 600; }
-  .btn-ghost { background: transparent; }
-  .btn-danger { border-color: #7f1d1d; color: var(--danger); }
+  .btn-primary { background: #fff; color: #000; border-color: #fff; font-weight: 700; }
   .btn-ok { background: var(--ok); color: #052e16; border-color: var(--ok); font-weight: 700; }
+  .btn-danger { border-color: #5c1a1a; color: var(--danger); background: transparent; }
+  .btn-ghost { background: transparent; }
   .list { display: flex; flex-direction: column; gap: 10px; }
   .card {
-    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
-    padding: 14px; display: grid; grid-template-columns: 48px 1fr auto; gap: 12px; align-items: center;
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 12px; display: grid; grid-template-columns: 52px 1fr auto; gap: 10px 12px; align-items: center;
   }
-  .card.due { border-color: var(--warn); box-shadow: 0 0 0 1px rgba(251,191,36,0.25); }
-  .card.low { border-color: var(--danger); }
-  .icon {
-    width: 48px; height: 48px; border-radius: 12px; background: #1c1c1c;
-    display: grid; place-items: center; font-size: 1.5rem;
+  .card.due { border-color: rgba(251,191,36,0.55); }
+  .card.low { border-color: rgba(248,113,113,0.55); }
+  .dev-icon {
+    width: 52px; height: 52px; border-radius: 14px; background: var(--card2);
+    display: grid; place-items: center; border: 1px solid var(--border);
   }
-  .name { font-weight: 600; font-size: 1rem; }
-  .meta { color: var(--muted); font-size: 0.75rem; margin-top: 4px; line-height: 1.35; }
-  .pct {
-    font-variant-numeric: tabular-nums; font-weight: 700; font-size: 1.1rem; text-align: right;
-  }
-  .pct.ok { color: var(--ok); }
-  .pct.warn { color: var(--warn); }
-  .pct.low { color: var(--danger); }
-  .bar {
-    grid-column: 1 / -1; height: 6px; background: #222; border-radius: 99px; overflow: hidden;
-  }
-  .bar > i { display: block; height: 100%; background: var(--accent); border-radius: 99px; }
-  .actions-row { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; }
+  .dev-icon svg { width: 28px; height: 28px; stroke: var(--accent); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .name { font-weight: 650; font-size: 1.02rem; letter-spacing: -0.01em; }
+  .meta { color: var(--muted); font-size: 0.72rem; margin-top: 3px; line-height: 1.4; }
+  .pct { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 1.15rem; text-align: right; min-width: 3.2rem; }
+  .pct.ok { color: var(--ok); } .pct.warn { color: var(--warn); } .pct.low { color: var(--danger); }
+  .bar { grid-column: 1 / -1; height: 7px; background: #222; border-radius: 99px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; border-radius: 99px; }
+  .actions-row { grid-column: 1 / -1; display: flex; gap: 8px; }
+  .actions-row .btn { flex: 1; }
   .empty {
-    text-align: center; color: var(--muted); padding: 48px 16px; border: 1px dashed var(--border);
-    border-radius: 14px;
+    text-align: center; color: var(--muted); padding: 40px 16px;
+    border: 1px dashed var(--border); border-radius: 16px; font-size: 0.92rem; line-height: 1.5;
   }
   .fab {
-    position: fixed; bottom: 20px; right: 20px; left: 20px; max-width: 480px; margin: 0 auto;
-    display: flex; gap: 8px;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 12px 14px calc(12px + var(--safe-b));
+    background: linear-gradient(transparent, var(--bg) 30%);
+    display: flex; justify-content: center; pointer-events: none;
   }
-  .fab .btn { flex: 1; padding: 14px; }
-  dialog {
-    border: 1px solid var(--border); border-radius: 16px; background: var(--card); color: var(--text);
-    padding: 0; width: min(420px, 94vw); max-height: 90dvh; overflow: auto;
-  }
-  dialog::backdrop { background: rgba(0,0,0,0.7); }
-  .dlg-h { padding: 16px 16px 8px; font-weight: 700; font-size: 1.05rem; }
-  .dlg-b { padding: 8px 16px 16px; display: flex; flex-direction: column; gap: 12px; }
-  .dlg-f { padding: 12px 16px 16px; display: flex; gap: 8px; justify-content: flex-end; }
-  label { font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 4px; }
-  input, select {
-    width: 100%; background: #0f0f0f; border: 1px solid var(--border); color: var(--text);
-    border-radius: 8px; padding: 10px 12px; font-size: 1rem;
-  }
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .fab .btn { pointer-events: auto; width: min(100%, 420px); padding: 15px; font-size: 1rem; }
   .toast {
-    position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
-    background: #1f1f1f; border: 1px solid var(--border); padding: 10px 16px; border-radius: 10px;
-    font-size: 0.85rem; z-index: 50; opacity: 0; transition: opacity .2s; pointer-events: none;
+    position: fixed; top: calc(12px + var(--safe-t)); left: 50%; transform: translateX(-50%);
+    background: #1c1c1c; border: 1px solid var(--border); padding: 10px 14px; border-radius: 12px;
+    font-size: 0.85rem; z-index: 80; opacity: 0; transition: opacity .2s; pointer-events: none;
+    max-width: 90vw; text-align: center;
   }
   .toast.show { opacity: 1; }
+
+  /* bottom sheet dialog */
+  dialog.sheet {
+    border: none; padding: 0; margin: 0; width: 100%; max-width: 100%;
+    max-height: min(92dvh, 900px); border-radius: 18px 18px 0 0;
+    background: var(--card); color: var(--text);
+    position: fixed; bottom: 0; top: auto; left: 0; right: 0;
+  }
+  dialog.sheet::backdrop { background: rgba(0,0,0,0.72); }
+  .sheet-handle {
+    width: 40px; height: 4px; background: #333; border-radius: 99px; margin: 10px auto 4px;
+  }
+  .dlg-h { padding: 6px 16px 8px; font-weight: 700; font-size: 1.1rem; }
+  .dlg-b {
+    padding: 4px 16px 8px; display: flex; flex-direction: column; gap: 14px;
+    overflow-y: auto; max-height: calc(92dvh - 140px);
+    -webkit-overflow-scrolling: touch;
+  }
+  .dlg-f {
+    padding: 10px 16px calc(14px + var(--safe-b)); display: flex; gap: 8px;
+    border-top: 1px solid var(--border); background: var(--card);
+  }
+  .dlg-f .btn { flex: 1; }
+  label { font-size: 0.72rem; color: var(--muted); display: block; margin-bottom: 6px; letter-spacing: 0.02em; }
+  input[type="text"], input[type="number"], select {
+    width: 100%; background: #0f0f0f; border: 1px solid var(--border); color: var(--text);
+    border-radius: 12px; padding: 12px 14px; font-size: 1rem; min-height: var(--tap);
+  }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .slider-wrap { display: flex; flex-direction: column; gap: 8px; }
+  .slider-top { display: flex; justify-content: space-between; align-items: baseline; }
+  .slider-val { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent); }
+  input[type="range"] {
+    width: 100%; height: 36px; accent-color: var(--accent); cursor: pointer;
+  }
+
+  /* icon drawer */
+  .icon-pick-row {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .icon-pick-preview {
+    width: 56px; height: 56px; border-radius: 14px; background: var(--card2);
+    border: 1px solid var(--border); display: grid; place-items: center; flex-shrink: 0;
+  }
+  .icon-pick-preview svg { width: 30px; height: 30px; stroke: var(--accent); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .icon-drawer {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px;
+    max-height: 200px; overflow-y: auto; padding: 4px 0;
+    -webkit-overflow-scrolling: touch;
+  }
+  .icon-cell {
+    min-height: 64px; border-radius: 12px; border: 1px solid var(--border);
+    background: #0f0f0f; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; cursor: pointer; padding: 6px 4px;
+  }
+  .icon-cell.selected { border-color: var(--accent); background: rgba(125,211,252,0.08); }
+  .icon-cell svg { width: 24px; height: 24px; stroke: var(--text); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .icon-cell span { font-size: 0.58rem; color: var(--muted); text-align: center; line-height: 1.15; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hint { font-size: 0.72rem; color: var(--muted); line-height: 1.35; }
+
+  @media (min-width: 640px) {
+    body { max-width: 520px; margin: 0 auto; }
+    dialog.sheet {
+      max-width: 440px; margin: auto; border-radius: 16px;
+      top: 50%; bottom: auto; left: 50%; transform: translate(-50%, -50%);
+      max-height: min(86vh, 720px);
+    }
+    .sheet-handle { display: none; }
+    .dlg-b { max-height: min(60vh, 520px); }
+    .dlg-f { padding-bottom: 14px; }
+  }
 </style>
 </head>
 <body>
+<!-- SVG sprite -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="i-tws" viewBox="0 0 24 24"><path d="M4 10v4a2 2 0 0 0 2 2h1"/><path d="M20 10v4a2 2 0 0 1-2 2h-1"/><path d="M7 8a5 5 0 0 1 10 0"/><circle cx="7" cy="14" r="2.5"/><circle cx="17" cy="14" r="2.5"/></symbol>
+  <symbol id="i-speaker" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="3"/><circle cx="12" cy="14" r="3.5"/><circle cx="12" cy="7" r="1.2"/></symbol>
+  <symbol id="i-powerbank" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M10 5h4"/><path d="M11 16h2"/><path d="M9 10h6"/></symbol>
+  <symbol id="i-laptop" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="1.5"/><path d="M2 19h20"/><path d="M8 19l1 2h6l1-2"/></symbol>
+  <symbol id="i-watch" viewBox="0 0 24 24"><rect x="7" y="6" width="10" height="12" rx="3"/><path d="M9 3h6v3M9 18v3h6"/><path d="M12 10v3l2 1"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></symbol>
+  <symbol id="i-controller" viewBox="0 0 24 24"><path d="M6 10h12a4 4 0 0 1 0 8H6a4 4 0 0 1 0-8z"/><path d="M9 13v4M7 15h4"/><circle cx="16" cy="13.5" r="1"/><circle cx="17.5" cy="15.5" r="1"/></symbol>
+  <symbol id="i-mouse" viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="14" rx="4"/><path d="M12 6v3"/><path d="M5 20h14"/></symbol>
+  <symbol id="i-keyboard" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="11" rx="2"/><path d="M6 11h.01M10 11h.01M14 11h.01M18 11h.01M8 15h8"/></symbol>
+  <symbol id="i-tablet" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M11 18h2"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+  <symbol id="i-drone" viewBox="0 0 24 24"><rect x="9" y="10" width="6" height="4" rx="1"/><path d="M3 8l4 3M21 8l-4 3M3 16l4-3M21 16l-4-3"/><circle cx="4" cy="7" r="2"/><circle cx="20" cy="7" r="2"/><circle cx="4" cy="17" r="2"/><circle cx="20" cy="17" r="2"/></symbol>
+  <symbol id="i-ebike" viewBox="0 0 24 24"><circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M6 17l3-8h5l2 5h2"/><path d="M10 9h4"/><path d="M12 4v3"/></symbol>
+  <symbol id="i-scooter" viewBox="0 0 24 24"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 18h7L14 8h-2"/><path d="M12 8V5"/></symbol>
+  <symbol id="i-toothbrush" viewBox="0 0 24 24"><path d="M9 3h4v6H9z"/><path d="M10 9v11a2 2 0 0 0 4 0V9"/><path d="M9 5h4M9 7h4"/></symbol>
+  <symbol id="i-shaver" viewBox="0 0 24 24"><rect x="8" y="8" width="8" height="13" rx="2"/><path d="M9 4h6v4H9z"/><path d="M10 12h4M10 15h4"/></symbol>
+  <symbol id="i-calculator" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><rect x="8" y="5" width="8" height="3" rx="0.5"/><path d="M8 11h2M12 11h2M8 14h2M12 14h2M8 17h2M12 17h4"/></symbol>
+  <symbol id="i-flashlight" viewBox="0 0 24 24"><path d="M8 2h8v5l2 3v12H6V10l2-3z"/><path d="M10 14h4"/></symbol>
+  <symbol id="i-router" viewBox="0 0 24 24"><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 17h.01M11 17h.01"/><path d="M8 14V9a4 4 0 0 1 8 0v5"/></symbol>
+  <symbol id="i-console" viewBox="0 0 24 24"><rect x="2" y="8" width="20" height="10" rx="2"/><path d="M7 13h.01M11 13h.01"/><path d="M16 12h3M16 15h2"/></symbol>
+  <symbol id="i-radio" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M7 4l10 3"/><circle cx="8" cy="14" r="2"/><path d="M13 12h5M13 16h3"/></symbol>
+  <symbol id="i-vape" viewBox="0 0 24 24"><rect x="9" y="8" width="6" height="13" rx="1.5"/><path d="M11 3h2v5h-2z"/><path d="M10 12h4"/></symbol>
+  <symbol id="i-light" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 1 4 10c-.6.6-1 1.5-1 2.5h-6c0-1-.4-1.9-1-2.5A6 6 0 0 1 12 3z"/></symbol>
+  <symbol id="i-vacuum" viewBox="0 0 24 24"><path d="M6 10a6 6 0 0 1 12 0v2H6z"/><rect x="5" y="12" width="14" height="6" rx="2"/><circle cx="9" cy="20" r="1.5"/><circle cx="15" cy="20" r="1.5"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M12 2v8"/><path d="M9 10h6l-1 11h-4z"/><path d="M10 4h4"/></symbol>
+  <symbol id="i-remote" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="20" rx="2"/><circle cx="12" cy="8" r="1.5"/><path d="M10 13h4M10 16h4"/></symbol>
+  <symbol id="i-other" viewBox="0 0 24 24"><rect x="6" y="7" width="12" height="12" rx="2"/><path d="M10 4h4v3h-4z"/><path d="M9 12h6"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 7 1 7 1 7H5s1 0 1-7"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+</svg>
+
 <header>
   <div>
     <h1>Batteries</h1>
-    <div class="sub">Tap charged · learns your drain · reminds you</div>
+    <div class="sub">Track charge · learn drain · remind yourself</div>
   </div>
-  <button class="btn btn-ghost" type="button" id="btnNotif" title="Notifications">🔔</button>
+  <button class="icon-btn" type="button" id="btnNotif" aria-label="Enable notifications">
+    <svg><use href="#i-bell"/></svg>
+  </button>
 </header>
 
 <div id="list" class="list"></div>
@@ -112,44 +216,52 @@
 </div>
 <div class="toast" id="toast"></div>
 
-<dialog id="dlg">
+<dialog class="sheet" id="dlg">
+  <div class="sheet-handle"></div>
   <div class="dlg-h" id="dlgTitle">Device</div>
   <div class="dlg-b">
     <div>
       <label>Name</label>
-      <input id="fName" placeholder="AirPods, Anker bank…">
+      <input id="fName" placeholder="AirPods, Anker bank…" autocomplete="off">
     </div>
+
     <div>
-      <label>Type</label>
-      <select id="fType">
-        <option value="tws">TWS headphones</option>
-        <option value="speaker">Bluetooth speaker</option>
-        <option value="powerbank">Power bank</option>
-        <option value="laptop">Laptop</option>
-        <option value="watch">Watch</option>
-        <option value="phone">Phone</option>
-        <option value="controller">Controller</option>
-        <option value="mouse">Mouse / keyboard</option>
-        <option value="other">Other</option>
-      </select>
+      <label>Icon</label>
+      <div class="icon-pick-row">
+        <div class="icon-pick-preview" id="iconPreview"></div>
+        <div style="flex:1">
+          <div class="hint" id="iconHint">Auto from name · or pick below</div>
+        </div>
+      </div>
+      <div class="icon-drawer" id="iconDrawer" role="listbox" aria-label="Icons"></div>
     </div>
+
+    <div>
+      <label>Type (for sorting / auto-icon)</label>
+      <select id="fType"></select>
+    </div>
+
+    <div class="slider-wrap">
+      <div class="slider-top">
+        <label style="margin:0">Charge level</label>
+        <span class="slider-val"><span id="fPctLabel">100</span>%</span>
+      </div>
+      <input id="fPct" type="range" min="0" max="100" value="100" step="1">
+    </div>
+
     <div class="row2">
       <div>
-        <label>Last known %</label>
-        <input id="fPct" type="number" min="0" max="100" value="100">
+        <label>Remind at %</label>
+        <input id="fLow" type="number" min="1" max="50" value="20" inputmode="numeric">
       </div>
       <div>
-        <label>Remind at % (est.)</label>
-        <input id="fLow" type="number" min="1" max="50" value="20">
+        <label>Manual interval (h)</label>
+        <input id="fInterval" type="number" min="0" step="0.5" placeholder="Optional" inputmode="decimal">
       </div>
     </div>
     <div>
-      <label>Manual reminder interval (hours, optional)</label>
-      <input id="fInterval" type="number" min="0" step="0.5" placeholder="Leave empty to use learned life">
-    </div>
-    <div>
-      <label>Learned full-cycle life (hours, editable)</label>
-      <input id="fLife" type="number" min="0" step="0.25" placeholder="Unknown until a few cycles">
+      <label>Learned full-cycle life (hours)</label>
+      <input id="fLife" type="number" min="0" step="0.25" placeholder="Fills in as you charge" inputmode="decimal">
     </div>
   </div>
   <div class="dlg-f">
@@ -161,21 +273,62 @@
 
 <script>
 const STORAGE_KEY = 'batteries_v1';
-const ICONS = {
-  tws: '🎧', speaker: '🔊', powerbank: '🔋', laptop: '💻', watch: '⌚',
-  phone: '📱', controller: '🎮', mouse: '🖱️', other: '⚡'
-};
 
-function uid() { return Math.random().toString(36).slice(2, 10) + Date.now().toString(36); }
+/** @type {{id:string,label:string,keywords:string[]}[]} */
+const TYPES = [
+  { id: 'tws', label: 'TWS / earbuds', keywords: ['airpod','earbuds','earbud','tws','buds','galaxy buds','earphone'] },
+  { id: 'speaker', label: 'Speaker', keywords: ['speaker','soundbar','boom','jbl','ue boom'] },
+  { id: 'powerbank', label: 'Power bank', keywords: ['powerbank','power bank','anker','magsafe battery','battery pack'] },
+  { id: 'laptop', label: 'Laptop', keywords: ['laptop','macbook','notebook','chromebook'] },
+  { id: 'watch', label: 'Watch', keywords: ['watch','apple watch','garmin','fitbit','band'] },
+  { id: 'phone', label: 'Phone', keywords: ['phone','iphone','android','pixel'] },
+  { id: 'tablet', label: 'Tablet', keywords: ['tablet','ipad','tab '] },
+  { id: 'controller', label: 'Controller', keywords: ['controller','dualsense','xbox','gamepad','joy-con'] },
+  { id: 'mouse', label: 'Mouse', keywords: ['mouse'] },
+  { id: 'keyboard', label: 'Keyboard', keywords: ['keyboard','keychron'] },
+  { id: 'camera', label: 'Camera', keywords: ['camera','gopro','insta360'] },
+  { id: 'drone', label: 'Drone', keywords: ['drone','mavic','mini 3','quad'] },
+  { id: 'ebike', label: 'E-bike', keywords: ['e-bike','ebike','electric bike'] },
+  { id: 'scooter', label: 'Scooter', keywords: ['scooter','ninebot','segway'] },
+  { id: 'toothbrush', label: 'Toothbrush', keywords: ['toothbrush','oral-b','sonicare'] },
+  { id: 'shaver', label: 'Shaver', keywords: ['shaver','trimmer','razor'] },
+  { id: 'calculator', label: 'Calculator', keywords: ['calculator','ti-','casio'] },
+  { id: 'flashlight', label: 'Flashlight', keywords: ['flashlight','torch','headlamp'] },
+  { id: 'router', label: 'Hotspot / router', keywords: ['router','hotspot','modem','mifi'] },
+  { id: 'console', label: 'Handheld console', keywords: ['switch','steam deck','rog ally','console'] },
+  { id: 'radio', label: 'Radio', keywords: ['radio','walkie'] },
+  { id: 'vape', label: 'Vape', keywords: ['vape','pod system'] },
+  { id: 'light', label: 'Light', keywords: ['lamp','light','bulb','nanoleaf'] },
+  { id: 'vacuum', label: 'Vacuum', keywords: ['vacuum','roomba','dyson'] },
+  { id: 'pen', label: 'Stylus / pen', keywords: ['stylus','pencil','s-pen'] },
+  { id: 'remote', label: 'Remote', keywords: ['remote'] },
+  { id: 'other', label: 'Other', keywords: [] }
+];
+
+const ICON_IDS = TYPES.map(t => t.id);
+
+function svgUse(id) {
+  return '<svg aria-hidden="true"><use href="#i-' + id + '"/></svg>';
+}
+
+function uid() {
+  return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+}
 
 function load() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { devices: [], version: 1 };
+    if (!raw) return { devices: [], version: 2 };
     const data = JSON.parse(raw);
     if (!data.devices) data.devices = [];
+    data.devices.forEach(d => {
+      if (!d.icon) d.icon = d.type || 'other';
+      if (!ICON_IDS.includes(d.icon)) d.icon = 'other';
+    });
     return data;
-  } catch { return { devices: [], version: 1 }; }
+  } catch {
+    return { devices: [], version: 2 };
+  }
 }
 
 function save(data) {
@@ -197,15 +350,23 @@ function fmtDuration(ms) {
   const h = ms / 3600000;
   if (h < 1) return Math.round(ms / 60000) + 'm';
   if (h < 48) return (Math.round(h * 10) / 10) + 'h';
-  return (Math.round(h / 24 * 10) / 10) + 'd';
+  return (Math.round((h / 24) * 10) / 10) + 'd';
+}
+
+function detectType(name) {
+  const n = String(name || '').toLowerCase();
+  for (const t of TYPES) {
+    if (t.id === 'other') continue;
+    if (t.keywords.some(k => n.includes(k))) return t.id;
+  }
+  return 'other';
 }
 
 function estimatePct(d, now = Date.now()) {
+  if (d.pctManual) return clamp(d.lastPct != null ? d.lastPct : 100, 0, 100);
   if (d.manualIntervalHours && d.manualIntervalHours > 0) {
     const life = d.manualIntervalHours * 3600000;
     const elapsed = now - (d.lastChargedAt || now);
-    const used = Math.min(1, Math.max(0, elapsed / life));
-    // manual interval = time until low threshold, approximate full cycle
     const span = life / Math.max(0.05, (100 - (d.lowAt || 20)) / 100);
     const usedFull = Math.min(1, Math.max(0, elapsed / span));
     return Math.round(100 * (1 - usedFull));
@@ -224,16 +385,13 @@ function dueAt(d) {
   }
   const life = d.learnedLifeMs;
   if (!life || !d.lastChargedAt) return null;
-  // time when estimated pct hits lowAt
-  const frac = 1 - low / 100;
-  return d.lastChargedAt + life * frac;
+  return d.lastChargedAt + life * (1 - low / 100);
 }
 
 function markCharged(d, pct = 100) {
   const now = Date.now();
   if (d.lastChargedAt && d.lastChargedAt < now) {
     const cycle = now - d.lastChargedAt;
-    // only learn plausible cycles (30m .. 30d)
     if (cycle >= 30 * 60000 && cycle <= 30 * 86400000) {
       const prev = d.learnedLifeMs || cycle;
       d.learnedLifeMs = Math.round(prev * 0.65 + cycle * 0.35);
@@ -243,17 +401,45 @@ function markCharged(d, pct = 100) {
   }
   d.lastChargedAt = now;
   d.lastPct = pct;
+  d.pctManual = false;
   d.notifiedForCharge = null;
+}
+
+function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 let state = load();
 let editId = null;
+let selectedIcon = 'other';
+let iconLocked = false; // user picked from drawer
+
+function fillTypeSelect() {
+  const sel = document.getElementById('fType');
+  sel.innerHTML = TYPES.map(t => `<option value="${t.id}">${t.label}</option>`).join('');
+}
+
+function renderIconDrawer() {
+  const drawer = document.getElementById('iconDrawer');
+  drawer.innerHTML = TYPES.map(t => `
+    <button type="button" class="icon-cell${selectedIcon === t.id ? ' selected' : ''}" data-icon="${t.id}" role="option" aria-selected="${selectedIcon === t.id}">
+      ${svgUse(t.id)}
+      <span>${escapeHtml(t.label.split('/')[0].trim())}</span>
+    </button>`).join('');
+}
+
+function setPreview(icon) {
+  selectedIcon = ICON_IDS.includes(icon) ? icon : 'other';
+  document.getElementById('iconPreview').innerHTML = svgUse(selectedIcon);
+  renderIconDrawer();
+}
 
 function render() {
   const root = document.getElementById('list');
   const now = Date.now();
   if (!state.devices.length) {
-    root.innerHTML = '<div class="empty">No devices yet.<br>Add a speaker, TWS, bank, laptop…</div>';
+    root.innerHTML = '<div class="empty">No devices yet.<br>Add earbuds, a power bank, toothbrush…</div>';
     return;
   }
   const sorted = state.devices.slice().sort((a, b) => estimatePct(a, now) - estimatePct(b, now));
@@ -265,18 +451,18 @@ function render() {
     const pctCls = pct <= (d.lowAt || 20) ? 'low' : (pct <= 40 ? 'warn' : 'ok');
     const lifeLabel = d.manualIntervalHours
       ? `remind every ${d.manualIntervalHours}h`
-      : (d.learnedLifeMs ? `learns ~${fmtDuration(d.learnedLifeMs)} full` : 'learning…');
-    const dueLabel = due ? (now >= due ? 'due now' : 'low in ' + fmtDuration(due - now)) : 'set a charge to start';
+      : (d.learnedLifeMs ? `~${fmtDuration(d.learnedLifeMs)} cycle` : 'learning…');
+    const dueLabel = due ? (now >= due ? 'due now' : 'low in ' + fmtDuration(due - now)) : 'charge once to start';
+    const icon = d.icon || d.type || 'other';
+    const barColor = pct <= 20 ? 'var(--danger)' : pct <= 40 ? 'var(--warn)' : 'var(--accent)';
     return `<article class="card ${cls}" data-id="${d.id}">
-      <div class="icon">${ICONS[d.type] || ICONS.other}</div>
+      <div class="dev-icon">${svgUse(icon)}</div>
       <div>
         <div class="name">${escapeHtml(d.name)}</div>
-        <div class="meta">${escapeHtml(d.type)} · ${lifeLabel}<br>${dueLabel}
-          ${d.lastChargedAt ? ' · charged ' + fmtDuration(now - d.lastChargedAt) + ' ago' : ''}
-        </div>
+        <div class="meta">${escapeHtml((TYPES.find(t => t.id === d.type) || {}).label || d.type)} · ${lifeLabel}<br>${dueLabel}${d.lastChargedAt ? ' · ' + fmtDuration(now - d.lastChargedAt) + ' ago' : ''}${d.pctManual ? ' · manual %' : ''}</div>
       </div>
       <div class="pct ${pctCls}">${pct}%</div>
-      <div class="bar"><i style="width:${Math.max(2, pct)}%;background:${pct <= 20 ? 'var(--danger)' : pct <= 40 ? 'var(--warn)' : 'var(--accent)'}"></i></div>
+      <div class="bar"><i style="width:${Math.max(2, pct)}%;background:${barColor}"></i></div>
       <div class="actions-row">
         <button class="btn btn-ok" type="button" data-act="charged">Charged</button>
         <button class="btn" type="button" data-act="edit">Edit</button>
@@ -285,39 +471,65 @@ function render() {
   }).join('');
 }
 
-function escapeHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
 document.getElementById('list').addEventListener('click', (e) => {
   const btn = e.target.closest('[data-act]');
   const card = e.target.closest('[data-id]');
   if (!card) return;
-  const id = card.getAttribute('data-id');
-  const d = state.devices.find(x => x.id === id);
+  const d = state.devices.find(x => x.id === card.getAttribute('data-id'));
   if (!d) return;
   if (btn && btn.dataset.act === 'charged') {
     markCharged(d, 100);
-    save(state);
-    render();
+    save(state); render(); scheduleChecks();
     toast(d.name + ' marked charged');
-    scheduleChecks();
     return;
   }
   if (btn && btn.dataset.act === 'edit') openEdit(d);
 });
 
+document.getElementById('iconDrawer').addEventListener('click', (e) => {
+  const cell = e.target.closest('[data-icon]');
+  if (!cell) return;
+  iconLocked = true;
+  setPreview(cell.getAttribute('data-icon'));
+  document.getElementById('iconHint').textContent = 'Custom icon selected';
+});
+
+document.getElementById('fName').addEventListener('input', () => {
+  if (iconLocked) return;
+  const det = detectType(document.getElementById('fName').value);
+  document.getElementById('fType').value = det;
+  setPreview(det);
+  document.getElementById('iconHint').textContent = det === 'other'
+    ? 'Auto: other — pick an icon if you want'
+    : 'Auto: ' + (TYPES.find(t => t.id === det) || {}).label;
+});
+
+document.getElementById('fType').addEventListener('change', () => {
+  if (iconLocked) return;
+  setPreview(document.getElementById('fType').value);
+});
+
+document.getElementById('fPct').addEventListener('input', () => {
+  document.getElementById('fPctLabel').textContent = document.getElementById('fPct').value;
+});
+
 function openEdit(d) {
   editId = d ? d.id : null;
+  iconLocked = !!(d && d.iconLocked);
   document.getElementById('dlgTitle').textContent = d ? 'Edit device' : 'Add device';
   document.getElementById('fName').value = d ? d.name : '';
-  document.getElementById('fType').value = d ? d.type : 'tws';
-  document.getElementById('fPct').value = d && d.lastPct != null ? d.lastPct : 100;
+  document.getElementById('fType').value = d ? d.type : 'other';
+  const pct = d ? (d.lastPct != null ? d.lastPct : estimatePct(d)) : 100;
+  document.getElementById('fPct').value = pct;
+  document.getElementById('fPctLabel').textContent = String(pct);
   document.getElementById('fLow').value = d && d.lowAt != null ? d.lowAt : 20;
   document.getElementById('fInterval').value = d && d.manualIntervalHours ? d.manualIntervalHours : '';
   document.getElementById('fLife').value = d && d.learnedLifeMs ? (d.learnedLifeMs / 3600000).toFixed(2) : '';
+  setPreview(d ? (d.icon || d.type || 'other') : 'other');
+  document.getElementById('iconHint').textContent = iconLocked ? 'Custom icon selected' : 'Auto from name · or pick below';
   document.getElementById('btnDelete').hidden = !d;
   document.getElementById('dlg').showModal();
+  setTimeout(() => document.getElementById('fName').focus(), 50);
 }
 
 document.getElementById('btnAdd').onclick = () => openEdit(null);
@@ -325,24 +537,23 @@ document.getElementById('btnCancel').onclick = () => document.getElementById('dl
 document.getElementById('btnDelete').onclick = () => {
   if (!editId) return;
   state.devices = state.devices.filter(x => x.id !== editId);
-  save(state);
-  document.getElementById('dlg').close();
-  render();
+  save(state); document.getElementById('dlg').close(); render();
 };
 document.getElementById('btnSave').onclick = () => {
   const name = document.getElementById('fName').value.trim();
   if (!name) return toast('Name required');
   const type = document.getElementById('fType').value;
-  const lastPct = clamp(parseInt(document.getElementById('fPct').value, 10) || 100, 0, 100);
+  const lastPct = clamp(parseInt(document.getElementById('fPct').value, 10) || 0, 0, 100);
   const lowAt = clamp(parseInt(document.getElementById('fLow').value, 10) || 20, 1, 50);
   const intervalRaw = document.getElementById('fInterval').value;
   const lifeRaw = document.getElementById('fLife').value;
   let d = editId ? state.devices.find(x => x.id === editId) : null;
   if (!d) {
-    d = { id: uid(), name, type, lastChargedAt: Date.now(), lastPct, lowAt, cycles: 0 };
+    d = { id: uid(), name, type, icon: selectedIcon, iconLocked, lastChargedAt: Date.now(), lastPct, lowAt, cycles: 0, pctManual: true };
     state.devices.push(d);
   } else {
-    d.name = name; d.type = type; d.lastPct = lastPct; d.lowAt = lowAt;
+    d.name = name; d.type = type; d.icon = selectedIcon; d.iconLocked = iconLocked;
+    d.lastPct = lastPct; d.lowAt = lowAt; d.pctManual = true;
   }
   if (intervalRaw === '' || intervalRaw == null) d.manualIntervalHours = null;
   else d.manualIntervalHours = Math.max(0, parseFloat(intervalRaw) || 0) || null;
@@ -350,25 +561,17 @@ document.getElementById('btnSave').onclick = () => {
     const h = parseFloat(lifeRaw);
     if (h > 0) d.learnedLifeMs = Math.round(h * 3600000);
   }
-  save(state);
-  document.getElementById('dlg').close();
-  render();
-  scheduleChecks();
+  save(state); document.getElementById('dlg').close(); render(); scheduleChecks();
 };
-
-function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
 
 async function ensureNotifPermission() {
   if (!('Notification' in window)) return false;
   if (Notification.permission === 'granted') return true;
   if (Notification.permission === 'denied') return false;
-  const r = await Notification.requestPermission();
-  return r === 'granted';
+  return (await Notification.requestPermission()) === 'granted';
 }
-
 document.getElementById('btnNotif').onclick = async () => {
-  const ok = await ensureNotifPermission();
-  toast(ok ? 'Notifications enabled' : 'Notifications blocked or unavailable');
+  toast((await ensureNotifPermission()) ? 'Notifications enabled' : 'Notifications blocked or unavailable');
 };
 
 function maybeNotify(d, now) {
@@ -396,11 +599,11 @@ function scheduleChecks() {
   render();
 }
 
-setInterval(scheduleChecks, 60000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) scheduleChecks(); });
-
+fillTypeSelect();
 render();
 scheduleChecks();
+setInterval(scheduleChecks, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) scheduleChecks(); });
 </script>
 </body>
 </html>
