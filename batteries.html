@@ -24,18 +24,17 @@
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100dvh;
+    background: var(--bg); color: var(--text); min-height: 100dvh;
     padding: calc(14px + var(--safe-t)) 14px calc(92px + var(--safe-b));
     overscroll-behavior-y: contain;
   }
   header {
     display: flex; align-items: flex-start; justify-content: space-between;
-    gap: 12px; margin-bottom: 16px;
+    gap: 10px; margin-bottom: 16px;
   }
   h1 { font-size: 1.45rem; font-weight: 700; letter-spacing: -0.03em; }
   .sub { color: var(--muted); font-size: 0.8rem; margin-top: 4px; }
+  .hdr-actions { display: flex; gap: 8px; }
   .icon-btn {
     width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--border);
     background: var(--card); color: var(--text); display: grid; place-items: center; cursor: pointer;
@@ -43,12 +42,13 @@
   .icon-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; }
   .btn {
     border: 1px solid var(--border); background: var(--card); color: var(--text);
-    border-radius: 12px; padding: 12px 14px; font-size: 0.95rem; cursor: pointer;
+    border-radius: 12px; padding: 12px 10px; font-size: 0.92rem; cursor: pointer;
     min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   }
   .btn:active { transform: scale(0.98); }
   .btn-primary { background: #fff; color: #000; border-color: #fff; font-weight: 700; }
   .btn-ok { background: var(--ok); color: #052e16; border-color: var(--ok); font-weight: 700; }
+  .btn-dead { background: transparent; color: var(--danger); border-color: #5a2020; font-weight: 650; }
   .btn-danger { border-color: #4a1515; color: var(--danger); background: transparent; }
   .list { display: flex; flex-direction: column; gap: 10px; }
   .card {
@@ -119,40 +119,49 @@
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .slider-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
   .slider-val { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent); font-size: 0.95rem; }
-  input[type="range"] { width: 100%; height: 32px; accent-color: var(--accent); }
+  input[type="range"] { width: 100%; height: 36px; accent-color: var(--accent); }
 
-  .icon-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-  }
-  @media (min-width: 400px) {
-    .icon-grid { grid-template-columns: repeat(5, 1fr); }
-  }
+  .icon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  @media (min-width: 400px) { .icon-grid { grid-template-columns: repeat(5, 1fr); } }
   .icon-cell {
-    aspect-ratio: 1;
-    border-radius: 14px;
-    border: 1px solid transparent;
-    background: var(--elev);
+    aspect-ratio: 1; border-radius: 14px; border: 1px solid transparent; background: var(--elev);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 6px; cursor: pointer; padding: 8px 4px;
-    transition: border-color .12s, background .12s;
   }
-  .icon-cell:active { transform: scale(0.96); }
-  .icon-cell.selected {
-    border-color: var(--accent);
-    background: rgba(125, 211, 252, 0.1);
-  }
-  .icon-cell svg {
-    width: 26px; height: 26px; stroke: #e8e8e8; fill: none;
-    stroke-width: 1.55; stroke-linecap: round; stroke-linejoin: round;
-  }
+  .icon-cell.selected { border-color: var(--accent); background: rgba(125,211,252,0.1); }
+  .icon-cell svg { width: 26px; height: 26px; stroke: #e8e8e8; fill: none; stroke-width: 1.55; stroke-linecap: round; stroke-linejoin: round; }
   .icon-cell.selected svg { stroke: var(--accent); }
   .icon-cell span {
     font-size: 0.6rem; color: var(--muted); text-align: center; line-height: 1.1;
     max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .icon-cell.selected span { color: var(--accent); }
+
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-row span { font-size: 0.95rem; }
+  .toggle-row small { display: block; color: var(--muted); font-size: 0.75rem; margin-top: 3px; }
+  .switch {
+    width: 48px; height: 28px; border-radius: 99px; background: #333; position: relative;
+    border: none; cursor: pointer; flex-shrink: 0;
+  }
+  .switch.on { background: var(--accent); }
+  .switch::after {
+    content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px;
+    border-radius: 50%; background: #fff; transition: transform .15s;
+  }
+  .switch.on::after { transform: translateX(20px); }
+
+  .checkin-card {
+    text-align: center; padding: 8px 0 4px;
+  }
+  .checkin-card .dev-icon { margin: 0 auto 12px; width: 64px; height: 64px; border-radius: 16px; }
+  .checkin-card .dev-icon svg { width: 34px; height: 34px; }
+  .checkin-card h2 { font-size: 1.15rem; margin-bottom: 4px; }
+  .checkin-card p { color: var(--muted); font-size: 0.85rem; margin-bottom: 18px; }
 
   @media (min-width: 640px) {
     body { max-width: 480px; margin: 0 auto; }
@@ -164,7 +173,6 @@
     .sheet-handle { display: none; }
     .dlg-b { max-height: min(62vh, 560px); }
     .dlg-f { padding-bottom: 14px; }
-    .icon-grid { grid-template-columns: repeat(5, 1fr); }
   }
 </style>
 </head>
@@ -205,16 +213,22 @@
   <symbol id="i-battery" viewBox="0 0 24 24"><rect x="3" y="7" width="16" height="10" rx="2"/><path d="M19 10h2v4h-2zM7 10v4M11 10v4"/></symbol>
   <symbol id="i-other" viewBox="0 0 24 24"><rect x="6" y="7" width="12" height="12" rx="2"/><path d="M10 4h4v3h-4zM9 12h6"/></symbol>
   <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 7 1 7 1 7H5s1 0 1-7"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
 </svg>
 
 <header>
   <div>
     <h1>Batteries</h1>
-    <div class="sub">Track charge · learn drain · remind yourself</div>
+    <div class="sub">Charged / dead · learns cycles · check-ins</div>
   </div>
-  <button class="icon-btn" type="button" id="btnNotif" aria-label="Enable notifications">
-    <svg><use href="#i-bell"/></svg>
-  </button>
+  <div class="hdr-actions">
+    <button class="icon-btn" type="button" id="btnSettings" aria-label="Settings">
+      <svg><use href="#i-gear"/></svg>
+    </button>
+    <button class="icon-btn" type="button" id="btnNotif" aria-label="Enable notifications">
+      <svg><use href="#i-bell"/></svg>
+    </button>
+  </div>
 </header>
 
 <div id="list" class="list"></div>
@@ -231,7 +245,7 @@
     </div>
     <div>
       <label>Icon</label>
-      <div class="icon-grid" id="iconDrawer" role="listbox" aria-label="Icons"></div>
+      <div class="icon-grid" id="iconDrawer" role="listbox"></div>
     </div>
     <div>
       <div class="slider-top">
@@ -262,46 +276,93 @@
   </div>
 </dialog>
 
+<dialog class="sheet" id="dlgSettings">
+  <div class="sheet-handle"></div>
+  <div class="dlg-h">Settings</div>
+  <div class="dlg-b">
+    <div class="toggle-row">
+      <div>
+        <span>Check-in notifications</span>
+        <small>Occasionally ask how charged a device is so learning stays accurate</small>
+      </div>
+      <button type="button" class="switch" id="swCheckins" aria-pressed="true"></button>
+    </div>
+    <div class="toggle-row">
+      <div>
+        <span>Low-battery reminders</span>
+        <small>Notify when estimated charge hits your threshold</small>
+      </div>
+      <button type="button" class="switch on" id="swLow" aria-pressed="true"></button>
+    </div>
+  </div>
+  <div class="dlg-f">
+    <button class="btn btn-primary" type="button" id="btnSettingsClose">Done</button>
+  </div>
+</dialog>
+
+<dialog class="sheet" id="dlgCheckin">
+  <div class="sheet-handle"></div>
+  <div class="dlg-h">Quick check-in</div>
+  <div class="dlg-b">
+    <div class="checkin-card">
+      <div class="dev-icon" id="ciIcon"></div>
+      <h2 id="ciName">Device</h2>
+      <p>How charged is it right now?</p>
+      <div class="slider-top">
+        <label style="margin:0">Charge</label>
+        <span class="slider-val"><span id="ciPctLabel">50</span>%</span>
+      </div>
+      <input id="ciPct" type="range" min="0" max="100" value="50" step="1">
+    </div>
+  </div>
+  <div class="dlg-f">
+    <button class="btn btn-dead" type="button" id="ciDead">Dead</button>
+    <button class="btn btn-ok" type="button" id="ciCharged">Full</button>
+    <button class="btn btn-primary" type="button" id="ciSave">Save</button>
+  </div>
+</dialog>
+
 <script>
 const STORAGE_KEY = 'batteries_v1';
+const CHECKIN_GAP_MS = 18 * 3600000; // ~18h between check-ins per device
+const CHECKIN_MIN_AGE_MS = 4 * 3600000; // only after 4h since last charge/report
 
 const TYPES = [
-  { id: 'tws', label: 'TWS', name: 'Earbuds', keywords: ['airpod','earbuds','earbud','tws','buds','galaxy buds'] },
-  { id: 'headphones', label: 'Headphones', name: 'Headphones', keywords: ['headphone','headset','sony wh','bose'] },
-  { id: 'speaker', label: 'Speaker', name: 'Speaker', keywords: ['speaker','soundbar','jbl','boom'] },
-  { id: 'powerbank', label: 'Power bank', name: 'Power bank', keywords: ['powerbank','power bank','anker','battery pack','magsafe battery'] },
-  { id: 'laptop', label: 'Laptop', name: 'Laptop', keywords: ['laptop','macbook','notebook'] },
-  { id: 'watch', label: 'Watch', name: 'Watch', keywords: ['watch','garmin','fitbit','band'] },
-  { id: 'phone', label: 'Phone', name: 'Phone', keywords: ['phone','iphone','pixel','android'] },
+  { id: 'tws', label: 'TWS', name: 'Earbuds', keywords: ['airpod','earbuds','earbud','tws','buds'] },
+  { id: 'headphones', label: 'Headphones', name: 'Headphones', keywords: ['headphone','headset'] },
+  { id: 'speaker', label: 'Speaker', name: 'Speaker', keywords: ['speaker','soundbar','jbl'] },
+  { id: 'powerbank', label: 'Power bank', name: 'Power bank', keywords: ['powerbank','power bank','anker'] },
+  { id: 'laptop', label: 'Laptop', name: 'Laptop', keywords: ['laptop','macbook'] },
+  { id: 'watch', label: 'Watch', name: 'Watch', keywords: ['watch','garmin','fitbit'] },
+  { id: 'phone', label: 'Phone', name: 'Phone', keywords: ['phone','iphone','pixel'] },
   { id: 'tablet', label: 'Tablet', name: 'Tablet', keywords: ['tablet','ipad'] },
-  { id: 'controller', label: 'Controller', name: 'Controller', keywords: ['controller','dualsense','xbox','gamepad'] },
+  { id: 'controller', label: 'Controller', name: 'Controller', keywords: ['controller','dualsense','xbox'] },
   { id: 'mouse', label: 'Mouse', name: 'Mouse', keywords: ['mouse'] },
-  { id: 'keyboard', label: 'Keyboard', name: 'Keyboard', keywords: ['keyboard','keychron'] },
-  { id: 'camera', label: 'Camera', name: 'Camera', keywords: ['camera','gopro','insta360'] },
-  { id: 'drone', label: 'Drone', name: 'Drone', keywords: ['drone','mavic'] },
+  { id: 'keyboard', label: 'Keyboard', name: 'Keyboard', keywords: ['keyboard'] },
+  { id: 'camera', label: 'Camera', name: 'Camera', keywords: ['camera','gopro'] },
+  { id: 'drone', label: 'Drone', name: 'Drone', keywords: ['drone'] },
   { id: 'ebike', label: 'E-bike', name: 'E-bike', keywords: ['e-bike','ebike'] },
-  { id: 'scooter', label: 'Scooter', name: 'Scooter', keywords: ['scooter','ninebot'] },
-  { id: 'toothbrush', label: 'Toothbrush', name: 'Toothbrush', keywords: ['toothbrush','oral-b','sonicare'] },
-  { id: 'shaver', label: 'Shaver', name: 'Shaver', keywords: ['shaver','trimmer','razor'] },
-  { id: 'calculator', label: 'Calculator', name: 'Calculator', keywords: ['calculator','ti-','casio'] },
-  { id: 'flashlight', label: 'Flashlight', name: 'Flashlight', keywords: ['flashlight','torch','headlamp'] },
-  { id: 'router', label: 'Hotspot', name: 'Hotspot', keywords: ['router','hotspot','mifi'] },
-  { id: 'console', label: 'Console', name: 'Handheld', keywords: ['switch','steam deck','rog ally'] },
-  { id: 'radio', label: 'Radio', name: 'Radio', keywords: ['radio','walkie'] },
-  { id: 'light', label: 'Light', name: 'Light', keywords: ['lamp','light','bulb'] },
-  { id: 'vacuum', label: 'Vacuum', name: 'Vacuum', keywords: ['vacuum','roomba','dyson'] },
-  { id: 'pen', label: 'Stylus', name: 'Stylus', keywords: ['stylus','pencil','s-pen'] },
+  { id: 'scooter', label: 'Scooter', name: 'Scooter', keywords: ['scooter'] },
+  { id: 'toothbrush', label: 'Toothbrush', name: 'Toothbrush', keywords: ['toothbrush','oral-b'] },
+  { id: 'shaver', label: 'Shaver', name: 'Shaver', keywords: ['shaver','trimmer'] },
+  { id: 'calculator', label: 'Calculator', name: 'Calculator', keywords: ['calculator'] },
+  { id: 'flashlight', label: 'Flashlight', name: 'Flashlight', keywords: ['flashlight','torch'] },
+  { id: 'router', label: 'Hotspot', name: 'Hotspot', keywords: ['router','hotspot'] },
+  { id: 'console', label: 'Console', name: 'Handheld', keywords: ['switch','steam deck'] },
+  { id: 'radio', label: 'Radio', name: 'Radio', keywords: ['radio'] },
+  { id: 'light', label: 'Light', name: 'Light', keywords: ['lamp','light'] },
+  { id: 'vacuum', label: 'Vacuum', name: 'Vacuum', keywords: ['vacuum','roomba'] },
+  { id: 'pen', label: 'Stylus', name: 'Stylus', keywords: ['stylus','pencil'] },
   { id: 'remote', label: 'Remote', name: 'Remote', keywords: ['remote'] },
   { id: 'ring', label: 'Ring', name: 'Smart ring', keywords: ['ring','oura'] },
-  { id: 'ssd', label: 'SSD', name: 'SSD', keywords: ['ssd','external drive','t7'] },
-  { id: 'monitor', label: 'Monitor', name: 'Monitor', keywords: ['monitor','display'] },
-  { id: 'car', label: 'Car key', name: 'Car key', keywords: ['car key','fob','key fob'] },
+  { id: 'ssd', label: 'SSD', name: 'SSD', keywords: ['ssd'] },
+  { id: 'monitor', label: 'Monitor', name: 'Monitor', keywords: ['monitor'] },
+  { id: 'car', label: 'Car key', name: 'Car key', keywords: ['car key','fob'] },
   { id: 'fan', label: 'Fan', name: 'Fan', keywords: ['fan'] },
   { id: 'hearing', label: 'Hearing', name: 'Hearing aid', keywords: ['hearing'] },
-  { id: 'battery', label: 'Battery', name: 'Battery', keywords: ['aa battery','18650','cell'] },
+  { id: 'battery', label: 'Battery', name: 'Battery', keywords: ['18650'] },
   { id: 'other', label: 'Other', name: 'Device', keywords: [] }
 ];
-
 const ICON_IDS = TYPES.map(t => t.id);
 const byId = Object.fromEntries(TYPES.map(t => [t.id, t]));
 
@@ -313,16 +374,20 @@ function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt
 function load() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { devices: [], version: 3 };
+    if (!raw) return { devices: [], settings: { checkins: true, lowReminders: true }, version: 4 };
     const data = JSON.parse(raw);
     if (!data.devices) data.devices = [];
+    if (!data.settings) data.settings = { checkins: true, lowReminders: true };
+    if (data.settings.checkins == null) data.settings.checkins = true;
+    if (data.settings.lowReminders == null) data.settings.lowReminders = true;
     data.devices.forEach(d => {
       if (!d.icon) d.icon = d.type || 'other';
-      if (!ICON_IDS.includes(d.icon)) d.icon = 'other';
-      if (d.icon === 'vape') d.icon = 'other';
+      if (!ICON_IDS.includes(d.icon) || d.icon === 'vape') d.icon = 'other';
     });
     return data;
-  } catch { return { devices: [], version: 3 }; }
+  } catch {
+    return { devices: [], settings: { checkins: true, lowReminders: true }, version: 4 };
+  }
 }
 function save(data) {
   data.updatedAt = Date.now();
@@ -354,6 +419,19 @@ function detectType(name) {
   return 'other';
 }
 
+/** Learn from a full cycle (charge → dead) or partial report */
+function learnFromSpan(d, spanMs, fromPct, toPct) {
+  if (!spanMs || spanMs < 20 * 60000 || spanMs > 45 * 86400000) return;
+  const drop = Math.max(1, (fromPct != null ? fromPct : 100) - (toPct != null ? toPct : 0));
+  // Extrapolate to full 100%→0% life
+  const fullLife = spanMs * (100 / drop);
+  if (fullLife < 30 * 60000 || fullLife > 45 * 86400000) return;
+  const prev = d.learnedLifeMs || fullLife;
+  d.learnedLifeMs = Math.round(prev * 0.55 + fullLife * 0.45);
+  d.cycles = (d.cycles || 0) + 1;
+  d.lastCycleMs = spanMs;
+}
+
 function estimatePct(d, now = Date.now()) {
   if (d.pctManual) return clamp(d.lastPct != null ? d.lastPct : 100, 0, 100);
   if (d.manualIntervalHours && d.manualIntervalHours > 0) {
@@ -364,8 +442,11 @@ function estimatePct(d, now = Date.now()) {
   }
   const life = d.learnedLifeMs;
   if (!life || life <= 0) return d.lastPct != null ? d.lastPct : 100;
-  const elapsed = now - (d.lastChargedAt || now);
-  return Math.round(100 * (1 - Math.min(1, Math.max(0, elapsed / life))));
+  const origin = d.lastReportAt || d.lastChargedAt || now;
+  const originPct = d.lastPct != null ? d.lastPct : 100;
+  const elapsed = now - origin;
+  const used = (elapsed / life) * 100;
+  return clamp(Math.round(originPct - used), 0, 100);
 }
 
 function dueAt(d) {
@@ -373,36 +454,69 @@ function dueAt(d) {
   if (d.manualIntervalHours && d.manualIntervalHours > 0)
     return (d.lastChargedAt || Date.now()) + d.manualIntervalHours * 3600000;
   const life = d.learnedLifeMs;
-  if (!life || !d.lastChargedAt) return null;
-  return d.lastChargedAt + life * (1 - low / 100);
+  if (!life) return null;
+  const origin = d.lastReportAt || d.lastChargedAt;
+  if (!origin) return null;
+  const originPct = d.lastPct != null ? d.lastPct : 100;
+  if (originPct <= low) return origin;
+  const hoursFrac = (originPct - low) / 100;
+  return origin + life * hoursFrac;
 }
 
-function markCharged(d, pct = 100) {
+function markCharged(d) {
   const now = Date.now();
-  if (d.lastChargedAt && d.lastChargedAt < now) {
-    const cycle = now - d.lastChargedAt;
-    if (cycle >= 30 * 60000 && cycle <= 30 * 86400000) {
-      const prev = d.learnedLifeMs || cycle;
-      d.learnedLifeMs = Math.round(prev * 0.65 + cycle * 0.35);
-      d.cycles = (d.cycles || 0) + 1;
-    }
-  }
   d.lastChargedAt = now;
-  d.lastPct = pct;
+  d.lastReportAt = now;
+  d.lastPct = 100;
   d.pctManual = false;
   d.notifiedForCharge = null;
+  d.lastCheckinAt = now;
+}
+
+function markDead(d) {
+  const now = Date.now();
+  const fromPct = d.lastPct != null ? d.lastPct : 100;
+  const origin = d.lastReportAt || d.lastChargedAt;
+  if (origin) learnFromSpan(d, now - origin, fromPct, 0);
+  d.lastReportAt = now;
+  d.lastPct = 0;
+  d.pctManual = true;
+  d.notifiedForCharge = d.lastChargedAt;
+  d.lastCheckinAt = now;
+}
+
+function reportPct(d, pct) {
+  const now = Date.now();
+  pct = clamp(pct, 0, 100);
+  const fromPct = d.lastPct != null ? d.lastPct : estimatePct(d, now);
+  const origin = d.lastReportAt || d.lastChargedAt;
+  if (origin && fromPct > pct) learnFromSpan(d, now - origin, fromPct, pct);
+  if (pct >= 95) {
+    markCharged(d);
+    d.lastPct = pct;
+    return;
+  }
+  if (pct <= 2) {
+    markDead(d);
+    return;
+  }
+  d.lastReportAt = now;
+  d.lastPct = pct;
+  d.pctManual = true;
+  d.lastCheckinAt = now;
+  if (pct > (d.lowAt || 20)) d.notifiedForCharge = null;
 }
 
 let state = load();
 let editId = null;
 let selectedIcon = 'other';
-let nameFromIcon = true; // name still auto-managed
+let nameFromIcon = true;
+let checkinDeviceId = null;
 
 function renderIconDrawer() {
   document.getElementById('iconDrawer').innerHTML = TYPES.map(t => `
-    <button type="button" class="icon-cell${selectedIcon === t.id ? ' selected' : ''}" data-icon="${t.id}" role="option">
-      ${svgUse(t.id)}
-      <span>${escapeHtml(t.label)}</span>
+    <button type="button" class="icon-cell${selectedIcon === t.id ? ' selected' : ''}" data-icon="${t.id}">
+      ${svgUse(t.id)}<span>${escapeHtml(t.label)}</span>
     </button>`).join('');
 }
 
@@ -423,7 +537,7 @@ function render() {
   const root = document.getElementById('list');
   const now = Date.now();
   if (!state.devices.length) {
-    root.innerHTML = '<div class="empty">No devices yet.<br>Add earbuds, a power bank, toothbrush…</div>';
+    root.innerHTML = '<div class="empty">No devices yet.<br>Add something, then tap Charged or Dead to teach it.</div>';
     return;
   }
   const sorted = state.devices.slice().sort((a, b) => estimatePct(a, now) - estimatePct(b, now));
@@ -436,19 +550,20 @@ function render() {
     const lifeLabel = d.manualIntervalHours
       ? `every ${d.manualIntervalHours}h`
       : (d.learnedLifeMs ? `~${fmtDuration(d.learnedLifeMs)} cycle` : 'learning…');
-    const dueLabel = due ? (now >= due ? 'due now' : 'low in ' + fmtDuration(due - now)) : 'charge once to start';
+    const dueLabel = due ? (now >= due ? 'due now' : 'low in ' + fmtDuration(due - now)) : 'mark charged / dead to learn';
     const icon = d.icon || d.type || 'other';
     const bar = pct <= 20 ? 'var(--danger)' : pct <= 40 ? 'var(--warn)' : 'var(--accent)';
     return `<article class="card ${cls}" data-id="${d.id}">
       <div class="dev-icon">${svgUse(icon)}</div>
       <div>
         <div class="name">${escapeHtml(d.name)}</div>
-        <div class="meta">${escapeHtml((byId[d.type] || byId[icon] || {}).label || '')} · ${lifeLabel}<br>${dueLabel}${d.lastChargedAt ? ' · ' + fmtDuration(now - d.lastChargedAt) + ' ago' : ''}</div>
+        <div class="meta">${escapeHtml((byId[icon] || {}).label || '')} · ${lifeLabel}<br>${dueLabel}</div>
       </div>
       <div class="pct ${pctCls}">${pct}%</div>
       <div class="bar"><i style="width:${Math.max(2,pct)}%;background:${bar}"></i></div>
       <div class="actions-row">
         <button class="btn btn-ok" type="button" data-act="charged">Charged</button>
+        <button class="btn btn-dead" type="button" data-act="dead">Dead</button>
         <button class="btn" type="button" data-act="edit">Edit</button>
       </div>
     </article>`;
@@ -458,19 +573,21 @@ function render() {
 document.getElementById('list').addEventListener('click', (e) => {
   const btn = e.target.closest('[data-act]');
   const card = e.target.closest('[data-id]');
-  if (!card) return;
+  if (!card || !btn) return;
   const d = state.devices.find(x => x.id === card.dataset.id);
   if (!d) return;
-  if (btn && btn.dataset.act === 'charged') {
-    markCharged(d, 100); save(state); render(); scheduleChecks();
-    toast(d.name + ' marked charged');
-  } else if (btn && btn.dataset.act === 'edit') openEdit(d);
+  if (btn.dataset.act === 'charged') {
+    markCharged(d); save(state); render(); scheduleChecks();
+    toast(d.name + ' charged');
+  } else if (btn.dataset.act === 'dead') {
+    markDead(d); save(state); render(); scheduleChecks();
+    toast(d.name + ' dead — cycle learned');
+  } else if (btn.dataset.act === 'edit') openEdit(d);
 });
 
 document.getElementById('iconDrawer').addEventListener('click', (e) => {
   const cell = e.target.closest('[data-icon]');
-  if (!cell) return;
-  selectIcon(cell.dataset.icon, { fillName: true });
+  if (cell) selectIcon(cell.dataset.icon, { fillName: true });
 });
 
 document.getElementById('fName').addEventListener('input', () => {
@@ -478,9 +595,11 @@ document.getElementById('fName').addEventListener('input', () => {
   const det = detectType(document.getElementById('fName').value);
   if (det !== 'other') selectIcon(det, { fillName: false });
 });
-
 document.getElementById('fPct').addEventListener('input', () => {
   document.getElementById('fPctLabel').textContent = document.getElementById('fPct').value;
+});
+document.getElementById('ciPct').addEventListener('input', () => {
+  document.getElementById('ciPctLabel').textContent = document.getElementById('ciPct').value;
 });
 
 function openEdit(d) {
@@ -499,6 +618,16 @@ function openEdit(d) {
   document.getElementById('dlg').showModal();
 }
 
+function openCheckin(d) {
+  checkinDeviceId = d.id;
+  const pct = estimatePct(d);
+  document.getElementById('ciName').textContent = d.name;
+  document.getElementById('ciIcon').innerHTML = svgUse(d.icon || d.type || 'other');
+  document.getElementById('ciPct').value = pct;
+  document.getElementById('ciPctLabel').textContent = String(pct);
+  document.getElementById('dlgCheckin').showModal();
+}
+
 document.getElementById('btnAdd').onclick = () => openEdit(null);
 document.getElementById('btnCancel').onclick = () => document.getElementById('dlg').close();
 document.getElementById('btnDelete').onclick = () => {
@@ -507,9 +636,18 @@ document.getElementById('btnDelete').onclick = () => {
   save(state); document.getElementById('dlg').close(); render();
 };
 
-function notify(title, body) {
+function notify(title, body, url) {
   if ('Notification' in window && Notification.permission === 'granted') {
-    try { new Notification(title, { body, tag: 'batteries-' + Date.now() }); } catch (_) {}
+    try {
+      const n = new Notification(title, { body, tag: 'batteries-' + (url || Date.now()) });
+      if (url) {
+        n.onclick = () => {
+          window.focus();
+          location.href = url;
+          n.close();
+        };
+      }
+    } catch (_) {}
   }
   toast(title + (body ? ' — ' + body : ''));
 }
@@ -526,12 +664,14 @@ document.getElementById('btnSave').onclick = async () => {
   if (!d) {
     d = {
       id: uid(), name, type: selectedIcon, icon: selectedIcon,
-      lastChargedAt: Date.now(), lastPct, lowAt, cycles: 0, pctManual: true
+      lastChargedAt: Date.now(), lastReportAt: Date.now(), lastPct, lowAt,
+      cycles: 0, pctManual: true, lastCheckinAt: Date.now()
     };
     state.devices.push(d);
   } else {
     d.name = name; d.type = selectedIcon; d.icon = selectedIcon;
     d.lastPct = lastPct; d.lowAt = lowAt; d.pctManual = true;
+    d.lastReportAt = Date.now();
   }
   if (intervalRaw === '' || intervalRaw == null) d.manualIntervalHours = null;
   else d.manualIntervalHours = Math.max(0, parseFloat(intervalRaw) || 0) || null;
@@ -543,7 +683,6 @@ document.getElementById('btnSave').onclick = async () => {
   document.getElementById('dlg').close();
   render();
   scheduleChecks();
-
   if (isNew) {
     if ('Notification' in window && Notification.permission === 'default') {
       try { await Notification.requestPermission(); } catch (_) {}
@@ -552,31 +691,120 @@ document.getElementById('btnSave').onclick = async () => {
   }
 };
 
+// Check-in dialog actions
+document.getElementById('ciSave').onclick = () => {
+  const d = state.devices.find(x => x.id === checkinDeviceId);
+  if (!d) return document.getElementById('dlgCheckin').close();
+  const pct = parseInt(document.getElementById('ciPct').value, 10) || 0;
+  reportPct(d, pct);
+  save(state);
+  document.getElementById('dlgCheckin').close();
+  render();
+  toast(d.name + ' → ' + pct + '%');
+  // clear query
+  if (location.search) history.replaceState({}, '', location.pathname);
+};
+document.getElementById('ciCharged').onclick = () => {
+  const d = state.devices.find(x => x.id === checkinDeviceId);
+  if (!d) return;
+  markCharged(d); save(state);
+  document.getElementById('dlgCheckin').close();
+  render();
+  toast(d.name + ' charged');
+  if (location.search) history.replaceState({}, '', location.pathname);
+};
+document.getElementById('ciDead').onclick = () => {
+  const d = state.devices.find(x => x.id === checkinDeviceId);
+  if (!d) return;
+  markDead(d); save(state);
+  document.getElementById('dlgCheckin').close();
+  render();
+  toast(d.name + ' dead — cycle learned');
+  if (location.search) history.replaceState({}, '', location.pathname);
+};
+
+// Settings
+function syncSettingsUI() {
+  document.getElementById('swCheckins').classList.toggle('on', !!state.settings.checkins);
+  document.getElementById('swLow').classList.toggle('on', !!state.settings.lowReminders);
+}
+document.getElementById('btnSettings').onclick = () => {
+  syncSettingsUI();
+  document.getElementById('dlgSettings').showModal();
+};
+document.getElementById('btnSettingsClose').onclick = () => document.getElementById('dlgSettings').close();
+document.getElementById('swCheckins').onclick = () => {
+  state.settings.checkins = !state.settings.checkins;
+  save(state); syncSettingsUI();
+};
+document.getElementById('swLow').onclick = () => {
+  state.settings.lowReminders = !state.settings.lowReminders;
+  save(state); syncSettingsUI();
+};
+
 document.getElementById('btnNotif').onclick = async () => {
   if (!('Notification' in window)) return toast('Notifications unavailable');
   const r = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
   toast(r === 'granted' ? 'Notifications enabled' : 'Notifications blocked');
 };
 
-function maybeNotify(d, now) {
+function maybeLowNotify(d, now) {
+  if (!state.settings.lowReminders) return;
   const due = dueAt(d);
   if (!due || now < due) return;
-  if (d.notifiedForCharge === d.lastChargedAt) return;
-  d.notifiedForCharge = d.lastChargedAt;
-  notify(d.name + ' battery low', 'Estimated ~' + estimatePct(d, now) + '% — time to charge.');
+  if (d.notifiedForCharge === (d.lastChargedAt || d.lastReportAt)) return;
+  d.notifiedForCharge = d.lastChargedAt || d.lastReportAt;
+  const url = location.origin + location.pathname + '?check=' + encodeURIComponent(d.id);
+  notify(d.name + ' battery low', 'Estimated ~' + estimatePct(d, now) + '% — tap to update', url);
+}
+
+function maybeCheckinNotify(d, now) {
+  if (!state.settings.checkins) return;
+  if (!d.lastChargedAt && !d.lastReportAt) return;
+  const last = d.lastCheckinAt || d.lastReportAt || d.lastChargedAt || 0;
+  if (now - last < CHECKIN_GAP_MS) return;
+  const origin = d.lastReportAt || d.lastChargedAt || 0;
+  if (now - origin < CHECKIN_MIN_AGE_MS) return;
+  // Prefer devices with little learning data or uncertain estimate
+  const curious = !d.learnedLifeMs || (d.cycles || 0) < 3 || d.pctManual;
+  if (!curious && (d.cycles || 0) >= 5) {
+    // still occasional check every ~3 days worth of gaps
+    if (now - last < CHECKIN_GAP_MS * 3) return;
+  }
+  if (d.lastCheckinNotifAt && now - d.lastCheckinNotifAt < CHECKIN_GAP_MS) return;
+  d.lastCheckinNotifAt = now;
+  const url = location.origin + location.pathname + '?check=' + encodeURIComponent(d.id);
+  notify('Checking in: ' + d.name, 'How charged is it? Tap to set the slider.', url);
 }
 
 function scheduleChecks() {
   const now = Date.now();
   let changed = false;
+  // One check-in notif max per tick
+  let checkinSent = false;
   state.devices.forEach(d => {
-    const before = d.notifiedForCharge;
-    maybeNotify(d, now);
-    if (d.notifiedForCharge !== before) changed = true;
+    const before = JSON.stringify([d.notifiedForCharge, d.lastCheckinNotifAt]);
+    maybeLowNotify(d, now);
+    if (!checkinSent) {
+      const prev = d.lastCheckinNotifAt;
+      maybeCheckinNotify(d, now);
+      if (d.lastCheckinNotifAt !== prev) checkinSent = true;
+    }
+    const after = JSON.stringify([d.notifiedForCharge, d.lastCheckinNotifAt]);
+    if (before !== after) changed = true;
   });
   if (changed) save(state);
   render();
 }
+
+// Deep link: ?check=id
+(function handleDeepLink() {
+  const params = new URLSearchParams(location.search);
+  const id = params.get('check');
+  if (!id) return;
+  const d = state.devices.find(x => x.id === id);
+  if (d) setTimeout(() => openCheckin(d), 200);
+})();
 
 render();
 scheduleChecks();
