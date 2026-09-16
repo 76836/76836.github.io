@@ -1,0 +1,123 @@
+atpk-name: batteries
+atpk-description: Optional Batteries add-on — reminds you when learned device charge is low via AkariNet notifications (not chat). Shares data with https://76836.github.io/batteries.html on the same origin.
+
+!AUTOMATON
+name: batteries-reminders
+version: 1.0.0
+description: Polls batteries_v1 device list and fires showNotification when a device is due for charge. Does not speak through Akari.
+priority: 40
+respondsto: timer, message_sent
+controls: showNotification
+code>
+module.exports.default = {
+    setup() {
+        const KEY = 'batteries_v1';
+        const INTERVAL_MS = 60000;
+
+        function load() {
+            try {
+                const raw = localStorage.getItem(KEY);
+                if (!raw) return { devices: [] };
+                const data = JSON.parse(raw);
+                if (!Array.isArray(data.devices)) data.devices = [];
+                return data;
+            } catch (e) {
+                return { devices: [] };
+            }
+        }
+
+        function save(data) {
+            try {
+                data.updatedAt = Date.now();
+                localStorage.setItem(KEY, JSON.stringify(data));
+            } catch (e) {}
+        }
+
+        function estimatePct(d, now) {
+            if (d.manualIntervalHours && d.manualIntervalHours > 0) {
+                const life = d.manualIntervalHours * 3600000;
+                const elapsed = now - (d.lastChargedAt || now);
+                const span = life / Math.max(0.05, (100 - (d.lowAt || 20)) / 100);
+                const usedFull = Math.min(1, Math.max(0, elapsed / span));
+                return Math.round(100 * (1 - usedFull));
+            }
+            const life = d.learnedLifeMs;
+            if (!life || life <= 0) return d.lastPct != null ? d.lastPct : 100;
+            const elapsed = now - (d.lastChargedAt || now);
+            const used = Math.min(1, Math.max(0, elapsed / life));
+            return Math.round(100 * (1 - used));
+        }
+
+        function dueAt(d) {
+            const low = d.lowAt != null ? d.lowAt : 20;
+            if (d.manualIntervalHours && d.manualIntervalHours > 0) {
+                return (d.lastChargedAt || Date.now()) + d.manualIntervalHours * 3600000;
+            }
+            const life = d.learnedLifeMs;
+            if (!life || !d.lastChargedAt) return null;
+            const frac = 1 - low / 100;
+            return d.lastChargedAt + life * frac;
+        }
+
+        function notifyDevice(d, pct) {
+            if (typeof showNotification !== 'function') return;
+            try {
+                showNotification(
+                    d.name + ' battery low',
+                    'Estimated ~' + pct + '% — time to charge. Open Batteries or mark charged in the app.',
+                    {
+                        borderColor: pct <= 15 ? '#f87171' : '#fbbf24',
+                        duration: 8000,
+                        image: null
+                    }
+                );
+            } catch (e) {}
+        }
+
+        function tick() {
+            const data = load();
+            const now = Date.now();
+            let changed = false;
+            (data.devices || []).forEach(function (d) {
+                const due = dueAt(d);
+                if (!due || now < due) return;
+                if (d.notifiedForCharge === d.lastChargedAt) return;
+                d.notifiedForCharge = d.lastChargedAt;
+                changed = true;
+                notifyDevice(d, estimatePct(d, now));
+            });
+            if (changed) save(data);
+        }
+
+        this._batteriesTimer = setInterval(tick, INTERVAL_MS);
+        setTimeout(tick, 2500);
+
+        on('message_sent', function (event) {
+            const msg = String((event && event.message) || '').trim().toLowerCase();
+            if (msg === 'battery status' || msg === 'batteries status') {
+                const data = load();
+                const now = Date.now();
+                if (!data.devices.length) {
+                    if (typeof showNotification === 'function') {
+                        showNotification('Batteries', 'No devices yet. Open batteries.html to add some.', { duration: 4000 });
+                    }
+                    return;
+                }
+                const lines = data.devices.map(function (d) {
+                    return d.name + ': ~' + estimatePct(d, now) + '%';
+                }).join(' · ');
+                if (typeof showNotification === 'function') {
+                    showNotification('Batteries', lines, { borderColor: '#7dd3fc', duration: 6000 });
+                }
+            }
+        });
+    },
+
+    teardown() {
+        if (this._batteriesTimer) {
+            clearInterval(this._batteriesTimer);
+            this._batteriesTimer = null;
+        }
+    }
+};
+<code

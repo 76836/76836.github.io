@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<title>Batteries</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --card: #141414;
+    --border: #2a2a2a;
+    --text: #f2f2f2;
+    --muted: #888;
+    --accent: #7dd3fc;
+    --warn: #fbbf24;
+    --danger: #f87171;
+    --ok: #4ade80;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    padding: 16px;
+    padding-bottom: 96px;
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px; gap: 12px;
+  }
+  h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.02em; }
+  .sub { color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
+  .btn {
+    border: 1px solid var(--border); background: var(--card); color: var(--text);
+    border-radius: 10px; padding: 10px 14px; font-size: 0.9rem; cursor: pointer;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: var(--text); color: #000; border-color: var(--text); font-weight: 600; }
+  .btn-ghost { background: transparent; }
+  .btn-danger { border-color: #7f1d1d; color: var(--danger); }
+  .btn-ok { background: var(--ok); color: #052e16; border-color: var(--ok); font-weight: 700; }
+  .list { display: flex; flex-direction: column; gap: 10px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 14px; display: grid; grid-template-columns: 48px 1fr auto; gap: 12px; align-items: center;
+  }
+  .card.due { border-color: var(--warn); box-shadow: 0 0 0 1px rgba(251,191,36,0.25); }
+  .card.low { border-color: var(--danger); }
+  .icon {
+    width: 48px; height: 48px; border-radius: 12px; background: #1c1c1c;
+    display: grid; place-items: center; font-size: 1.5rem;
+  }
+  .name { font-weight: 600; font-size: 1rem; }
+  .meta { color: var(--muted); font-size: 0.75rem; margin-top: 4px; line-height: 1.35; }
+  .pct {
+    font-variant-numeric: tabular-nums; font-weight: 700; font-size: 1.1rem; text-align: right;
+  }
+  .pct.ok { color: var(--ok); }
+  .pct.warn { color: var(--warn); }
+  .pct.low { color: var(--danger); }
+  .bar {
+    grid-column: 1 / -1; height: 6px; background: #222; border-radius: 99px; overflow: hidden;
+  }
+  .bar > i { display: block; height: 100%; background: var(--accent); border-radius: 99px; }
+  .actions-row { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; }
+  .empty {
+    text-align: center; color: var(--muted); padding: 48px 16px; border: 1px dashed var(--border);
+    border-radius: 14px;
+  }
+  .fab {
+    position: fixed; bottom: 20px; right: 20px; left: 20px; max-width: 480px; margin: 0 auto;
+    display: flex; gap: 8px;
+  }
+  .fab .btn { flex: 1; padding: 14px; }
+  dialog {
+    border: 1px solid var(--border); border-radius: 16px; background: var(--card); color: var(--text);
+    padding: 0; width: min(420px, 94vw); max-height: 90dvh; overflow: auto;
+  }
+  dialog::backdrop { background: rgba(0,0,0,0.7); }
+  .dlg-h { padding: 16px 16px 8px; font-weight: 700; font-size: 1.05rem; }
+  .dlg-b { padding: 8px 16px 16px; display: flex; flex-direction: column; gap: 12px; }
+  .dlg-f { padding: 12px 16px 16px; display: flex; gap: 8px; justify-content: flex-end; }
+  label { font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 4px; }
+  input, select {
+    width: 100%; background: #0f0f0f; border: 1px solid var(--border); color: var(--text);
+    border-radius: 8px; padding: 10px 12px; font-size: 1rem;
+  }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .toast {
+    position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+    background: #1f1f1f; border: 1px solid var(--border); padding: 10px 16px; border-radius: 10px;
+    font-size: 0.85rem; z-index: 50; opacity: 0; transition: opacity .2s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Batteries</h1>
+    <div class="sub">Tap charged · learns your drain · reminds you</div>
+  </div>
+  <button class="btn btn-ghost" type="button" id="btnNotif" title="Notifications">🔔</button>
+</header>
+
+<div id="list" class="list"></div>
+
+<div class="fab">
+  <button class="btn btn-primary" type="button" id="btnAdd">+ Device</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<dialog id="dlg">
+  <div class="dlg-h" id="dlgTitle">Device</div>
+  <div class="dlg-b">
+    <div>
+      <label>Name</label>
+      <input id="fName" placeholder="AirPods, Anker bank…">
+    </div>
+    <div>
+      <label>Type</label>
+      <select id="fType">
+        <option value="tws">TWS headphones</option>
+        <option value="speaker">Bluetooth speaker</option>
+        <option value="powerbank">Power bank</option>
+        <option value="laptop">Laptop</option>
+        <option value="watch">Watch</option>
+        <option value="phone">Phone</option>
+        <option value="controller">Controller</option>
+        <option value="mouse">Mouse / keyboard</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="row2">
+      <div>
+        <label>Last known %</label>
+        <input id="fPct" type="number" min="0" max="100" value="100">
+      </div>
+      <div>
+        <label>Remind at % (est.)</label>
+        <input id="fLow" type="number" min="1" max="50" value="20">
+      </div>
+    </div>
+    <div>
+      <label>Manual reminder interval (hours, optional)</label>
+      <input id="fInterval" type="number" min="0" step="0.5" placeholder="Leave empty to use learned life">
+    </div>
+    <div>
+      <label>Learned full-cycle life (hours, editable)</label>
+      <input id="fLife" type="number" min="0" step="0.25" placeholder="Unknown until a few cycles">
+    </div>
+  </div>
+  <div class="dlg-f">
+    <button class="btn btn-danger" type="button" id="btnDelete" hidden>Delete</button>
+    <button class="btn" type="button" id="btnCancel">Cancel</button>
+    <button class="btn btn-primary" type="button" id="btnSave">Save</button>
+  </div>
+</dialog>
+
+<script>
+const STORAGE_KEY = 'batteries_v1';
+const ICONS = {
+  tws: '🎧', speaker: '🔊', powerbank: '🔋', laptop: '💻', watch: '⌚',
+  phone: '📱', controller: '🎮', mouse: '🖱️', other: '⚡'
+};
+
+function uid() { return Math.random().toString(36).slice(2, 10) + Date.now().toString(36); }
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { devices: [], version: 1 };
+    const data = JSON.parse(raw);
+    if (!data.devices) data.devices = [];
+    return data;
+  } catch { return { devices: [], version: 1 }; }
+}
+
+function save(data) {
+  data.updatedAt = Date.now();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  try { window.dispatchEvent(new CustomEvent('batteries:update', { detail: data })); } catch (_) {}
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function fmtDuration(ms) {
+  if (!ms || ms <= 0 || !isFinite(ms)) return '—';
+  const h = ms / 3600000;
+  if (h < 1) return Math.round(ms / 60000) + 'm';
+  if (h < 48) return (Math.round(h * 10) / 10) + 'h';
+  return (Math.round(h / 24 * 10) / 10) + 'd';
+}
+
+function estimatePct(d, now = Date.now()) {
+  if (d.manualIntervalHours && d.manualIntervalHours > 0) {
+    const life = d.manualIntervalHours * 3600000;
+    const elapsed = now - (d.lastChargedAt || now);
+    const used = Math.min(1, Math.max(0, elapsed / life));
+    // manual interval = time until low threshold, approximate full cycle
+    const span = life / Math.max(0.05, (100 - (d.lowAt || 20)) / 100);
+    const usedFull = Math.min(1, Math.max(0, elapsed / span));
+    return Math.round(100 * (1 - usedFull));
+  }
+  const life = d.learnedLifeMs;
+  if (!life || life <= 0) return d.lastPct != null ? d.lastPct : 100;
+  const elapsed = now - (d.lastChargedAt || now);
+  const used = Math.min(1, Math.max(0, elapsed / life));
+  return Math.round(100 * (1 - used));
+}
+
+function dueAt(d) {
+  const low = d.lowAt != null ? d.lowAt : 20;
+  if (d.manualIntervalHours && d.manualIntervalHours > 0) {
+    return (d.lastChargedAt || Date.now()) + d.manualIntervalHours * 3600000;
+  }
+  const life = d.learnedLifeMs;
+  if (!life || !d.lastChargedAt) return null;
+  // time when estimated pct hits lowAt
+  const frac = 1 - low / 100;
+  return d.lastChargedAt + life * frac;
+}
+
+function markCharged(d, pct = 100) {
+  const now = Date.now();
+  if (d.lastChargedAt && d.lastChargedAt < now) {
+    const cycle = now - d.lastChargedAt;
+    // only learn plausible cycles (30m .. 30d)
+    if (cycle >= 30 * 60000 && cycle <= 30 * 86400000) {
+      const prev = d.learnedLifeMs || cycle;
+      d.learnedLifeMs = Math.round(prev * 0.65 + cycle * 0.35);
+      d.cycles = (d.cycles || 0) + 1;
+      d.lastCycleMs = cycle;
+    }
+  }
+  d.lastChargedAt = now;
+  d.lastPct = pct;
+  d.notifiedForCharge = null;
+}
+
+let state = load();
+let editId = null;
+
+function render() {
+  const root = document.getElementById('list');
+  const now = Date.now();
+  if (!state.devices.length) {
+    root.innerHTML = '<div class="empty">No devices yet.<br>Add a speaker, TWS, bank, laptop…</div>';
+    return;
+  }
+  const sorted = state.devices.slice().sort((a, b) => estimatePct(a, now) - estimatePct(b, now));
+  root.innerHTML = sorted.map(d => {
+    const pct = estimatePct(d, now);
+    const due = dueAt(d);
+    const isDue = due && now >= due;
+    const cls = pct <= (d.lowAt || 20) ? 'low' : (isDue ? 'due' : '');
+    const pctCls = pct <= (d.lowAt || 20) ? 'low' : (pct <= 40 ? 'warn' : 'ok');
+    const lifeLabel = d.manualIntervalHours
+      ? `remind every ${d.manualIntervalHours}h`
+      : (d.learnedLifeMs ? `learns ~${fmtDuration(d.learnedLifeMs)} full` : 'learning…');
+    const dueLabel = due ? (now >= due ? 'due now' : 'low in ' + fmtDuration(due - now)) : 'set a charge to start';
+    return `<article class="card ${cls}" data-id="${d.id}">
+      <div class="icon">${ICONS[d.type] || ICONS.other}</div>
+      <div>
+        <div class="name">${escapeHtml(d.name)}</div>
+        <div class="meta">${escapeHtml(d.type)} · ${lifeLabel}<br>${dueLabel}
+          ${d.lastChargedAt ? ' · charged ' + fmtDuration(now - d.lastChargedAt) + ' ago' : ''}
+        </div>
+      </div>
+      <div class="pct ${pctCls}">${pct}%</div>
+      <div class="bar"><i style="width:${Math.max(2, pct)}%;background:${pct <= 20 ? 'var(--danger)' : pct <= 40 ? 'var(--warn)' : 'var(--accent)'}"></i></div>
+      <div class="actions-row">
+        <button class="btn btn-ok" type="button" data-act="charged">Charged</button>
+        <button class="btn" type="button" data-act="edit">Edit</button>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+document.getElementById('list').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-act]');
+  const card = e.target.closest('[data-id]');
+  if (!card) return;
+  const id = card.getAttribute('data-id');
+  const d = state.devices.find(x => x.id === id);
+  if (!d) return;
+  if (btn && btn.dataset.act === 'charged') {
+    markCharged(d, 100);
+    save(state);
+    render();
+    toast(d.name + ' marked charged');
+    scheduleChecks();
+    return;
+  }
+  if (btn && btn.dataset.act === 'edit') openEdit(d);
+});
+
+function openEdit(d) {
+  editId = d ? d.id : null;
+  document.getElementById('dlgTitle').textContent = d ? 'Edit device' : 'Add device';
+  document.getElementById('fName').value = d ? d.name : '';
+  document.getElementById('fType').value = d ? d.type : 'tws';
+  document.getElementById('fPct').value = d && d.lastPct != null ? d.lastPct : 100;
+  document.getElementById('fLow').value = d && d.lowAt != null ? d.lowAt : 20;
+  document.getElementById('fInterval').value = d && d.manualIntervalHours ? d.manualIntervalHours : '';
+  document.getElementById('fLife').value = d && d.learnedLifeMs ? (d.learnedLifeMs / 3600000).toFixed(2) : '';
+  document.getElementById('btnDelete').hidden = !d;
+  document.getElementById('dlg').showModal();
+}
+
+document.getElementById('btnAdd').onclick = () => openEdit(null);
+document.getElementById('btnCancel').onclick = () => document.getElementById('dlg').close();
+document.getElementById('btnDelete').onclick = () => {
+  if (!editId) return;
+  state.devices = state.devices.filter(x => x.id !== editId);
+  save(state);
+  document.getElementById('dlg').close();
+  render();
+};
+document.getElementById('btnSave').onclick = () => {
+  const name = document.getElementById('fName').value.trim();
+  if (!name) return toast('Name required');
+  const type = document.getElementById('fType').value;
+  const lastPct = clamp(parseInt(document.getElementById('fPct').value, 10) || 100, 0, 100);
+  const lowAt = clamp(parseInt(document.getElementById('fLow').value, 10) || 20, 1, 50);
+  const intervalRaw = document.getElementById('fInterval').value;
+  const lifeRaw = document.getElementById('fLife').value;
+  let d = editId ? state.devices.find(x => x.id === editId) : null;
+  if (!d) {
+    d = { id: uid(), name, type, lastChargedAt: Date.now(), lastPct, lowAt, cycles: 0 };
+    state.devices.push(d);
+  } else {
+    d.name = name; d.type = type; d.lastPct = lastPct; d.lowAt = lowAt;
+  }
+  if (intervalRaw === '' || intervalRaw == null) d.manualIntervalHours = null;
+  else d.manualIntervalHours = Math.max(0, parseFloat(intervalRaw) || 0) || null;
+  if (lifeRaw !== '' && lifeRaw != null) {
+    const h = parseFloat(lifeRaw);
+    if (h > 0) d.learnedLifeMs = Math.round(h * 3600000);
+  }
+  save(state);
+  document.getElementById('dlg').close();
+  render();
+  scheduleChecks();
+};
+
+function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+
+async function ensureNotifPermission() {
+  if (!('Notification' in window)) return false;
+  if (Notification.permission === 'granted') return true;
+  if (Notification.permission === 'denied') return false;
+  const r = await Notification.requestPermission();
+  return r === 'granted';
+}
+
+document.getElementById('btnNotif').onclick = async () => {
+  const ok = await ensureNotifPermission();
+  toast(ok ? 'Notifications enabled' : 'Notifications blocked or unavailable');
+};
+
+function maybeNotify(d, now) {
+  const due = dueAt(d);
+  if (!due || now < due) return;
+  if (d.notifiedForCharge === d.lastChargedAt) return;
+  d.notifiedForCharge = d.lastChargedAt;
+  const title = d.name + ' battery low';
+  const body = 'Estimated ~' + estimatePct(d, now) + '% — time to charge.';
+  if ('Notification' in window && Notification.permission === 'granted') {
+    try { new Notification(title, { body, tag: 'batteries-' + d.id }); } catch (_) {}
+  }
+  toast(title);
+}
+
+function scheduleChecks() {
+  const now = Date.now();
+  let changed = false;
+  state.devices.forEach(d => {
+    const before = d.notifiedForCharge;
+    maybeNotify(d, now);
+    if (d.notifiedForCharge !== before) changed = true;
+  });
+  if (changed) save(state);
+  render();
+}
+
+setInterval(scheduleChecks, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) scheduleChecks(); });
+
+render();
+scheduleChecks();
+</script>
+</body>
+</html>
