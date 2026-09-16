@@ -8,194 +8,202 @@
 <title>Batteries</title>
 <style>
   :root {
-    --bg: #0a0a0a;
-    --card: #141414;
-    --card2: #1a1a1a;
-    --border: #2a2a2a;
-    --text: #f2f2f2;
-    --muted: #8a8a8a;
+    --bg: #070707;
+    --card: #121212;
+    --elev: #1c1c1c;
+    --border: #2c2c2c;
+    --text: #f5f5f5;
+    --muted: #8b8b8b;
     --accent: #7dd3fc;
     --warn: #fbbf24;
     --danger: #f87171;
     --ok: #4ade80;
     --safe-b: env(safe-area-inset-bottom, 0px);
     --safe-t: env(safe-area-inset-top, 0px);
-    --tap: 44px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; }
   body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100dvh;
-    padding: calc(12px + var(--safe-t)) 14px calc(88px + var(--safe-b));
+    padding: calc(14px + var(--safe-t)) 14px calc(92px + var(--safe-b));
     overscroll-behavior-y: contain;
   }
   header {
     display: flex; align-items: flex-start; justify-content: space-between;
-    gap: 12px; margin-bottom: 14px; position: sticky; top: 0; z-index: 5;
-    background: linear-gradient(var(--bg) 70%, transparent); padding-bottom: 8px;
+    gap: 12px; margin-bottom: 16px;
   }
-  h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.03em; }
-  .sub { color: var(--muted); font-size: 0.78rem; margin-top: 3px; line-height: 1.35; max-width: 16rem; }
+  h1 { font-size: 1.45rem; font-weight: 700; letter-spacing: -0.03em; }
+  .sub { color: var(--muted); font-size: 0.8rem; margin-top: 4px; }
   .icon-btn {
-    min-width: var(--tap); min-height: var(--tap); border-radius: 12px;
-    border: 1px solid var(--border); background: var(--card); color: var(--text);
-    display: grid; place-items: center; cursor: pointer; flex-shrink: 0;
+    width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text); display: grid; place-items: center; cursor: pointer;
   }
-  .icon-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  .icon-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; }
   .btn {
     border: 1px solid var(--border); background: var(--card); color: var(--text);
-    border-radius: 12px; padding: 12px 16px; font-size: 0.95rem; cursor: pointer;
-    min-height: var(--tap); display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    border-radius: 12px; padding: 12px 14px; font-size: 0.95rem; cursor: pointer;
+    min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   }
   .btn:active { transform: scale(0.98); }
   .btn-primary { background: #fff; color: #000; border-color: #fff; font-weight: 700; }
   .btn-ok { background: var(--ok); color: #052e16; border-color: var(--ok); font-weight: 700; }
-  .btn-danger { border-color: #5c1a1a; color: var(--danger); background: transparent; }
-  .btn-ghost { background: transparent; }
+  .btn-danger { border-color: #4a1515; color: var(--danger); background: transparent; }
   .list { display: flex; flex-direction: column; gap: 10px; }
   .card {
     background: var(--card); border: 1px solid var(--border); border-radius: 16px;
-    padding: 12px; display: grid; grid-template-columns: 52px 1fr auto; gap: 10px 12px; align-items: center;
+    padding: 12px; display: grid; grid-template-columns: 48px 1fr auto; gap: 10px 12px; align-items: center;
   }
-  .card.due { border-color: rgba(251,191,36,0.55); }
-  .card.low { border-color: rgba(248,113,113,0.55); }
+  .card.due { border-color: rgba(251,191,36,0.5); }
+  .card.low { border-color: rgba(248,113,113,0.5); }
   .dev-icon {
-    width: 52px; height: 52px; border-radius: 14px; background: var(--card2);
-    display: grid; place-items: center; border: 1px solid var(--border);
+    width: 48px; height: 48px; border-radius: 12px; background: var(--elev);
+    display: grid; place-items: center;
   }
-  .dev-icon svg { width: 28px; height: 28px; stroke: var(--accent); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-  .name { font-weight: 650; font-size: 1.02rem; letter-spacing: -0.01em; }
-  .meta { color: var(--muted); font-size: 0.72rem; margin-top: 3px; line-height: 1.4; }
-  .pct { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 1.15rem; text-align: right; min-width: 3.2rem; }
+  .dev-icon svg { width: 26px; height: 26px; stroke: var(--accent); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .name { font-weight: 650; font-size: 1rem; }
+  .meta { color: var(--muted); font-size: 0.72rem; margin-top: 3px; line-height: 1.35; }
+  .pct { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 1.1rem; text-align: right; min-width: 3rem; }
   .pct.ok { color: var(--ok); } .pct.warn { color: var(--warn); } .pct.low { color: var(--danger); }
-  .bar { grid-column: 1 / -1; height: 7px; background: #222; border-radius: 99px; overflow: hidden; }
+  .bar { grid-column: 1 / -1; height: 6px; background: #222; border-radius: 99px; overflow: hidden; }
   .bar > i { display: block; height: 100%; border-radius: 99px; }
   .actions-row { grid-column: 1 / -1; display: flex; gap: 8px; }
   .actions-row .btn { flex: 1; }
   .empty {
-    text-align: center; color: var(--muted); padding: 40px 16px;
-    border: 1px dashed var(--border); border-radius: 16px; font-size: 0.92rem; line-height: 1.5;
+    text-align: center; color: var(--muted); padding: 48px 16px;
+    border: 1px dashed var(--border); border-radius: 16px; line-height: 1.5;
   }
   .fab {
     position: fixed; bottom: 0; left: 0; right: 0;
     padding: 12px 14px calc(12px + var(--safe-b));
-    background: linear-gradient(transparent, var(--bg) 30%);
+    background: linear-gradient(transparent, var(--bg) 35%);
     display: flex; justify-content: center; pointer-events: none;
   }
-  .fab .btn { pointer-events: auto; width: min(100%, 420px); padding: 15px; font-size: 1rem; }
+  .fab .btn { pointer-events: auto; width: min(100%, 420px); }
   .toast {
     position: fixed; top: calc(12px + var(--safe-t)); left: 50%; transform: translateX(-50%);
-    background: #1c1c1c; border: 1px solid var(--border); padding: 10px 14px; border-radius: 12px;
-    font-size: 0.85rem; z-index: 80; opacity: 0; transition: opacity .2s; pointer-events: none;
+    background: #1a1a1a; border: 1px solid var(--border); padding: 10px 14px; border-radius: 12px;
+    font-size: 0.85rem; z-index: 90; opacity: 0; transition: opacity .2s; pointer-events: none;
     max-width: 90vw; text-align: center;
   }
   .toast.show { opacity: 1; }
 
-  /* bottom sheet dialog */
   dialog.sheet {
     border: none; padding: 0; margin: 0; width: 100%; max-width: 100%;
-    max-height: min(92dvh, 900px); border-radius: 18px 18px 0 0;
-    background: var(--card); color: var(--text);
+    max-height: min(94dvh, 920px); border-radius: 20px 20px 0 0;
+    background: #0e0e0e; color: var(--text);
     position: fixed; bottom: 0; top: auto; left: 0; right: 0;
   }
-  dialog.sheet::backdrop { background: rgba(0,0,0,0.72); }
-  .sheet-handle {
-    width: 40px; height: 4px; background: #333; border-radius: 99px; margin: 10px auto 4px;
-  }
-  .dlg-h { padding: 6px 16px 8px; font-weight: 700; font-size: 1.1rem; }
+  dialog.sheet::backdrop { background: rgba(0,0,0,0.75); }
+  .sheet-handle { width: 36px; height: 4px; background: #333; border-radius: 99px; margin: 10px auto 0; }
+  .dlg-h { padding: 14px 18px 6px; font-weight: 700; font-size: 1.2rem; letter-spacing: -0.02em; }
   .dlg-b {
-    padding: 4px 16px 8px; display: flex; flex-direction: column; gap: 14px;
-    overflow-y: auto; max-height: calc(92dvh - 140px);
-    -webkit-overflow-scrolling: touch;
+    padding: 8px 18px 12px; display: flex; flex-direction: column; gap: 16px;
+    overflow-y: auto; max-height: calc(94dvh - 132px); -webkit-overflow-scrolling: touch;
   }
   .dlg-f {
-    padding: 10px 16px calc(14px + var(--safe-b)); display: flex; gap: 8px;
-    border-top: 1px solid var(--border); background: var(--card);
+    padding: 12px 18px calc(14px + var(--safe-b)); display: flex; gap: 8px;
+    border-top: 1px solid var(--border);
   }
   .dlg-f .btn { flex: 1; }
-  label { font-size: 0.72rem; color: var(--muted); display: block; margin-bottom: 6px; letter-spacing: 0.02em; }
-  input[type="text"], input[type="number"], select {
-    width: 100%; background: #0f0f0f; border: 1px solid var(--border); color: var(--text);
-    border-radius: 12px; padding: 12px 14px; font-size: 1rem; min-height: var(--tap);
+  label {
+    font-size: 0.7rem; color: var(--muted); display: block; margin-bottom: 8px;
+    text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
   }
+  input[type="text"], input[type="number"] {
+    width: 100%; background: var(--elev); border: 1px solid var(--border); color: var(--text);
+    border-radius: 12px; padding: 13px 14px; font-size: 1rem; min-height: 48px;
+  }
+  input:focus { outline: none; border-color: #555; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .slider-wrap { display: flex; flex-direction: column; gap: 8px; }
-  .slider-top { display: flex; justify-content: space-between; align-items: baseline; }
-  .slider-val { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent); }
-  input[type="range"] {
-    width: 100%; height: 36px; accent-color: var(--accent); cursor: pointer;
-  }
+  .slider-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .slider-val { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent); font-size: 0.95rem; }
+  input[type="range"] { width: 100%; height: 32px; accent-color: var(--accent); }
 
-  /* icon drawer */
-  .icon-pick-row {
-    display: flex; align-items: center; gap: 12px;
+  .icon-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
   }
-  .icon-pick-preview {
-    width: 56px; height: 56px; border-radius: 14px; background: var(--card2);
-    border: 1px solid var(--border); display: grid; place-items: center; flex-shrink: 0;
-  }
-  .icon-pick-preview svg { width: 30px; height: 30px; stroke: var(--accent); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-  .icon-drawer {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px;
-    max-height: 200px; overflow-y: auto; padding: 4px 0;
-    -webkit-overflow-scrolling: touch;
+  @media (min-width: 400px) {
+    .icon-grid { grid-template-columns: repeat(5, 1fr); }
   }
   .icon-cell {
-    min-height: 64px; border-radius: 12px; border: 1px solid var(--border);
-    background: #0f0f0f; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 4px; cursor: pointer; padding: 6px 4px;
+    aspect-ratio: 1;
+    border-radius: 14px;
+    border: 1px solid transparent;
+    background: var(--elev);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 6px; cursor: pointer; padding: 8px 4px;
+    transition: border-color .12s, background .12s;
   }
-  .icon-cell.selected { border-color: var(--accent); background: rgba(125,211,252,0.08); }
-  .icon-cell svg { width: 24px; height: 24px; stroke: var(--text); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-  .icon-cell span { font-size: 0.58rem; color: var(--muted); text-align: center; line-height: 1.15; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .hint { font-size: 0.72rem; color: var(--muted); line-height: 1.35; }
+  .icon-cell:active { transform: scale(0.96); }
+  .icon-cell.selected {
+    border-color: var(--accent);
+    background: rgba(125, 211, 252, 0.1);
+  }
+  .icon-cell svg {
+    width: 26px; height: 26px; stroke: #e8e8e8; fill: none;
+    stroke-width: 1.55; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .icon-cell.selected svg { stroke: var(--accent); }
+  .icon-cell span {
+    font-size: 0.6rem; color: var(--muted); text-align: center; line-height: 1.1;
+    max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .icon-cell.selected span { color: var(--accent); }
 
   @media (min-width: 640px) {
-    body { max-width: 520px; margin: 0 auto; }
+    body { max-width: 480px; margin: 0 auto; }
     dialog.sheet {
-      max-width: 440px; margin: auto; border-radius: 16px;
+      max-width: 420px; margin: auto; border-radius: 18px;
       top: 50%; bottom: auto; left: 50%; transform: translate(-50%, -50%);
-      max-height: min(86vh, 720px);
+      max-height: min(88vh, 760px);
     }
     .sheet-handle { display: none; }
-    .dlg-b { max-height: min(60vh, 520px); }
+    .dlg-b { max-height: min(62vh, 560px); }
     .dlg-f { padding-bottom: 14px; }
+    .icon-grid { grid-template-columns: repeat(5, 1fr); }
   }
 </style>
 </head>
 <body>
-<!-- SVG sprite -->
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
   <symbol id="i-tws" viewBox="0 0 24 24"><path d="M4 10v4a2 2 0 0 0 2 2h1"/><path d="M20 10v4a2 2 0 0 1-2 2h-1"/><path d="M7 8a5 5 0 0 1 10 0"/><circle cx="7" cy="14" r="2.5"/><circle cx="17" cy="14" r="2.5"/></symbol>
-  <symbol id="i-speaker" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="3"/><circle cx="12" cy="14" r="3.5"/><circle cx="12" cy="7" r="1.2"/></symbol>
-  <symbol id="i-powerbank" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M10 5h4"/><path d="M11 16h2"/><path d="M9 10h6"/></symbol>
-  <symbol id="i-laptop" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="1.5"/><path d="M2 19h20"/><path d="M8 19l1 2h6l1-2"/></symbol>
-  <symbol id="i-watch" viewBox="0 0 24 24"><rect x="7" y="6" width="10" height="12" rx="3"/><path d="M9 3h6v3M9 18v3h6"/><path d="M12 10v3l2 1"/></symbol>
+  <symbol id="i-headphones" viewBox="0 0 24 24"><path d="M4 13v3a2 2 0 0 0 2 2h1v-7H6a2 2 0 0 0-2 2z"/><path d="M20 13v3a2 2 0 0 1-2 2h-1v-7h1a2 2 0 0 1 2 2z"/><path d="M5 11a7 7 0 0 1 14 0"/></symbol>
+  <symbol id="i-speaker" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="3"/><circle cx="12" cy="14" r="3"/><circle cx="12" cy="7" r="1"/></symbol>
+  <symbol id="i-powerbank" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M10 5h4M9 11h6M11 16h2"/></symbol>
+  <symbol id="i-laptop" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M2 18h20M9 18l.5 2h5l.5-2"/></symbol>
+  <symbol id="i-watch" viewBox="0 0 24 24"><rect x="7" y="6" width="10" height="12" rx="3"/><path d="M9 3h6v3M9 18v3h6M12 10v3l2 1"/></symbol>
   <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></symbol>
-  <symbol id="i-controller" viewBox="0 0 24 24"><path d="M6 10h12a4 4 0 0 1 0 8H6a4 4 0 0 1 0-8z"/><path d="M9 13v4M7 15h4"/><circle cx="16" cy="13.5" r="1"/><circle cx="17.5" cy="15.5" r="1"/></symbol>
-  <symbol id="i-mouse" viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="14" rx="4"/><path d="M12 6v3"/><path d="M5 20h14"/></symbol>
-  <symbol id="i-keyboard" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="11" rx="2"/><path d="M6 11h.01M10 11h.01M14 11h.01M18 11h.01M8 15h8"/></symbol>
   <symbol id="i-tablet" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M11 18h2"/></symbol>
+  <symbol id="i-controller" viewBox="0 0 24 24"><path d="M6 9h12a4 4 0 0 1 0 9H6a4 4 0 0 1 0-9z"/><path d="M9 12v4M7 14h4"/><circle cx="16" cy="12.5" r="1"/><circle cx="17.5" cy="14.5" r="1"/></symbol>
+  <symbol id="i-mouse" viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="14" rx="4"/><path d="M12 6v3M5 20h14"/></symbol>
+  <symbol id="i-keyboard" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="11" rx="2"/><path d="M6 11h.01M10 11h.01M14 11h.01M18 11h.01M8 15h8"/></symbol>
   <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
   <symbol id="i-drone" viewBox="0 0 24 24"><rect x="9" y="10" width="6" height="4" rx="1"/><path d="M3 8l4 3M21 8l-4 3M3 16l4-3M21 16l-4-3"/><circle cx="4" cy="7" r="2"/><circle cx="20" cy="7" r="2"/><circle cx="4" cy="17" r="2"/><circle cx="20" cy="17" r="2"/></symbol>
-  <symbol id="i-ebike" viewBox="0 0 24 24"><circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M6 17l3-8h5l2 5h2"/><path d="M10 9h4"/><path d="M12 4v3"/></symbol>
-  <symbol id="i-scooter" viewBox="0 0 24 24"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 18h7L14 8h-2"/><path d="M12 8V5"/></symbol>
+  <symbol id="i-ebike" viewBox="0 0 24 24"><circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M6 17l3-8h5l2 5h2M10 9h4M12 4v3"/></symbol>
+  <symbol id="i-scooter" viewBox="0 0 24 24"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 18h7L14 8h-2M12 8V5"/></symbol>
   <symbol id="i-toothbrush" viewBox="0 0 24 24"><path d="M9 3h4v6H9z"/><path d="M10 9v11a2 2 0 0 0 4 0V9"/><path d="M9 5h4M9 7h4"/></symbol>
-  <symbol id="i-shaver" viewBox="0 0 24 24"><rect x="8" y="8" width="8" height="13" rx="2"/><path d="M9 4h6v4H9z"/><path d="M10 12h4M10 15h4"/></symbol>
+  <symbol id="i-shaver" viewBox="0 0 24 24"><rect x="8" y="8" width="8" height="13" rx="2"/><path d="M9 4h6v4H9zM10 12h4M10 15h4"/></symbol>
   <symbol id="i-calculator" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><rect x="8" y="5" width="8" height="3" rx="0.5"/><path d="M8 11h2M12 11h2M8 14h2M12 14h2M8 17h2M12 17h4"/></symbol>
   <symbol id="i-flashlight" viewBox="0 0 24 24"><path d="M8 2h8v5l2 3v12H6V10l2-3z"/><path d="M10 14h4"/></symbol>
-  <symbol id="i-router" viewBox="0 0 24 24"><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 17h.01M11 17h.01"/><path d="M8 14V9a4 4 0 0 1 8 0v5"/></symbol>
-  <symbol id="i-console" viewBox="0 0 24 24"><rect x="2" y="8" width="20" height="10" rx="2"/><path d="M7 13h.01M11 13h.01"/><path d="M16 12h3M16 15h2"/></symbol>
+  <symbol id="i-router" viewBox="0 0 24 24"><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 17h.01M11 17h.01M8 14V9a4 4 0 0 1 8 0v5"/></symbol>
+  <symbol id="i-console" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="11" rx="2"/><path d="M7 12h.01M11 12h.01M16 11h3M16 14h2"/></symbol>
   <symbol id="i-radio" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M7 4l10 3"/><circle cx="8" cy="14" r="2"/><path d="M13 12h5M13 16h3"/></symbol>
-  <symbol id="i-vape" viewBox="0 0 24 24"><rect x="9" y="8" width="6" height="13" rx="1.5"/><path d="M11 3h2v5h-2z"/><path d="M10 12h4"/></symbol>
-  <symbol id="i-light" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 1 4 10c-.6.6-1 1.5-1 2.5h-6c0-1-.4-1.9-1-2.5A6 6 0 0 1 12 3z"/></symbol>
+  <symbol id="i-light" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 1 4 10c-.6.6-1 1.5-1 2.5h-6c0-1-.4-1.9-1-2.5A6 6 0 0 1 12 3z"/></symbol>
   <symbol id="i-vacuum" viewBox="0 0 24 24"><path d="M6 10a6 6 0 0 1 12 0v2H6z"/><rect x="5" y="12" width="14" height="6" rx="2"/><circle cx="9" cy="20" r="1.5"/><circle cx="15" cy="20" r="1.5"/></symbol>
   <symbol id="i-pen" viewBox="0 0 24 24"><path d="M12 2v8"/><path d="M9 10h6l-1 11h-4z"/><path d="M10 4h4"/></symbol>
   <symbol id="i-remote" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="20" rx="2"/><circle cx="12" cy="8" r="1.5"/><path d="M10 13h4M10 16h4"/></symbol>
-  <symbol id="i-other" viewBox="0 0 24 24"><rect x="6" y="7" width="12" height="12" rx="2"/><path d="M10 4h4v3h-4z"/><path d="M9 12h6"/></symbol>
+  <symbol id="i-ring" viewBox="0 0 24 24"><circle cx="12" cy="13" r="6"/><path d="M12 7V4M10 4h4"/></symbol>
+  <symbol id="i-ssd" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 12h.01M11 12h.01M16 10v4"/></symbol>
+  <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="13" rx="1.5"/><path d="M8 20h8M12 17v3"/></symbol>
+  <symbol id="i-car" viewBox="0 0 24 24"><path d="M4 14l2-5h12l2 5"/><path d="M3 14h18v4H3z"/><circle cx="7" cy="18" r="1.5"/><circle cx="17" cy="18" r="1.5"/></symbol>
+  <symbol id="i-fan" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M12 4c2 2 2 5 0 6M12 20c-2-2-2-5 0-6M4 12c2-2 5-2 6 0M20 12c-2 2-5 2-6 0"/></symbol>
+  <symbol id="i-hearing" viewBox="0 0 24 24"><path d="M8 12a4 4 0 1 1 8 0v2a2 2 0 0 1-2 2h-1"/><path d="M13 16v3a2 2 0 0 1-4 0"/></symbol>
+  <symbol id="i-battery" viewBox="0 0 24 24"><rect x="3" y="7" width="16" height="10" rx="2"/><path d="M19 10h2v4h-2zM7 10v4M11 10v4"/></symbol>
+  <symbol id="i-other" viewBox="0 0 24 24"><rect x="6" y="7" width="12" height="12" rx="2"/><path d="M10 4h4v3h-4zM9 12h6"/></symbol>
   <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 7 1 7 1 7H5s1 0 1-7"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
 </svg>
 
@@ -210,58 +218,41 @@
 </header>
 
 <div id="list" class="list"></div>
-
-<div class="fab">
-  <button class="btn btn-primary" type="button" id="btnAdd">+ Device</button>
-</div>
+<div class="fab"><button class="btn btn-primary" type="button" id="btnAdd">+ Device</button></div>
 <div class="toast" id="toast"></div>
 
 <dialog class="sheet" id="dlg">
   <div class="sheet-handle"></div>
-  <div class="dlg-h" id="dlgTitle">Device</div>
+  <div class="dlg-h" id="dlgTitle">Add device</div>
   <div class="dlg-b">
     <div>
       <label>Name</label>
-      <input id="fName" placeholder="AirPods, Anker bank…" autocomplete="off">
+      <input id="fName" placeholder="Optional — fills from icon" autocomplete="off">
     </div>
-
     <div>
       <label>Icon</label>
-      <div class="icon-pick-row">
-        <div class="icon-pick-preview" id="iconPreview"></div>
-        <div style="flex:1">
-          <div class="hint" id="iconHint">Auto from name · or pick below</div>
-        </div>
-      </div>
-      <div class="icon-drawer" id="iconDrawer" role="listbox" aria-label="Icons"></div>
+      <div class="icon-grid" id="iconDrawer" role="listbox" aria-label="Icons"></div>
     </div>
-
     <div>
-      <label>Type (for sorting / auto-icon)</label>
-      <select id="fType"></select>
-    </div>
-
-    <div class="slider-wrap">
       <div class="slider-top">
-        <label style="margin:0">Charge level</label>
+        <label style="margin:0">Charge</label>
         <span class="slider-val"><span id="fPctLabel">100</span>%</span>
       </div>
       <input id="fPct" type="range" min="0" max="100" value="100" step="1">
     </div>
-
     <div class="row2">
       <div>
         <label>Remind at %</label>
         <input id="fLow" type="number" min="1" max="50" value="20" inputmode="numeric">
       </div>
       <div>
-        <label>Manual interval (h)</label>
-        <input id="fInterval" type="number" min="0" step="0.5" placeholder="Optional" inputmode="decimal">
+        <label>Interval (hours)</label>
+        <input id="fInterval" type="number" min="0" step="0.5" placeholder="Auto" inputmode="decimal">
       </div>
     </div>
     <div>
-      <label>Learned full-cycle life (hours)</label>
-      <input id="fLife" type="number" min="0" step="0.25" placeholder="Fills in as you charge" inputmode="decimal">
+      <label>Learned cycle (hours)</label>
+      <input id="fLife" type="number" min="0" step="0.25" placeholder="Learns over time" inputmode="decimal">
     </div>
   </div>
   <div class="dlg-f">
@@ -274,67 +265,68 @@
 <script>
 const STORAGE_KEY = 'batteries_v1';
 
-/** @type {{id:string,label:string,keywords:string[]}[]} */
 const TYPES = [
-  { id: 'tws', label: 'TWS / earbuds', keywords: ['airpod','earbuds','earbud','tws','buds','galaxy buds','earphone'] },
-  { id: 'speaker', label: 'Speaker', keywords: ['speaker','soundbar','boom','jbl','ue boom'] },
-  { id: 'powerbank', label: 'Power bank', keywords: ['powerbank','power bank','anker','magsafe battery','battery pack'] },
-  { id: 'laptop', label: 'Laptop', keywords: ['laptop','macbook','notebook','chromebook'] },
-  { id: 'watch', label: 'Watch', keywords: ['watch','apple watch','garmin','fitbit','band'] },
-  { id: 'phone', label: 'Phone', keywords: ['phone','iphone','android','pixel'] },
-  { id: 'tablet', label: 'Tablet', keywords: ['tablet','ipad','tab '] },
-  { id: 'controller', label: 'Controller', keywords: ['controller','dualsense','xbox','gamepad','joy-con'] },
-  { id: 'mouse', label: 'Mouse', keywords: ['mouse'] },
-  { id: 'keyboard', label: 'Keyboard', keywords: ['keyboard','keychron'] },
-  { id: 'camera', label: 'Camera', keywords: ['camera','gopro','insta360'] },
-  { id: 'drone', label: 'Drone', keywords: ['drone','mavic','mini 3','quad'] },
-  { id: 'ebike', label: 'E-bike', keywords: ['e-bike','ebike','electric bike'] },
-  { id: 'scooter', label: 'Scooter', keywords: ['scooter','ninebot','segway'] },
-  { id: 'toothbrush', label: 'Toothbrush', keywords: ['toothbrush','oral-b','sonicare'] },
-  { id: 'shaver', label: 'Shaver', keywords: ['shaver','trimmer','razor'] },
-  { id: 'calculator', label: 'Calculator', keywords: ['calculator','ti-','casio'] },
-  { id: 'flashlight', label: 'Flashlight', keywords: ['flashlight','torch','headlamp'] },
-  { id: 'router', label: 'Hotspot / router', keywords: ['router','hotspot','modem','mifi'] },
-  { id: 'console', label: 'Handheld console', keywords: ['switch','steam deck','rog ally','console'] },
-  { id: 'radio', label: 'Radio', keywords: ['radio','walkie'] },
-  { id: 'vape', label: 'Vape', keywords: ['vape','pod system'] },
-  { id: 'light', label: 'Light', keywords: ['lamp','light','bulb','nanoleaf'] },
-  { id: 'vacuum', label: 'Vacuum', keywords: ['vacuum','roomba','dyson'] },
-  { id: 'pen', label: 'Stylus / pen', keywords: ['stylus','pencil','s-pen'] },
-  { id: 'remote', label: 'Remote', keywords: ['remote'] },
-  { id: 'other', label: 'Other', keywords: [] }
+  { id: 'tws', label: 'TWS', name: 'Earbuds', keywords: ['airpod','earbuds','earbud','tws','buds','galaxy buds'] },
+  { id: 'headphones', label: 'Headphones', name: 'Headphones', keywords: ['headphone','headset','sony wh','bose'] },
+  { id: 'speaker', label: 'Speaker', name: 'Speaker', keywords: ['speaker','soundbar','jbl','boom'] },
+  { id: 'powerbank', label: 'Power bank', name: 'Power bank', keywords: ['powerbank','power bank','anker','battery pack','magsafe battery'] },
+  { id: 'laptop', label: 'Laptop', name: 'Laptop', keywords: ['laptop','macbook','notebook'] },
+  { id: 'watch', label: 'Watch', name: 'Watch', keywords: ['watch','garmin','fitbit','band'] },
+  { id: 'phone', label: 'Phone', name: 'Phone', keywords: ['phone','iphone','pixel','android'] },
+  { id: 'tablet', label: 'Tablet', name: 'Tablet', keywords: ['tablet','ipad'] },
+  { id: 'controller', label: 'Controller', name: 'Controller', keywords: ['controller','dualsense','xbox','gamepad'] },
+  { id: 'mouse', label: 'Mouse', name: 'Mouse', keywords: ['mouse'] },
+  { id: 'keyboard', label: 'Keyboard', name: 'Keyboard', keywords: ['keyboard','keychron'] },
+  { id: 'camera', label: 'Camera', name: 'Camera', keywords: ['camera','gopro','insta360'] },
+  { id: 'drone', label: 'Drone', name: 'Drone', keywords: ['drone','mavic'] },
+  { id: 'ebike', label: 'E-bike', name: 'E-bike', keywords: ['e-bike','ebike'] },
+  { id: 'scooter', label: 'Scooter', name: 'Scooter', keywords: ['scooter','ninebot'] },
+  { id: 'toothbrush', label: 'Toothbrush', name: 'Toothbrush', keywords: ['toothbrush','oral-b','sonicare'] },
+  { id: 'shaver', label: 'Shaver', name: 'Shaver', keywords: ['shaver','trimmer','razor'] },
+  { id: 'calculator', label: 'Calculator', name: 'Calculator', keywords: ['calculator','ti-','casio'] },
+  { id: 'flashlight', label: 'Flashlight', name: 'Flashlight', keywords: ['flashlight','torch','headlamp'] },
+  { id: 'router', label: 'Hotspot', name: 'Hotspot', keywords: ['router','hotspot','mifi'] },
+  { id: 'console', label: 'Console', name: 'Handheld', keywords: ['switch','steam deck','rog ally'] },
+  { id: 'radio', label: 'Radio', name: 'Radio', keywords: ['radio','walkie'] },
+  { id: 'light', label: 'Light', name: 'Light', keywords: ['lamp','light','bulb'] },
+  { id: 'vacuum', label: 'Vacuum', name: 'Vacuum', keywords: ['vacuum','roomba','dyson'] },
+  { id: 'pen', label: 'Stylus', name: 'Stylus', keywords: ['stylus','pencil','s-pen'] },
+  { id: 'remote', label: 'Remote', name: 'Remote', keywords: ['remote'] },
+  { id: 'ring', label: 'Ring', name: 'Smart ring', keywords: ['ring','oura'] },
+  { id: 'ssd', label: 'SSD', name: 'SSD', keywords: ['ssd','external drive','t7'] },
+  { id: 'monitor', label: 'Monitor', name: 'Monitor', keywords: ['monitor','display'] },
+  { id: 'car', label: 'Car key', name: 'Car key', keywords: ['car key','fob','key fob'] },
+  { id: 'fan', label: 'Fan', name: 'Fan', keywords: ['fan'] },
+  { id: 'hearing', label: 'Hearing', name: 'Hearing aid', keywords: ['hearing'] },
+  { id: 'battery', label: 'Battery', name: 'Battery', keywords: ['aa battery','18650','cell'] },
+  { id: 'other', label: 'Other', name: 'Device', keywords: [] }
 ];
 
 const ICON_IDS = TYPES.map(t => t.id);
+const byId = Object.fromEntries(TYPES.map(t => [t.id, t]));
 
-function svgUse(id) {
-  return '<svg aria-hidden="true"><use href="#i-' + id + '"/></svg>';
-}
-
-function uid() {
-  return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
-}
+function svgUse(id) { return '<svg aria-hidden="true"><use href="#i-' + id + '"/></svg>'; }
+function uid() { return Math.random().toString(36).slice(2, 10) + Date.now().toString(36); }
+function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
+function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 function load() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { devices: [], version: 2 };
+    if (!raw) return { devices: [], version: 3 };
     const data = JSON.parse(raw);
     if (!data.devices) data.devices = [];
     data.devices.forEach(d => {
       if (!d.icon) d.icon = d.type || 'other';
       if (!ICON_IDS.includes(d.icon)) d.icon = 'other';
+      if (d.icon === 'vape') d.icon = 'other';
     });
     return data;
-  } catch {
-    return { devices: [], version: 2 };
-  }
+  } catch { return { devices: [], version: 3 }; }
 }
-
 function save(data) {
   data.updatedAt = Date.now();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  try { window.dispatchEvent(new CustomEvent('batteries:update', { detail: data })); } catch (_) {}
 }
 
 function toast(msg) {
@@ -342,7 +334,7 @@ function toast(msg) {
   el.textContent = msg;
   el.classList.add('show');
   clearTimeout(toast._t);
-  toast._t = setTimeout(() => el.classList.remove('show'), 2200);
+  toast._t = setTimeout(() => el.classList.remove('show'), 2400);
 }
 
 function fmtDuration(ms) {
@@ -350,7 +342,7 @@ function fmtDuration(ms) {
   const h = ms / 3600000;
   if (h < 1) return Math.round(ms / 60000) + 'm';
   if (h < 48) return (Math.round(h * 10) / 10) + 'h';
-  return (Math.round((h / 24) * 10) / 10) + 'd';
+  return (Math.round(h / 24 * 10) / 10) + 'd';
 }
 
 function detectType(name) {
@@ -368,21 +360,18 @@ function estimatePct(d, now = Date.now()) {
     const life = d.manualIntervalHours * 3600000;
     const elapsed = now - (d.lastChargedAt || now);
     const span = life / Math.max(0.05, (100 - (d.lowAt || 20)) / 100);
-    const usedFull = Math.min(1, Math.max(0, elapsed / span));
-    return Math.round(100 * (1 - usedFull));
+    return Math.round(100 * (1 - Math.min(1, Math.max(0, elapsed / span))));
   }
   const life = d.learnedLifeMs;
   if (!life || life <= 0) return d.lastPct != null ? d.lastPct : 100;
   const elapsed = now - (d.lastChargedAt || now);
-  const used = Math.min(1, Math.max(0, elapsed / life));
-  return Math.round(100 * (1 - used));
+  return Math.round(100 * (1 - Math.min(1, Math.max(0, elapsed / life))));
 }
 
 function dueAt(d) {
   const low = d.lowAt != null ? d.lowAt : 20;
-  if (d.manualIntervalHours && d.manualIntervalHours > 0) {
+  if (d.manualIntervalHours && d.manualIntervalHours > 0)
     return (d.lastChargedAt || Date.now()) + d.manualIntervalHours * 3600000;
-  }
   const life = d.learnedLifeMs;
   if (!life || !d.lastChargedAt) return null;
   return d.lastChargedAt + life * (1 - low / 100);
@@ -396,7 +385,6 @@ function markCharged(d, pct = 100) {
       const prev = d.learnedLifeMs || cycle;
       d.learnedLifeMs = Math.round(prev * 0.65 + cycle * 0.35);
       d.cycles = (d.cycles || 0) + 1;
-      d.lastCycleMs = cycle;
     }
   }
   d.lastChargedAt = now;
@@ -405,34 +393,30 @@ function markCharged(d, pct = 100) {
   d.notifiedForCharge = null;
 }
 
-function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
-function escapeHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
 let state = load();
 let editId = null;
 let selectedIcon = 'other';
-let iconLocked = false; // user picked from drawer
-
-function fillTypeSelect() {
-  const sel = document.getElementById('fType');
-  sel.innerHTML = TYPES.map(t => `<option value="${t.id}">${t.label}</option>`).join('');
-}
+let nameFromIcon = true; // name still auto-managed
 
 function renderIconDrawer() {
-  const drawer = document.getElementById('iconDrawer');
-  drawer.innerHTML = TYPES.map(t => `
-    <button type="button" class="icon-cell${selectedIcon === t.id ? ' selected' : ''}" data-icon="${t.id}" role="option" aria-selected="${selectedIcon === t.id}">
+  document.getElementById('iconDrawer').innerHTML = TYPES.map(t => `
+    <button type="button" class="icon-cell${selectedIcon === t.id ? ' selected' : ''}" data-icon="${t.id}" role="option">
       ${svgUse(t.id)}
-      <span>${escapeHtml(t.label.split('/')[0].trim())}</span>
+      <span>${escapeHtml(t.label)}</span>
     </button>`).join('');
 }
 
-function setPreview(icon) {
-  selectedIcon = ICON_IDS.includes(icon) ? icon : 'other';
-  document.getElementById('iconPreview').innerHTML = svgUse(selectedIcon);
+function selectIcon(id, { fillName } = { fillName: true }) {
+  selectedIcon = ICON_IDS.includes(id) ? id : 'other';
   renderIconDrawer();
+  if (fillName) {
+    const t = byId[selectedIcon];
+    const nameEl = document.getElementById('fName');
+    if (nameFromIcon || !nameEl.value.trim()) {
+      nameEl.value = t ? t.name : '';
+      nameFromIcon = true;
+    }
+  }
 }
 
 function render() {
@@ -450,19 +434,19 @@ function render() {
     const cls = pct <= (d.lowAt || 20) ? 'low' : (isDue ? 'due' : '');
     const pctCls = pct <= (d.lowAt || 20) ? 'low' : (pct <= 40 ? 'warn' : 'ok');
     const lifeLabel = d.manualIntervalHours
-      ? `remind every ${d.manualIntervalHours}h`
+      ? `every ${d.manualIntervalHours}h`
       : (d.learnedLifeMs ? `~${fmtDuration(d.learnedLifeMs)} cycle` : 'learning…');
     const dueLabel = due ? (now >= due ? 'due now' : 'low in ' + fmtDuration(due - now)) : 'charge once to start';
     const icon = d.icon || d.type || 'other';
-    const barColor = pct <= 20 ? 'var(--danger)' : pct <= 40 ? 'var(--warn)' : 'var(--accent)';
+    const bar = pct <= 20 ? 'var(--danger)' : pct <= 40 ? 'var(--warn)' : 'var(--accent)';
     return `<article class="card ${cls}" data-id="${d.id}">
       <div class="dev-icon">${svgUse(icon)}</div>
       <div>
         <div class="name">${escapeHtml(d.name)}</div>
-        <div class="meta">${escapeHtml((TYPES.find(t => t.id === d.type) || {}).label || d.type)} · ${lifeLabel}<br>${dueLabel}${d.lastChargedAt ? ' · ' + fmtDuration(now - d.lastChargedAt) + ' ago' : ''}${d.pctManual ? ' · manual %' : ''}</div>
+        <div class="meta">${escapeHtml((byId[d.type] || byId[icon] || {}).label || '')} · ${lifeLabel}<br>${dueLabel}${d.lastChargedAt ? ' · ' + fmtDuration(now - d.lastChargedAt) + ' ago' : ''}</div>
       </div>
       <div class="pct ${pctCls}">${pct}%</div>
-      <div class="bar"><i style="width:${Math.max(2, pct)}%;background:${barColor}"></i></div>
+      <div class="bar"><i style="width:${Math.max(2,pct)}%;background:${bar}"></i></div>
       <div class="actions-row">
         <button class="btn btn-ok" type="button" data-act="charged">Charged</button>
         <button class="btn" type="button" data-act="edit">Edit</button>
@@ -475,38 +459,24 @@ document.getElementById('list').addEventListener('click', (e) => {
   const btn = e.target.closest('[data-act]');
   const card = e.target.closest('[data-id]');
   if (!card) return;
-  const d = state.devices.find(x => x.id === card.getAttribute('data-id'));
+  const d = state.devices.find(x => x.id === card.dataset.id);
   if (!d) return;
   if (btn && btn.dataset.act === 'charged') {
-    markCharged(d, 100);
-    save(state); render(); scheduleChecks();
+    markCharged(d, 100); save(state); render(); scheduleChecks();
     toast(d.name + ' marked charged');
-    return;
-  }
-  if (btn && btn.dataset.act === 'edit') openEdit(d);
+  } else if (btn && btn.dataset.act === 'edit') openEdit(d);
 });
 
 document.getElementById('iconDrawer').addEventListener('click', (e) => {
   const cell = e.target.closest('[data-icon]');
   if (!cell) return;
-  iconLocked = true;
-  setPreview(cell.getAttribute('data-icon'));
-  document.getElementById('iconHint').textContent = 'Custom icon selected';
+  selectIcon(cell.dataset.icon, { fillName: true });
 });
 
 document.getElementById('fName').addEventListener('input', () => {
-  if (iconLocked) return;
+  nameFromIcon = false;
   const det = detectType(document.getElementById('fName').value);
-  document.getElementById('fType').value = det;
-  setPreview(det);
-  document.getElementById('iconHint').textContent = det === 'other'
-    ? 'Auto: other — pick an icon if you want'
-    : 'Auto: ' + (TYPES.find(t => t.id === det) || {}).label;
-});
-
-document.getElementById('fType').addEventListener('change', () => {
-  if (iconLocked) return;
-  setPreview(document.getElementById('fType').value);
+  if (det !== 'other') selectIcon(det, { fillName: false });
 });
 
 document.getElementById('fPct').addEventListener('input', () => {
@@ -515,21 +485,18 @@ document.getElementById('fPct').addEventListener('input', () => {
 
 function openEdit(d) {
   editId = d ? d.id : null;
-  iconLocked = !!(d && d.iconLocked);
+  nameFromIcon = !d;
   document.getElementById('dlgTitle').textContent = d ? 'Edit device' : 'Add device';
   document.getElementById('fName').value = d ? d.name : '';
-  document.getElementById('fType').value = d ? d.type : 'other';
   const pct = d ? (d.lastPct != null ? d.lastPct : estimatePct(d)) : 100;
   document.getElementById('fPct').value = pct;
   document.getElementById('fPctLabel').textContent = String(pct);
   document.getElementById('fLow').value = d && d.lowAt != null ? d.lowAt : 20;
   document.getElementById('fInterval').value = d && d.manualIntervalHours ? d.manualIntervalHours : '';
   document.getElementById('fLife').value = d && d.learnedLifeMs ? (d.learnedLifeMs / 3600000).toFixed(2) : '';
-  setPreview(d ? (d.icon || d.type || 'other') : 'other');
-  document.getElementById('iconHint').textContent = iconLocked ? 'Custom icon selected' : 'Auto from name · or pick below';
+  selectIcon(d ? (d.icon || d.type || 'other') : 'other', { fillName: !d });
   document.getElementById('btnDelete').hidden = !d;
   document.getElementById('dlg').showModal();
-  setTimeout(() => document.getElementById('fName').focus(), 50);
 }
 
 document.getElementById('btnAdd').onclick = () => openEdit(null);
@@ -539,20 +506,31 @@ document.getElementById('btnDelete').onclick = () => {
   state.devices = state.devices.filter(x => x.id !== editId);
   save(state); document.getElementById('dlg').close(); render();
 };
-document.getElementById('btnSave').onclick = () => {
-  const name = document.getElementById('fName').value.trim();
-  if (!name) return toast('Name required');
-  const type = document.getElementById('fType').value;
+
+function notify(title, body) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    try { new Notification(title, { body, tag: 'batteries-' + Date.now() }); } catch (_) {}
+  }
+  toast(title + (body ? ' — ' + body : ''));
+}
+
+document.getElementById('btnSave').onclick = async () => {
+  let name = document.getElementById('fName').value.trim();
+  if (!name) name = (byId[selectedIcon] || {}).name || 'Device';
   const lastPct = clamp(parseInt(document.getElementById('fPct').value, 10) || 0, 0, 100);
   const lowAt = clamp(parseInt(document.getElementById('fLow').value, 10) || 20, 1, 50);
   const intervalRaw = document.getElementById('fInterval').value;
   const lifeRaw = document.getElementById('fLife').value;
+  const isNew = !editId;
   let d = editId ? state.devices.find(x => x.id === editId) : null;
   if (!d) {
-    d = { id: uid(), name, type, icon: selectedIcon, iconLocked, lastChargedAt: Date.now(), lastPct, lowAt, cycles: 0, pctManual: true };
+    d = {
+      id: uid(), name, type: selectedIcon, icon: selectedIcon,
+      lastChargedAt: Date.now(), lastPct, lowAt, cycles: 0, pctManual: true
+    };
     state.devices.push(d);
   } else {
-    d.name = name; d.type = type; d.icon = selectedIcon; d.iconLocked = iconLocked;
+    d.name = name; d.type = selectedIcon; d.icon = selectedIcon;
     d.lastPct = lastPct; d.lowAt = lowAt; d.pctManual = true;
   }
   if (intervalRaw === '' || intervalRaw == null) d.manualIntervalHours = null;
@@ -561,17 +539,23 @@ document.getElementById('btnSave').onclick = () => {
     const h = parseFloat(lifeRaw);
     if (h > 0) d.learnedLifeMs = Math.round(h * 3600000);
   }
-  save(state); document.getElementById('dlg').close(); render(); scheduleChecks();
+  save(state);
+  document.getElementById('dlg').close();
+  render();
+  scheduleChecks();
+
+  if (isNew) {
+    if ('Notification' in window && Notification.permission === 'default') {
+      try { await Notification.requestPermission(); } catch (_) {}
+    }
+    notify(d.name + ' added', 'Battery at ' + lastPct + '%');
+  }
 };
 
-async function ensureNotifPermission() {
-  if (!('Notification' in window)) return false;
-  if (Notification.permission === 'granted') return true;
-  if (Notification.permission === 'denied') return false;
-  return (await Notification.requestPermission()) === 'granted';
-}
 document.getElementById('btnNotif').onclick = async () => {
-  toast((await ensureNotifPermission()) ? 'Notifications enabled' : 'Notifications blocked or unavailable');
+  if (!('Notification' in window)) return toast('Notifications unavailable');
+  const r = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+  toast(r === 'granted' ? 'Notifications enabled' : 'Notifications blocked');
 };
 
 function maybeNotify(d, now) {
@@ -579,12 +563,7 @@ function maybeNotify(d, now) {
   if (!due || now < due) return;
   if (d.notifiedForCharge === d.lastChargedAt) return;
   d.notifiedForCharge = d.lastChargedAt;
-  const title = d.name + ' battery low';
-  const body = 'Estimated ~' + estimatePct(d, now) + '% — time to charge.';
-  if ('Notification' in window && Notification.permission === 'granted') {
-    try { new Notification(title, { body, tag: 'batteries-' + d.id }); } catch (_) {}
-  }
-  toast(title);
+  notify(d.name + ' battery low', 'Estimated ~' + estimatePct(d, now) + '% — time to charge.');
 }
 
 function scheduleChecks() {
@@ -599,7 +578,6 @@ function scheduleChecks() {
   render();
 }
 
-fillTypeSelect();
 render();
 scheduleChecks();
 setInterval(scheduleChecks, 60000);
