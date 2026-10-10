@@ -330,7 +330,15 @@
             transform: scale(0.92);
         }
         .osk-key.wide { min-width: 80px; }
-    </style>
+    
+        html.embed-mode body { /* WebDesk embed: keep chrome minimal */ }
+        html.embed-mode .embed-banner {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+            padding: 6px 12px; font-size: 12px; text-align: center;
+            background: rgba(0, 120, 212, 0.25); color: var(--text-dim);
+            pointer-events: none;
+        }
+        </style>
 </head>
 <body>
     <div id="wallpaper-container"></div>
@@ -465,6 +473,32 @@
 
     <script>
         // Persistence Engine (unchanged)
+
+        const EMBED_MODE = new URLSearchParams(location.search).get('embed') === 'true';
+        // Hosts that refuse iframe embeds (X-Frame-Options / CSP) — hidden when ?embed=true
+        const EMBED_BLOCK_HOSTS = [
+            'discord.com', 'discordapp.com', 'youtube.com', 'youtu.be', 'youtubekids.com',
+            'play.geforcenow.com', 'geforcenow.com', 'nvidia.com',
+            'classic.minecraft.net', 'minecraft.net',
+            'kirka.io', 'krunker.io', 'shellshock.io',
+            'facebook.com', 'twitter.com', 'x.com', 'instagram.com', 'tiktok.com',
+            'netflix.com', 'twitch.tv', 'spotify.com'
+        ];
+        function hostBlockedForEmbed(url) {
+            try {
+                const h = new URL(url).hostname.replace(/^www\./, '').toLowerCase();
+                return EMBED_BLOCK_HOSTS.some((b) => h === b || h.endsWith('.' + b));
+            } catch (_) {
+                return true;
+            }
+        }
+        function isEmbeddableGame(game) {
+            if (!game || !game.url || game.url === '#') return false;
+            if (game.embed === true) return true;
+            if (game.embed === false) return false;
+            return !hostBlockedForEmbed(game.url);
+        }
+
         const DB = {
             name: 'BSL_v1',
             store: 'games',
@@ -521,8 +555,12 @@
             oskActiveInput: null,          // reference to currently focused text input for OSK
 
             async init() {
+                this.embedMode = EMBED_MODE;
+                if (this.embedMode) document.documentElement.classList.add('embed-mode');
                 this.games = await DB.getAll();
                 if (this.games.length === 0) await this.seed();
+                this.games = await DB.getAll();
+                if (this.embedMode) this.games = this.games.filter(isEmbeddableGame);
                 await this.loadPrefs();
                 this.render();
                 this.setupListeners();
@@ -648,7 +686,12 @@
                 if (!game) return;
                 this.showToast(`Starting ${game.title}...`);
                 if (game.url && game.url !== '#') {
-                    setTimeout(() => window.open(game.url, '_blank'), 1200);
+                    if (this.embedMode || EMBED_MODE) {
+                        // Same window (WebDesk iframe) — never open a new tab
+                        setTimeout(() => { window.location.href = game.url; }, 400);
+                    } else {
+                        setTimeout(() => window.open(game.url, '_blank'), 1200);
+                    }
                 }
             },
             launchSelected() {
@@ -784,6 +827,7 @@ const data = {
                 if (this.editingId) data.id = this.editingId;
                 await DB.put(DB.store, data);
                 this.games = await DB.getAll();
+                if (this.embedMode || EMBED_MODE) this.games = this.games.filter(isEmbeddableGame);
                 this.render();
                 Modals.close('edit-modal');
                 this.showToast("Library Synced");
@@ -792,6 +836,7 @@ const data = {
                 if (!this.editingId) return;
                 await DB.delete(this.editingId);
                 this.games = await DB.getAll();
+                if (this.embedMode || EMBED_MODE) this.games = this.games.filter(isEmbeddableGame);
                 this.render();
                 Modals.close('edit-modal');
                 this.showToast("Game Removed");
