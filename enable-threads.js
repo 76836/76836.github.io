@@ -68,20 +68,15 @@ if (typeof window === 'undefined') {
     e.respondWith(handleFetch(e.request));
   });
 } else {
-  // Optional: if this file is included as a <script>, auto-register (legacy).
+  // Legacy <script> include: register only. NEVER location.reload/replace — that kills WebDesk.
   (async function () {
-    if (window.crossOriginIsolated !== false) return;
+    if (window.crossOriginIsolated) return;
     try {
-      const registration = await navigator.serviceWorker.register(window.document.currentScript.src, {
+      await navigator.serviceWorker.register(window.document.currentScript.src, {
         scope: '/',
         updateViaCache: 'none',
       });
-      console.log('[enable-threads] registered', registration.scope);
-      await navigator.serviceWorker.ready;
-      if (!window.crossOriginIsolated && !sessionStorage.getItem('coiReloaded')) {
-        sessionStorage.setItem('coiReloaded', '1');
-        location.replace(location.pathname + location.search + location.hash);
-      }
+      console.log('[enable-threads] registered (no auto-navigation)');
     } catch (e) {
       console.error('[enable-threads] register failed', e);
     }
